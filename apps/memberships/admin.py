@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib import admin
 
 from .models import (
@@ -41,6 +43,22 @@ class GenerationQuotaPeriodAdmin(admin.ModelAdmin):
         "ends_at",
     )
     search_fields = ("user__username",)
+    readonly_fields = ("used_count", "reserved_count", "starts_at", "ends_at")
+
+    def save_model(self, request, obj, form, change):
+        previous_limit = None
+        if change:
+            previous_limit = type(obj).objects.get(pk=obj.pk).total_limit
+        super().save_model(request, obj, form, change)
+        if previous_limit is not None and previous_limit != obj.total_limit:
+            GenerationQuotaLedger.objects.create(
+                quota_period=obj,
+                event="adjust",
+                amount=abs(obj.total_limit - previous_limit),
+                idempotency_key=f"admin-adjust:{obj.pk}:{uuid.uuid4().hex}",
+                reason=f"管理员调整周期张数：{previous_limit} → {obj.total_limit}",
+                created_by=request.user,
+            )
 
 
 @admin.register(GenerationQuotaLedger)

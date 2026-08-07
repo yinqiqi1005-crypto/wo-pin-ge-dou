@@ -92,3 +92,15 @@ def test_prompt_guards_against_image_instructions_and_lists_enabled_options():
     assert "[30, 50]" in prompt
     assert "[12]" in prompt
     assert "['keep', 'remove']" in prompt
+
+
+def test_rule_provider_recommends_only_enabled_backend_options():
+    provider = RuleBasedAnalysisProvider(
+        grid_sizes=(70,), color_limits=(36,), background_modes=("keep",)
+    )
+
+    analysis = provider.analyze(image_bytes((120, 80, 60)), media_type="image/png").analysis
+
+    assert analysis.recommendations.grid_size == 70
+    assert analysis.recommendations.color_limit == 36
+    assert analysis.recommendations.background_mode == "keep"

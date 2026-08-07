@@ -56,3 +56,8 @@ class ParameterAdjustmentForm(forms.Form):
         label="背景处理",
         choices=(("keep", "保留背景"), ("simplify", "简化背景"), ("remove", "移除背景")),
     )
+
+
+class PatternMetadataForm(forms.Form):
+    title = forms.CharField(label="图纸名称", max_length=120)
+    note = forms.CharField(label="备注", required=False, widget=forms.Textarea(attrs={"rows": 3}))

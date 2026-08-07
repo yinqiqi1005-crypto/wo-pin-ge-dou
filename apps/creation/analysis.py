@@ -98,7 +98,10 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
     extension = task.input_image.name.rsplit(".", 1)[-1].lower()
     media_type = "image/png" if extension == "png" else "image/jpeg"
 
-    route = task.configuration_snapshot.get("model_routes", {}).get("analysis", {})
+    route = {
+        **task.configuration_snapshot.get("model_routes", {}).get("analysis", {}),
+        **task.configuration_snapshot.get("generation", {}).get("enabled_options", {}),
+    }
     configured_provider = route.get("provider", settings.AI_ANALYSIS_PROVIDER).lower()
     configured_model = route.get("model", settings.AI_ANALYSIS_MODEL)
     provider = None
@@ -135,7 +138,11 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
                 logger.warning("Analysis provider attempt failed", exc_info=True)
 
     if result is None and configured_provider != "rules":
-        fallback = RuleBasedAnalysisProvider()
+        fallback = RuleBasedAnalysisProvider(
+            grid_sizes=tuple(route.get("grid_sizes", (30, 50, 70))),
+            color_limits=tuple(route.get("color_limits", (12, 24, 36))),
+            background_modes=tuple(route.get("background_modes", ("keep", "simplify", "remove"))),
+        )
         try:
             result = fallback.analyze(image_bytes, media_type=media_type)
             _record_call(task, result)

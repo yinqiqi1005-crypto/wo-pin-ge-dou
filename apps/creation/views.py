@@ -97,6 +97,7 @@ def settings(request, task_id):
         request.POST or None,
         instance=instance,
         has_subject=task.analysis.subject_count > 0,
+        enabled_options=task.configuration_snapshot.get("generation", {}).get("enabled_options"),
     )
     if request.method == "POST" and form.is_valid():
         form.save()

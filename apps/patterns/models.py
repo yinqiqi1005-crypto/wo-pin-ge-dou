@@ -51,6 +51,7 @@ class Pattern(models.Model):
     title = models.CharField(max_length=120)
     note = models.TextField(blank=True)
     is_saved = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -106,3 +107,27 @@ class PatternVersion(models.Model):
 
         if self.parent_version and self.parent_version.pattern_id != self.pattern_id:
             raise ValidationError("父版本必须属于同一个作品。")
+
+
+class ExportKind(models.TextChoices):
+    EFFECT_PNG = "effect_png", "效果图 PNG"
+    GRID_PNG = "grid_png", "编号网格 PNG"
+    PATTERN_PDF = "pattern_pdf", "制作图 PDF"
+
+
+class PatternExport(models.Model):
+    version = models.ForeignKey(PatternVersion, on_delete=models.CASCADE, related_name="exports")
+    kind = models.CharField(max_length=30, choices=ExportKind)
+    file = models.FileField(upload_to="patterns/exports/%Y/%m/")
+    page_count = models.PositiveSmallIntegerField(default=1)
+    metadata = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(fields=("version", "kind"), name="unique_version_export_kind")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.version} · {self.get_kind_display()}"

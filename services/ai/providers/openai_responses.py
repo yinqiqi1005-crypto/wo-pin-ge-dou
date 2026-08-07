@@ -20,11 +20,17 @@ class OpenAIResponsesAnalysisProvider:
         api_key: str,
         base_url: str,
         timeout_seconds: float,
+        grid_sizes=(30, 50, 70),
+        color_limits=(12, 24, 36),
+        background_modes=("keep", "simplify", "remove"),
         client=None,
     ):
         if not api_key and client is None:
             raise ValueError("OPENAI_API_KEY is required for the OpenAI provider.")
         self.model_name = model_name
+        self.grid_sizes = grid_sizes
+        self.color_limits = color_limits
+        self.background_modes = background_modes
         self.client = client or OpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -41,7 +47,14 @@ class OpenAIResponsesAnalysisProvider:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "input_text", "text": build_analysis_prompt()},
+                        {
+                            "type": "input_text",
+                            "text": build_analysis_prompt(
+                                grid_sizes=self.grid_sizes,
+                                color_limits=self.color_limits,
+                                background_modes=self.background_modes,
+                            ),
+                        },
                         {"type": "input_image", "image_url": image_url, "detail": "low"},
                     ],
                 }
@@ -56,6 +69,13 @@ class OpenAIResponsesAnalysisProvider:
             },
         )
         analysis = ImageAnalysis.model_validate(json.loads(response.output_text))
+        recommendation = analysis.recommendations
+        if (
+            recommendation.grid_size not in self.grid_sizes
+            or recommendation.color_limit not in self.color_limits
+            or recommendation.background_mode not in self.background_modes
+        ):
+            raise ValueError("Model recommended a disabled generation option.")
         return AnalysisProviderResult(
             analysis=analysis,
             provider=self.provider_name,

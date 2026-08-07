@@ -14,6 +14,19 @@ class RuleBasedAnalysisProvider:
     provider_name = "rules"
     model_name = "rule-analysis-v1"
 
+    def __init__(
+        self,
+        *,
+        grid_sizes=(30, 50, 70),
+        color_limits=(12, 24, 36),
+        background_modes=("keep", "simplify", "remove"),
+    ):
+        if not grid_sizes or not color_limits or not background_modes:
+            raise ValueError("At least one generation option must be enabled.")
+        self.grid_sizes = tuple(sorted(grid_sizes))
+        self.color_limits = tuple(sorted(color_limits))
+        self.background_modes = tuple(background_modes)
+
     def analyze(self, image_bytes: bytes, *, media_type: str) -> AnalysisProviderResult:
         started = monotonic()
         try:
@@ -46,8 +59,13 @@ class RuleBasedAnalysisProvider:
         suitability = "suitable"
         if quality == "poor" or edge_variance < 20:
             suitability = "try"
-        grid_size = 70 if min(width, height) >= 700 else 50 if min(width, height) >= 64 else 30
-        color_limit = 12 if grid_size == 30 else 24 if grid_size == 50 else 36
+        ideal_size = 70 if min(width, height) >= 700 else 50 if min(width, height) >= 64 else 30
+        grid_size = min(self.grid_sizes, key=lambda value: abs(value - ideal_size))
+        ideal_colors = 12 if grid_size == 30 else 24 if grid_size == 50 else 36
+        color_limit = min(self.color_limits, key=lambda value: abs(value - ideal_colors))
+        background_mode = (
+            "simplify" if "simplify" in self.background_modes else self.background_modes[0]
+        )
         analysis = ImageAnalysis(
             quality_level=quality,
             suitability_level=suitability,
@@ -59,7 +77,7 @@ class RuleBasedAnalysisProvider:
             recommendations=AnalysisRecommendation(
                 grid_size=grid_size,
                 color_limit=color_limit,
-                background_mode="simplify",
+                background_mode=background_mode,
                 reason=f"{grid_size}×{grid_size} 能兼顾当前图片细节和制作难度。",
             ),
             requires_subject_confirmation=suitability != "suitable",

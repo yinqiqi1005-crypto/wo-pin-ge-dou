@@ -25,7 +25,10 @@
       {% endif %}
     </div>
   </header>
-  <main class="page-shell" id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+  <main class="page-shell" id="main-content" tabindex="-1">
+    {% if messages %}<div class="messages" aria-live="polite">{% for message in messages %}<p class="notice">{{ message }}</p>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
   {% block scripts %}{% endblock %}
 </body>
 </html>

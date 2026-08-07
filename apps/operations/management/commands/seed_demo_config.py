@@ -129,6 +129,33 @@ class Command(BaseCommand):
             },
         )
         ConfigurationRevision.objects.get_or_create(
+            namespace="generation",
+            key="enabled_options",
+            version=1,
+            defaults={
+                "value": {
+                    "grid_sizes": [30, 50, 70],
+                    "color_limits": [12, 24, 36],
+                    "background_modes": ["keep", "simplify", "remove"],
+                },
+                "is_active": True,
+            },
+        )
+        ConfigurationRevision.objects.get_or_create(
+            namespace="quality",
+            key="generation_policy",
+            version=1,
+            defaults={
+                "value": {
+                    "analysis_max_attempts": 2,
+                    "generation_max_attempts": 2,
+                    "advanced_max_attempts": 2,
+                    "max_upload_mb": 10,
+                },
+                "is_active": True,
+            },
+        )
+        ConfigurationRevision.objects.get_or_create(
             namespace="model_routes",
             key="advanced_creation",
             version=1,

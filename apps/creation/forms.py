@@ -39,9 +39,23 @@ class GenerationSettingsForm(forms.ModelForm):
         model = GenerationSettings
         fields = ("grid_size", "color_limit", "background_mode")
 
-    def __init__(self, *args, has_subject=True, **kwargs):
+    def __init__(self, *args, has_subject=True, enabled_options=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.has_subject = has_subject
+        enabled_options = enabled_options or {}
+        if enabled_options:
+            self.fields["grid_size"].choices = [
+                (value, f"{value}×{value}") for value in enabled_options.get("grid_sizes", [])
+            ]
+            self.fields["color_limit"].choices = [
+                (value, f"{value} 色") for value in enabled_options.get("color_limits", [])
+            ]
+            background_labels = dict(self.BACKGROUND_CHOICES)
+            self.fields["background_mode"].choices = [
+                (value, background_labels[value])
+                for value in enabled_options.get("background_modes", [])
+                if value in background_labels
+            ]
 
     def clean(self):
         cleaned = super().clean()

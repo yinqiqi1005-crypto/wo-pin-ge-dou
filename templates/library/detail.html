@@ -9,8 +9,15 @@
       <p><a class="button" href="{{ version.grid_preview.url }}" target="_blank">查看网格图</a></p>
       <p><a href="{% url 'library:adjust' pattern.id version.version_number %}">免费调整尺寸、颜色或背景</a></p>
       <p><a href="{% url 'library:advanced' pattern.id version.version_number %}">高级创作新版本</a></p>
+      <h3>导出</h3><p class="export-actions">
+        <a href="{% url 'library:export' pattern.id version.version_number 'effect.png' %}">效果图 PNG</a>
+        <a href="{% url 'library:export' pattern.id version.version_number 'grid.png' %}">编号网格 PNG</a>
+        <a href="{% url 'library:export' pattern.id version.version_number 'pattern.pdf' %}">制作图 PDF</a>
+      </p>
     </div>
   </div>
   <h2>版本历史</h2><nav class="version-list" aria-label="版本历史">{% for item in versions %}<a {% if item.id == version.id %}aria-current="page"{% endif %} href="?version={{ item.version_number }}">v{{ item.version_number }}</a>{% endfor %}</nav>
+  <details><summary>重命名和备注</summary><form method="post" action="{% url 'library:update' pattern.id %}" class="stacked-form">{% csrf_token %}{{ metadata_form.as_p }}<button class="button">保存信息</button></form></details>
+  <details><summary>删除图纸</summary><p>首版采用软删除，便于误删恢复；关联文件由后台保留策略统一清理。</p><form method="post" action="{% url 'library:delete' pattern.id %}">{% csrf_token %}<button class="link-button">确认移入回收状态</button></form></details>
 </section>
 {% endblock %}

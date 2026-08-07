@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Palette, PaletteColor, Pattern, PatternVersion
+from .models import Palette, PaletteColor, Pattern, PatternExport, PatternVersion
 
 
 class PaletteColorInline(admin.TabularInline):
@@ -17,8 +17,8 @@ class PaletteAdmin(admin.ModelAdmin):
 
 @admin.register(Pattern)
 class PatternAdmin(admin.ModelAdmin):
-    list_display = ("title", "owner", "is_saved", "created_at", "updated_at")
-    list_filter = ("is_saved",)
+    list_display = ("title", "owner", "is_saved", "deleted_at", "created_at", "updated_at")
+    list_filter = ("is_saved", "deleted_at")
     search_fields = ("title", "owner__username")
 
 
@@ -26,3 +26,9 @@ class PatternAdmin(admin.ModelAdmin):
 class PatternVersionAdmin(admin.ModelAdmin):
     list_display = ("pattern", "version_number", "parent_version", "created_at")
     search_fields = ("pattern__title", "pattern__owner__username")
+
+
+@admin.register(PatternExport)
+class PatternExportAdmin(admin.ModelAdmin):
+    list_display = ("version", "kind", "page_count", "created_at")
+    list_filter = ("kind",)

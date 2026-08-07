@@ -46,19 +46,19 @@ def create_generation_task(
     else:
         plan = MembershipPlan.objects.get(level="registered", is_active=True)
 
-    model_routes = {}
-    revisions = ConfigurationRevision.objects.filter(
-        namespace="model_routes", is_active=True
-    ).order_by("key", "-version")
+    configuration = {}
+    revisions = ConfigurationRevision.objects.filter(is_active=True).order_by(
+        "namespace", "key", "-version"
+    )
     for revision in revisions:
-        model_routes.setdefault(revision.key, revision.value)
+        configuration.setdefault(revision.namespace, {}).setdefault(revision.key, revision.value)
     task = GenerationTask.objects.create(
         user=user,
         idempotency_key=idempotency_key,
         mode=mode,
         configuration_snapshot={
             "membership": plan.snapshot(),
-            "model_routes": model_routes,
+            **configuration,
         },
     )
     return task, True

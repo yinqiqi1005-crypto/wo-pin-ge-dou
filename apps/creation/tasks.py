@@ -18,8 +18,10 @@ MAX_AUTOMATIC_ATTEMPTS = 2
 
 def execute_generation_task(task_id: str) -> GenerationTask:
     task = GenerationTask.objects.select_related("settings", "result_version").get(pk=task_id)
+    policy = task.configuration_snapshot.get("quality", {}).get("generation_policy", {})
+    max_attempts = max(1, min(policy.get("generation_max_attempts", MAX_AUTOMATIC_ATTEMPTS), 2))
 
-    for attempt in range(task.retry_count, MAX_AUTOMATIC_ATTEMPTS):
+    for attempt in range(task.retry_count, max_attempts):
         task.refresh_from_db()
         if task.status == GenerationStatus.QUOTA_RESERVED:
             transition_task(
@@ -47,7 +49,7 @@ def execute_generation_task(task_id: str) -> GenerationTask:
             task.retry_count = attempt + 1
             task.failure_code = type(exc).__name__
             task.failure_message = str(exc)[:500]
-            if attempt + 1 < MAX_AUTOMATIC_ATTEMPTS:
+            if attempt + 1 < max_attempts:
                 task.status = GenerationStatus.QUEUED
                 task.current_stage = "automatic_retry"
                 task.progress_message = "第一次结果未达到要求，系统正在免费优化。"
