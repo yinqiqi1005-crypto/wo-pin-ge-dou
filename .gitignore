@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+media/
+staticfiles/
+celerybeat-schedule
+
