@@ -63,6 +63,16 @@ uv run python manage.py smoke_deployment \
 
 命令检查健康页、产品首页、指纹 CSS/JavaScript、HTTPS 最终地址、目标域名，以及 HSTS、点击劫持、MIME 嗅探和 Referrer Policy 响应头。`--allow-http-localhost` 只用于本机生产进程冒烟，不能作为公网发布证据。
 
+确定性性能基线使用最大 70×70/36 色输出，实际测量存储读回、规则分析、图纸/PNG 生成和完整 PDF 导出：
+
+```bash
+uv run python manage.py check_release_performance \
+  --iterations 3 \
+  --report docs/performance/local-YYYY-MM-DD.json
+```
+
+固定上限、报告字段和证据边界见 [性能基线说明](docs/performance.md)。
+
 ## 演示账号与素材
 
 不会在仓库硬编码演示密码。先设置后台配置，再显式提供至少 12 位的临时密码：

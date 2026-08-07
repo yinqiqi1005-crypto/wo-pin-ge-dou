@@ -1,0 +1,63 @@
+{
+  "checked_at": "2026-08-07T17:28:34.528216+00:00",
+  "python_version": "3.12.13",
+  "platform": "Darwin arm64",
+  "iterations": 3,
+  "sample": {
+    "image_width": 800,
+    "image_height": 600,
+    "grid_size": 70,
+    "color_limit": 36,
+    "effect_png_bytes": 26892,
+    "grid_png_bytes": 94670
+  },
+  "stages": [
+    {
+      "name": "upload_storage",
+      "samples_seconds": [
+        0.000656,
+        0.000183,
+        0.000146
+      ],
+      "median_seconds": 0.000183,
+      "maximum_seconds": 0.000656,
+      "limit_seconds": 2.0
+    },
+    {
+      "name": "rule_analysis",
+      "samples_seconds": [
+        0.003324,
+        0.003073,
+        0.003064
+      ],
+      "median_seconds": 0.003073,
+      "maximum_seconds": 0.003324,
+      "limit_seconds": 2.0
+    },
+    {
+      "name": "pattern_generation",
+      "samples_seconds": [
+        0.299464,
+        0.288463,
+        0.288808
+      ],
+      "median_seconds": 0.288808,
+      "maximum_seconds": 0.299464,
+      "limit_seconds": 10.0
+    },
+    {
+      "name": "pdf_export",
+      "samples_seconds": [
+        0.174556,
+        0.094991,
+        0.088355
+      ],
+      "median_seconds": 0.094991,
+      "maximum_seconds": 0.174556,
+      "limit_seconds": 10.0
+    }
+  ],
+  "runtime": {
+    "python_executable": "python3"
+  }
+}
