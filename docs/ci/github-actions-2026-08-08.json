@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "provider": "github-actions",
+  "repository": "yinqiqi1005-crypto/wo-pin-ge-dou",
+  "workflow": "test",
+  "event": "push",
+  "branch": "main",
+  "commit_sha": "91020c45eeaa48cc144cb138621ed70d9e254d9c",
+  "run_id": 31212392462,
+  "run_url": "https://github.com/yinqiqi1005-crypto/wo-pin-ge-dou/actions/runs/31212392462",
+  "status": "completed",
+  "conclusion": "success",
+  "checked_at": "2026-08-07T19:40:45+00:00",
+  "jobs": [
+    {
+      "name": "test",
+      "job_id": 92978019024,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-07T19:39:02+00:00",
+      "completed_at": "2026-08-07T19:40:44+00:00",
+      "verified_steps": [
+        "uv sync --dev",
+        "playwright install --with-deps chromium",
+        "ruff check",
+        "ruff format --check",
+        "pytest: 256 passed"
+      ]
+    },
+    {
+      "name": "infrastructure",
+      "job_id": 92978018955,
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-07T19:39:01+00:00",
+      "completed_at": "2026-08-07T19:39:48+00:00",
+      "verified_steps": [
+        "PostgreSQL and Redis service health",
+        "Django migrations",
+        "Celery worker start",
+        "10 concurrent infrastructure round trips",
+        "queued task survives worker restart",
+        "replacement worker concurrency",
+        "acceptance evidence upload"
+      ]
+    }
+  ]
+}

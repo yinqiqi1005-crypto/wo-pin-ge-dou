@@ -29,7 +29,9 @@
 
 自动化通过标准是零失败、零跳过、零 xfail。任何失败必须修复实现或明确修复错误测试数据，不允许删除测试或放宽业务标准。最终测试命令和实际数量记录在交付说明中。
 
-2026-08-08 最终本机结果：`256 passed in 22.86s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、首次外部真人六任务走查证据门槛、三类实体制作证据门槛、SQLite 并发张数测试、真实 PostgreSQL/Redis/Celery 证据防伪、非计费 AI 服务能力证据、数据库运营指标取证、仓库卫生防护、开发计划全量追溯、内部演示录像解码、四阶段真实性能基线、Worker 离线入队/重启恢复协议、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/390px 手机/纯键盘主流程和 6 类异常恢复端到端证据。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和最新指纹 CSS/JavaScript 静态资源冒烟通过。
+2026-08-08 最终本机结果：`257 passed in 23.97s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、首次外部真人六任务走查证据门槛、三类实体制作证据门槛、SQLite 并发张数测试、真实 PostgreSQL/Redis/Celery 与 GitHub Actions 证据防伪、非计费 AI 服务能力证据、数据库运营指标取证、仓库卫生防护、开发计划全量追溯、内部演示录像解码、四阶段真实性能基线、Worker 离线入队/重启恢复协议、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/390px 手机/纯键盘主流程和 6 类异常恢复端到端证据。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和最新指纹 CSS/JavaScript 静态资源冒烟通过。
+
+同日 GitHub Actions 运行 [`31212392462`](https://github.com/yinqiqi1005-crypto/wo-pin-ge-dou/actions/runs/31212392462) 通过：`test` 作业完成 Ruff、格式检查、Chromium 安装和 `256 passed`；`infrastructure` 作业完成 PostgreSQL/Redis 服务启动、迁移、Celery 非 eager Worker、10 个并发往返、离线入队后的 Worker 重启恢复和替代 Worker 并发复验。两项作业均为 `success`，结构化证据见 [`ci/github-actions-2026-08-08.json`](ci/github-actions-2026-08-08.json)。
 
 本地固定性能基线以 3 次迭代的最大值判定：存储上传/读回 `0.001s`、规则分析 `0.003s`、70×70/36 色图纸及 PNG `0.299s`、完整分页 PDF `0.175s`，均低于 2/2/10/10 秒固定上限。原始样本见 [`performance/local-2026-08-08.json`](performance/local-2026-08-08.json)。
 

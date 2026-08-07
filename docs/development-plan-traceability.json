@@ -1,7 +1,7 @@
 {
   "plan": "development-plan.md",
   "statuses": {
-    "verified_local": "实现和本机自动证据都已验证",
+    "verified_local": "实现和本机或远程自动证据都已验证",
     "target_run_pending": "实现已完成，需要目标基础设施或远程 CI 成功记录",
     "paid_model_review_pending": "工具和适配层已完成，需要授权密钥、费用确认和真人模型评审",
     "human_review_pending": "证据模板和硬校验已完成，需要真人观察或实体制作",
@@ -28,9 +28,9 @@
     },
     {
       "requirements": "M0-09",
-      "status": "target_run_pending",
-      "evidence": [".github/workflows/test.yml", "tests/unit/test_worker_recovery_command.py"],
-      "remaining": "仓库尚未连接远程，需要至少一次 GitHub Actions 成功记录。"
+      "status": "verified_local",
+      "evidence": [".github/workflows/test.yml", "docs/ci/github-actions-2026-08-08.json", "tests/unit/test_ci_evidence.py"],
+      "remaining": ""
     },
     {
       "requirements": "M0-10..M0-11",
@@ -192,9 +192,9 @@
   "completion_gates": [
     {
       "gate": "M0-repeatable-target-environment",
-      "status": "target_run_pending",
-      "evidence": ["README.md", "Dockerfile", "docker-compose.yml", ".github/workflows/test.yml", "docs/infrastructure/local-2026-08-08.json"],
-      "remaining": "全新本地 PostgreSQL/Redis/Celery 环境已验证；仍需要至少一次远程 CI 成功记录。"
+      "status": "verified_local",
+      "evidence": ["README.md", "Dockerfile", "docker-compose.yml", ".github/workflows/test.yml", "docs/infrastructure/local-2026-08-08.json", "docs/ci/github-actions-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "gate": "M1-deterministic-pattern-core",

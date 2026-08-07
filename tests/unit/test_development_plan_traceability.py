@@ -14,7 +14,6 @@ PENDING_STATUSES = {
     "public_deployment_pending",
 }
 MUST_REMAIN_PENDING = {
-    "M0-09",
     "M5-02",
     "M5-03",
     "M5-04",
