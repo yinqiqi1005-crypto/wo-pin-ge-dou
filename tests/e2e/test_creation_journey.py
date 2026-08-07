@@ -125,6 +125,8 @@ def test_real_browser_completes_six_step_creation_and_save(
 
     page.goto(f"{live_server.url}/accounts/login/")
     if interaction == "keyboard":
+        page.locator("body").focus()
+        assert page.locator(":focus").evaluate("element => element === document.body")
         page.keyboard.press("Tab")
         assert page.locator(":focus").get_attribute("class") == "skip-link"
         page.keyboard.press("Enter")
