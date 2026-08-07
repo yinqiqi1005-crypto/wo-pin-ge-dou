@@ -158,6 +158,9 @@ def test_result_has_three_sections_guidance_and_save_error_is_near_form(creator)
     assert "材料与建议" in result_page
     assert "难度：入门" in result_page
     assert "放大查看带编号网格图" in result_page
+    for panel_id in ("effect-panel", "grid-panel", "materials-panel"):
+        assert f'id="{panel_id}" data-tab-panel' in result_page
+        assert f'id="{panel_id}" data-tab-panel hidden' not in result_page
 
     invalid_save = client.post(f"/create/{task.pk}/save/", {"title": "", "note": ""})
     assert invalid_save.status_code == 200

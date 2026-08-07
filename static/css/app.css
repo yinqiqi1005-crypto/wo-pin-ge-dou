@@ -16,7 +16,7 @@ a { color: inherit; }
 .skip-link { position: fixed; left: 12px; top: -60px; z-index: 20; padding: 10px; background: var(--ink); color: white; }
 .skip-link:focus { top: 12px; }
 .site-header { min-height: 64px; padding: 0 5vw; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; background: var(--surface); border-bottom: 1px solid var(--line); }
-.site-header nav, .account-nav { display: flex; gap: 20px; align-items: center; }
+.site-header nav, .account-nav { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
 .account-nav { justify-self: end; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; }
 .brand-mark { color: var(--accent); }
@@ -72,7 +72,10 @@ input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var
 .subject-editor { margin: 18px 0; }
 .compact-grid p { display: grid; grid-template-columns: 1fr 100px; align-items: center; gap: 10px; }
 .result-tabs { display: flex; gap: 8px; margin: 12px 0 26px; }
-.result-tabs a { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; }
+.result-tabs button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
+.result-tabs button[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.result-panel { margin-bottom: 26px; }
+.result-panel[hidden] { display: none; }
 .status.try, .status.not_suitable { color: #805b00; background: #fff3cc; }
 .status.unprocessable { color: #8a2d2d; background: #fde8e8; }
 .errorlist { color: #9c2f2f; text-align: left; }
@@ -80,7 +83,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 @media (max-width: 700px) {
   .site-header { grid-template-columns: 1fr auto; padding: 12px 4vw; }
-  .site-header nav { display: none; }
+  .site-header nav { grid-column: 1 / -1; justify-content: center; padding-top: 10px; border-top: 1px solid var(--line); }
   .page-shell { padding-top: 24px; }
   .two-column { grid-template-columns: 1fr; }
   .steps li { font-size: 0; }
@@ -91,5 +94,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .content-card, .narrow-card { padding: 18px; }
   .compact-grid p { grid-template-columns: 1fr; }
   .decision-grid { grid-template-columns: 1fr; }
+  .result-tabs { overflow-x: auto; padding-bottom: 4px; }
+  .result-tabs button { flex: 0 0 auto; }
   img { max-width: 100%; }
 }

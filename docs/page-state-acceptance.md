@@ -18,7 +18,7 @@
 | 14 | 生成中 | `status=generating` | 后台状态机与持久阶段测试 |
 | 15 | 自动重试中 | 首次处理失败 | `test_first_generation_failure_then_automatic_retry_succeeds_without_second_reservation` |
 | 16 | 生成失败 | 两次处理均失败 | 失败释放张数测试 |
-| 17 | 图纸预览 | 任务成功进入结果页 | 基础闭环、结果三标签和 Playwright 测试 |
+| 17 | 图纸预览 | 任务成功进入结果页 | 基础闭环、结果三标签和 Playwright 鼠标/键盘测试 |
 | 18 | 参数调整 | 从任意旧版本进入免费调整 | `test_parameter_adjustment_reuses_base_and_does_not_use_quota` |
 | 19 | 内容型二次创作 | Plus/Pro 高级创作 | 高级创作父子版本测试 |
 | 20 | 保存中 | 保存提交后表单进入 `aria-busy` 且按钮显示“正在保存” | 浏览器流程及保存模板断言 |
@@ -26,3 +26,10 @@
 | 22 | 保存失败 | 数据库保存异常，保留生成结果 | `test_save_database_failure_preserves_generated_result_for_retry` |
 
 所有状态必须有文字或结构语义，不能只依赖颜色。页面错误靠近对应表单；排队、生成和保存状态刷新后仍由数据库恢复。
+
+## 响应式和键盘验收
+
+- Chromium 分别在 1280px 桌面和 390px 手机视口完成登录、上传、分析、设置、生成、三结果标签、保存和图纸库流程；
+- 手机视口必须保留“AI 创作/我的图纸”主导航，首页、结果和图纸详情不得横向溢出；
+- 纯键盘 Chromium 路径先验证“跳到主要内容”，再使用焦点 + Enter 激活主要按钮和链接；
+- 结果页由 JavaScript 增强为 `tablist/tab/tabpanel`，支持左右方向键和 Home/End；JavaScript 不可用时，三个结果区仍全部出现在服务器 HTML 中。
