@@ -143,3 +143,34 @@ class ModelCallLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.task_id} · {self.capability} · {self.model_name}"
+
+
+class AdvancedOperation(models.TextChoices):
+    STYLE_TRANSFER = "style_transfer", "风格转换"
+    BACKGROUND_CREATION = "background_creation", "背景创作"
+    CONTOUR_ENHANCE = "contour_enhance", "主体轮廓强化"
+    ELEMENT_EDIT = "element_edit", "元素增删"
+    LOCAL_EDIT = "local_edit", "局部编辑"
+
+
+class AdvancedCreationRequest(models.Model):
+    task = models.OneToOneField(
+        GenerationTask,
+        on_delete=models.CASCADE,
+        related_name="advanced_request",
+    )
+    source_version = models.ForeignKey(
+        "patterns.PatternVersion",
+        on_delete=models.PROTECT,
+        related_name="advanced_requests",
+    )
+    operation = models.CharField(max_length=40, choices=AdvancedOperation)
+    instruction = models.TextField(blank=True)
+    preserve_content = models.JSONField(default=list)
+    editable_content = models.JSONField(default=list)
+    edit_region = models.JSONField(default=dict)
+    review_result = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"{self.task_id} · {self.get_operation_display()}"

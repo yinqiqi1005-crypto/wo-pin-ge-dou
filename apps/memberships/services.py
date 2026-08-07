@@ -26,7 +26,7 @@ class InvalidQuotaState(ValueError):
     """Raised when quota settlement does not match the task state."""
 
 
-def _plan_for_user(user) -> MembershipPlan:
+def current_plan_for_user(user) -> MembershipPlan:
     subscription = (
         MembershipSubscription.objects.select_related("plan")
         .filter(user=user, is_active=True)
@@ -52,7 +52,7 @@ def _period_boundaries(plan: MembershipPlan) -> tuple[datetime, datetime | None]
 
 @transaction.atomic
 def get_or_create_current_quota(user) -> GenerationQuotaPeriod:
-    plan = _plan_for_user(user)
+    plan = current_plan_for_user(user)
     starts_at, ends_at = _period_boundaries(plan)
     try:
         quota, created = GenerationQuotaPeriod.objects.get_or_create(

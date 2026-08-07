@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}高级创作 · {{ pattern.title }}{% endblock %}
+{% block content %}
+<section class="content-card"><div class="two-column">
+  <img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="{{ pattern.title }} v{{ version.version_number }}">
+  <div><p class="eyebrow">{{ plan.name }} · 内容型创作</p><h1>从 v{{ version.version_number }} 创作新版本</h1>
+    <p class="notice">成功并通过复查后使用 1 张；失败会保留旧版本并释放预留张数。</p>
+    {% if form.fields.operation.choices %}<form method="post" class="stacked-form" novalidate>{% csrf_token %}{{ form.non_field_errors }}{{ form.as_p }}<button class="button">确认创作 1 张</button></form>
+    {% else %}<p role="alert">当前会员没有高级创作权限。升级 Plus 或 Pro 后可使用。</p>{% endif %}
+  </div>
+</div></section>
+{% endblock %}

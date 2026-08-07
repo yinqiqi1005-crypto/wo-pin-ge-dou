@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from apps.memberships.services import consume_generation, release_generation
 
+from .advanced import execute_advanced_task
 from .analysis import execute_analysis_task
 from .models import GenerationStatus, GenerationTask
 from .services import generate_basic_pattern
@@ -93,3 +94,8 @@ def run_generation_task(task_id: str) -> str:
 @shared_task(name="creation.run_analysis_task")
 def run_analysis_task(task_id: str) -> str:
     return str(execute_analysis_task(task_id).pk)
+
+
+@shared_task(name="creation.run_advanced_task")
+def run_advanced_task(task_id: str) -> str:
+    return str(execute_advanced_task(task_id).pk)

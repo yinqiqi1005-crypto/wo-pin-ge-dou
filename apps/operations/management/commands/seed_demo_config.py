@@ -128,5 +128,20 @@ class Command(BaseCommand):
                 "is_active": True,
             },
         )
+        ConfigurationRevision.objects.get_or_create(
+            namespace="model_routes",
+            key="advanced_creation",
+            version=1,
+            defaults={
+                "value": {
+                    "provider": "mock",
+                    "model": "deterministic-edit-v1",
+                    "production_model": "gpt-image-2",
+                    "timeout_seconds": 60,
+                    "max_attempts": 2,
+                },
+                "is_active": True,
+            },
+        )
 
         self.stdout.write(self.style.SUCCESS("Demo configuration is ready."))

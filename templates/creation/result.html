@@ -18,7 +18,7 @@
       <section class="guidance"><h2>制作建议</h2><p><strong>难度：{{ guidance.difficulty }}</strong></p><p>{{ guidance.advice }}</p></section>
       <p id="grid"><a href="{{ version.grid_preview.url }}" target="_blank" rel="noopener">放大查看带编号网格图</a></p>
       <p class="muted small">调整尺寸、颜色或背景属于参数调整；增加元素或改变内容会创建新版本，并在开始前确认使用 1 张。</p>
-      <a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>
+      {% if version.pattern.is_saved %}<a class="button" href="{% url 'library:detail' version.pattern.id %}?version={{ version.version_number }}">返回我的图纸</a>{% else %}<a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>{% endif %}
     </div>
   </div>
 </section>

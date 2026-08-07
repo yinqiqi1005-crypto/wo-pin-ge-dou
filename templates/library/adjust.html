@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}免费调整参数 · {{ pattern.title }}{% endblock %}
+{% block content %}<section class="narrow-card"><p class="eyebrow">参数型修改</p><h1>调整 v{{ version.version_number }}</h1><p class="notice">复用现有底图，不使用新的生成张数。</p><form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">免费生成参数版本</button></form></section>{% endblock %}

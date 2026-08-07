@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import GenerationSettings, GenerationTask, ImageAnalysisResult, ModelCallLog
+from .models import (
+    AdvancedCreationRequest,
+    GenerationSettings,
+    GenerationTask,
+    ImageAnalysisResult,
+    ModelCallLog,
+)
 
 
 @admin.register(GenerationTask)
@@ -24,3 +30,9 @@ class GenerationSettingsAdmin(admin.ModelAdmin):
 class ModelCallLogAdmin(admin.ModelAdmin):
     list_display = ("task", "capability", "provider", "model_name", "success", "latency_ms")
     list_filter = ("capability", "provider", "success")
+
+
+@admin.register(AdvancedCreationRequest)
+class AdvancedCreationRequestAdmin(admin.ModelAdmin):
+    list_display = ("task", "source_version", "operation", "created_at")
+    list_filter = ("operation",)

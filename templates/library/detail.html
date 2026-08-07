@@ -5,8 +5,12 @@
   <p class="eyebrow">已保存图纸</p><h1>{{ pattern.title }}</h1>{% if pattern.note %}<p>{{ pattern.note }}</p>{% endif %}
   <div class="two-column result-layout">
     <img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}效果预览">
-    <div><h2>v{{ version.version_number }}</h2><p>{{ version.grid_data.width }}×{{ version.grid_data.height }} · {{ version.material_counts|length }} 色</p><a class="button" href="{{ version.grid_preview.url }}" target="_blank">查看网格图</a></div>
+    <div><h2>v{{ version.version_number }}</h2><p>{{ version.grid_data.width }}×{{ version.grid_data.height }} · {{ version.material_counts|length }} 色</p>
+      <p><a class="button" href="{{ version.grid_preview.url }}" target="_blank">查看网格图</a></p>
+      <p><a href="{% url 'library:adjust' pattern.id version.version_number %}">免费调整尺寸、颜色或背景</a></p>
+      <p><a href="{% url 'library:advanced' pattern.id version.version_number %}">高级创作新版本</a></p>
+    </div>
   </div>
+  <h2>版本历史</h2><nav class="version-list" aria-label="版本历史">{% for item in versions %}<a {% if item.id == version.id %}aria-current="page"{% endif %} href="?version={{ item.version_number }}">v{{ item.version_number }}</a>{% endfor %}</nav>
 </section>
 {% endblock %}
-
