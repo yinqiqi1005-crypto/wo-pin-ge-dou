@@ -181,8 +181,8 @@ def test_ci_stops_first_worker_and_queues_before_starting_replacement():
     assert 'CELERY_TASK_ALWAYS_EAGER: "false"' in workflow
     assert workflow.count("--concurrent-tasks 10") == 2
     assert "--report artifacts/worker-recovery.json" in workflow
-    assert workflow.count("actions/checkout@v7") == 2
-    assert workflow.count("astral-sh/setup-uv@v9") == 2
+    assert workflow.count("actions/checkout@v7.0.1") == 2
+    assert workflow.count("astral-sh/setup-uv@v9.0.0") == 2
     assert workflow.count("prune-cache: true") == 2
-    assert "actions/upload-artifact@v7" in workflow
+    assert "actions/upload-artifact@v7.0.1" in workflow
     assert "path: artifacts/*.json" in workflow
