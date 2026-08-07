@@ -12,6 +12,7 @@
 - 端到端：Chromium 桌面与 390px 手机视口完成登录、上传、分析、设置、生成、预览、保存和图纸库；
 - 运维：健康检查、超大文件、密钥日志脱敏、演示数据、迁移检查、Ruff 和 Django system check。
 - 发布门槛：40 图人工评分完整性、主体可辨认率、严重主体错误率、可制作率、高级创作符合率、重试率、错误扣减、P0/P1 和部署冒烟统一硬校验。
+- 部署冒烟工具：HTTPS、预期主机、健康页、产品首页、指纹 CSS/JavaScript、HSTS、点击劫持、MIME 嗅探、Referrer Policy、跨域重定向和不可覆盖 JSON 证据。
 
 ## 40 图固定集
 
@@ -21,7 +22,7 @@
 
 自动化通过标准是零失败、零跳过、零 xfail。任何失败必须修复实现或明确修复错误测试数据，不允许删除测试或放宽业务标准。最终测试命令和实际数量记录在交付说明中。
 
-2026-08-08 最终本机结果：`155 passed in 11.56s`。同一次全量运行包含 40 图正式转换、SQLite 并发张数测试、真实模型评测保护、严格发布门槛、三尺寸 PDF 实际渲染，以及 Chromium 桌面/手机端到端流程。Ruff、格式、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页、指纹 CSS 和指纹 JavaScript 冒烟通过。
+2026-08-08 最终本机结果：`167 passed in 11.06s`。同一次全量运行包含 40 图正式转换、SQLite 并发张数测试、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/手机端到端流程。Ruff、格式、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页、指纹 CSS 和指纹 JavaScript 冒烟通过。
 
 PostgreSQL、Redis 与真实 Celery Worker 的端到端检查已固化为 `check_infrastructure`，CI 使用 PostgreSQL 16 与 Redis 7 服务执行，任何一环不可用都会失败，不会退回 SQLite 冒充通过。当前本机没有 Docker、PostgreSQL 或 Redis 可执行文件，因此本次本机报告不声明这三项已经运行。
 

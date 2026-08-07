@@ -52,6 +52,17 @@ docker compose run --rm web uv run python manage.py migrate
 docker compose up --build web worker
 ```
 
+公网部署完成后，用真实 HTTPS 域名运行并保存不可覆盖的验收证据：
+
+```bash
+uv run python manage.py smoke_deployment \
+  --base-url https://demo.example.com \
+  --expected-host demo.example.com \
+  --report docs/deployment-smoke/production-2026-08.json
+```
+
+命令检查健康页、产品首页、指纹 CSS/JavaScript、HTTPS 最终地址、目标域名，以及 HSTS、点击劫持、MIME 嗅探和 Referrer Policy 响应头。`--allow-http-localhost` 只用于本机生产进程冒烟，不能作为公网发布证据。
+
 ## 演示账号与素材
 
 不会在仓库硬编码演示密码。先设置后台配置，再显式提供至少 12 位的临时密码：

@@ -25,6 +25,17 @@
 4. 展示最近任务入口，说明用户离开进度页后仍可恢复；
 5. 展示超大/损坏文件的就近错误提示。
 
+## 公网发布后冒烟
+
+```bash
+uv run python manage.py smoke_deployment \
+  --base-url https://demo.example.com \
+  --expected-host demo.example.com \
+  --report docs/deployment-smoke/production-2026-08.json
+```
+
+报告必须由真实公网域名生成，且不得覆盖旧报告。通过后再把 `check_release_quality` 的 `--deployment-smoke` 设为 `passed`。仅有本机 Gunicorn 测试不能替代这一项。
+
 ## 面试讲解重点
 
 - 为什么放弃点数，改成用户可直接理解的“张数”；
