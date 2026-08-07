@@ -34,7 +34,7 @@ uv run python manage.py smoke_deployment \
   --report docs/deployment-smoke/production-2026-08.json
 ```
 
-报告必须由真实公网域名生成，且不得覆盖旧报告。通过后再把 `check_release_quality` 的 `--deployment-smoke` 设为 `passed`。仅有本机 Gunicorn 测试不能替代这一项。
+报告必须由真实公网域名生成，且不得覆盖旧报告。在 7 天内将该文件传给 `check_release_quality --deployment-report`；命令会再次核对 HTTPS、同域名和全部安全项，不接受手填的 `passed`。仅有本机 Gunicorn 测试不能替代这一项。
 
 ## 面试讲解重点
 

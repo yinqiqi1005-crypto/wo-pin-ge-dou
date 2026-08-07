@@ -95,19 +95,16 @@ CI 会安装 Poppler 和 Noto CJK 字体，实际渲染三种尺寸的 PDF 后�
 
 ## M9 发布质量门槛
 
-`docs/test-results-40.csv` 将自动化技术结果与真人观察结果分栏保存。真人完成 40 图评审、至少 3 个高级创作案例、生产环境冒烟和运营指标统计后运行：
+`docs/test-results-40.csv` 将自动化技术结果与真人观察结果分栏保存。真人完成 40 图评审、至少 3 个高级创作案例、生产环境冒烟和问题登记后运行：
 
 ```bash
 uv run python manage.py check_release_quality \
   --physical-results docs/physical-validation.csv \
-  --generation-attempts 100 \
-  --automatic-retries 10 \
-  --wrong-charges 0 \
-  --open-critical-issues 0 \
-  --deployment-smoke passed
+  --issues docs/issues.csv \
+  --deployment-report docs/deployment-smoke/production-2026-08.json
 ```
 
-存在任何 `pending`、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、三类实体制作证据不完整、自动重试率达到 15%、错误扣减、P0/P1 问题或部署冒烟失败时，命令都会失败。示例数字仅展示命令格式，正式发布必须填入真实统计值。实体制作步骤见 [实物验证说明](docs/physical-validation.md)。
+命令会直接从数据库的生成任务和张数流水计算尝试数、重试率、错误扣减与未完成任务；从 `docs/issues.csv` 读取 P0/P1；并校验 7 天内的真实 HTTPS 部署报告。这些值不再允许由发布人手填。存在任何 `pending`、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、三类实体制作证据不完整、自动重试率达到 15%、错误扣减、未完成生成、P0/P1 问题或部署证据失效时，命令都会失败。实体制作步骤见 [实物验证说明](docs/physical-validation.md)。
 
 开始真人评分前生成不可覆盖的 40 图对照包：
 

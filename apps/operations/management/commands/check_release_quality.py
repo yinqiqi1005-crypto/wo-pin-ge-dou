@@ -1,5 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.operations.release_evidence import (
+    ReleaseEvidenceError,
+    collect_operational_metrics,
+    count_open_critical_issues,
+)
 from apps.operations.release_quality import ReleaseQualityError, evaluate_release_quality
 
 
@@ -9,28 +14,21 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--results", default="docs/test-results-40.csv")
         parser.add_argument("--physical-results", default="docs/physical-validation.csv")
-        parser.add_argument("--generation-attempts", required=True, type=int)
-        parser.add_argument("--automatic-retries", required=True, type=int)
-        parser.add_argument("--wrong-charges", required=True, type=int)
-        parser.add_argument("--open-critical-issues", required=True, type=int)
-        parser.add_argument(
-            "--deployment-smoke",
-            required=True,
-            choices=("passed", "failed"),
-        )
+        parser.add_argument("--issues", default="docs/issues.csv")
+        parser.add_argument("--deployment-report", required=True)
 
     def handle(self, *args, **options):
         try:
+            operational_metrics = collect_operational_metrics()
+            open_critical_issues = count_open_critical_issues(options["issues"])
             summary = evaluate_release_quality(
                 options["results"],
-                generation_attempts=options["generation_attempts"],
-                automatic_retries=options["automatic_retries"],
-                wrong_charges=options["wrong_charges"],
-                open_critical_issues=options["open_critical_issues"],
-                deployment_smoke_passed=options["deployment_smoke"] == "passed",
+                operational_metrics=operational_metrics,
+                open_critical_issues=open_critical_issues,
+                deployment_report_path=options["deployment_report"],
                 physical_results_path=options["physical_results"],
             )
-        except (OSError, ReleaseQualityError) as exc:
+        except (OSError, ReleaseEvidenceError, ReleaseQualityError) as exc:
             raise CommandError(str(exc)) from exc
 
         self.stdout.write(

@@ -6,6 +6,11 @@ from apps.operations.physical_validation import (
     PhysicalValidationError,
     evaluate_physical_validation,
 )
+from apps.operations.release_evidence import (
+    OperationalMetrics,
+    ReleaseEvidenceError,
+    validate_deployment_report,
+)
 
 
 class ReleaseQualityError(ValueError):
@@ -50,11 +55,9 @@ def _validate_values(rows, field, allowed):
 def evaluate_release_quality(
     results_path,
     *,
-    generation_attempts,
-    automatic_retries,
-    wrong_charges,
+    operational_metrics: OperationalMetrics,
     open_critical_issues,
-    deployment_smoke_passed,
+    deployment_report_path,
     physical_results_path,
 ):
     path = Path(results_path)
@@ -85,11 +88,15 @@ def evaluate_release_quality(
         {"pass", "fail", "not_applicable"},
     )
 
-    if generation_attempts <= 0:
-        raise ReleaseQualityError("generation_attempts must be greater than zero.")
-    if not 0 <= automatic_retries <= generation_attempts:
-        raise ReleaseQualityError("automatic_retries must be between zero and generation_attempts.")
-    if wrong_charges < 0 or open_critical_issues < 0:
+    if operational_metrics.generation_attempts <= 0:
+        raise ReleaseQualityError("No generation attempts are recorded in the database.")
+    if not 0 <= operational_metrics.retried_tasks <= operational_metrics.generation_attempts:
+        raise ReleaseQualityError("Operational retry metrics are inconsistent.")
+    if (
+        operational_metrics.wrong_charge_count < 0
+        or operational_metrics.unfinished_task_count < 0
+        or open_critical_issues < 0
+    ):
         raise ReleaseQualityError("Operational counters cannot be negative.")
 
     advanced_rows = [row for row in rows if row["human_advanced_conformance"] != "not_applicable"]
@@ -98,7 +105,8 @@ def evaluate_release_quality(
 
     try:
         physical_summary = evaluate_physical_validation(physical_results_path)
-    except PhysicalValidationError as exc:
+        validate_deployment_report(deployment_report_path)
+    except (PhysicalValidationError, ReleaseEvidenceError) as exc:
         raise ReleaseQualityError(str(exc)) from exc
 
     summary = ReleaseQualitySummary(
@@ -112,7 +120,7 @@ def evaluate_release_quality(
             "human_advanced_conformance",
             "pass",
         ),
-        automatic_retry_rate=automatic_retries / generation_attempts,
+        automatic_retry_rate=operational_metrics.automatic_retry_rate,
         physical_case_count=physical_summary.case_count,
     )
 
@@ -131,12 +139,12 @@ def evaluate_release_quality(
         failures.append("advanced creation conformance is below 85%")
     if summary.automatic_retry_rate >= 0.15:
         failures.append("automatic retry rate is not below 15%")
-    if wrong_charges != 0:
+    if operational_metrics.wrong_charge_count != 0:
         failures.append("system failures caused incorrect image charges")
+    if operational_metrics.unfinished_task_count != 0:
+        failures.append("generation tasks remain unfinished")
     if open_critical_issues != 0:
         failures.append("P0 or P1 issues remain open")
-    if not deployment_smoke_passed:
-        failures.append("deployment smoke test has not passed")
     if failures:
         raise ReleaseQualityError("; ".join(failures) + ".")
     return summary

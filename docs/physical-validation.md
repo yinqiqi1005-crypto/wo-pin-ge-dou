@@ -42,11 +42,8 @@ CSV 中对应写 `physical-validation-photos/per-01.png` 等相对路径。照�
 uv run python manage.py check_release_quality \
   --results docs/test-results-40.csv \
   --physical-results docs/physical-validation.csv \
-  --generation-attempts <真实生成尝试数> \
-  --automatic-retries <真实自动重试数> \
-  --wrong-charges 0 \
-  --open-critical-issues 0 \
-  --deployment-smoke passed
+  --issues docs/issues.csv \
+  --deployment-report docs/deployment-smoke/production-2026-08.json
 ```
 
-缺少类别、不是 30×30、记录未完成、数量差值错误、制作时长无效、熨烫失败、图片缺失/损坏、评审人或日期缺失都会失败。不要为了通过命令修改这些标准。
+生成尝试、自动重试、张数扣减和未完成任务会从当前数据库自动计算，不需要也不允许手填。缺少类别、不是 30×30、记录未完成、数量差值错误、制作时长无效、熨烫失败、图片缺失/损坏、评审人或日期缺失都会失败。不要为了通过命令修改这些标准。

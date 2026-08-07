@@ -1,11 +1,23 @@
 import csv
-from datetime import date
+import json
+from datetime import UTC, date, datetime
 
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.utils import timezone
 from PIL import Image
 
+from apps.creation.models import GenerationStatus, GenerationTask
+from apps.memberships.models import (
+    GenerationQuotaLedger,
+    GenerationQuotaPeriod,
+    MembershipLevel,
+    MembershipPlan,
+    QuotaLedgerEvent,
+    QuotaPeriodType,
+)
+from apps.operations.release_evidence import OperationalMetrics
 from apps.operations.release_quality import (
     ReleaseQualityError,
     evaluate_release_quality,
@@ -97,16 +109,46 @@ def write_complete_physical_results(path):
         writer.writerows(rows)
 
 
+def write_valid_deployment_report(path):
+    payload = {
+        "checked_at": datetime.now(UTC).isoformat(),
+        "base_url": "https://beads.example/",
+        "health_url": "https://beads.example/health/",
+        "homepage_url": "https://beads.example/",
+        "css_url": "https://beads.example/static/css/app.0123456789ab.css",
+        "javascript_url": "https://beads.example/static/js/creation.0123456789ab.js",
+        "checks": {
+            "health": True,
+            "homepage": True,
+            "fingerprinted_assets": True,
+            "content_type_nosniff": True,
+            "frame_options_deny": True,
+            "referrer_policy": True,
+            "hsts": True,
+        },
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
 def evaluate(path, **overrides):
     physical_path = overrides.pop("physical_results_path", path.parent / "physical.csv")
     if not physical_path.exists():
         write_complete_physical_results(physical_path)
+    deployment_path = overrides.pop(
+        "deployment_report_path",
+        path.parent / "deployment.json",
+    )
+    if not deployment_path.exists():
+        write_valid_deployment_report(deployment_path)
     arguments = {
-        "generation_attempts": 100,
-        "automatic_retries": 14,
-        "wrong_charges": 0,
+        "operational_metrics": OperationalMetrics(
+            generation_attempts=100,
+            retried_tasks=14,
+            wrong_charge_count=0,
+            unfinished_task_count=0,
+        ),
         "open_critical_issues": 0,
-        "deployment_smoke_passed": True,
+        "deployment_report_path": deployment_path,
         "physical_results_path": physical_path,
     }
     arguments.update(overrides)
@@ -167,7 +209,44 @@ def test_release_quality_rejects_retry_rate_at_fifteen_percent(tmp_path):
     write_results(path, reviewed_rows())
 
     with pytest.raises(ReleaseQualityError, match="retry rate is not below 15%"):
-        evaluate(path, automatic_retries=15)
+        evaluate(
+            path,
+            operational_metrics=OperationalMetrics(100, 15, 0, 0),
+        )
+
+
+@pytest.mark.parametrize(
+    ("metrics", "message"),
+    [
+        (OperationalMetrics(0, 0, 0, 0), "No generation attempts"),
+        (OperationalMetrics(100, 0, 1, 0), "incorrect image charges"),
+        (OperationalMetrics(100, 0, 0, 1), "tasks remain unfinished"),
+    ],
+)
+def test_release_quality_rejects_invalid_database_operational_evidence(
+    tmp_path,
+    metrics,
+    message,
+):
+    path = tmp_path / "results.csv"
+    write_results(path, reviewed_rows())
+
+    with pytest.raises(ReleaseQualityError, match=message):
+        evaluate(path, operational_metrics=metrics)
+
+
+def test_release_quality_rejects_local_deployment_report(tmp_path):
+    path = tmp_path / "results.csv"
+    write_results(path, reviewed_rows())
+    deployment_path = tmp_path / "deployment.json"
+    write_valid_deployment_report(deployment_path)
+    payload = json.loads(deployment_path.read_text(encoding="utf-8"))
+    for field in ("base_url", "health_url", "homepage_url", "css_url", "javascript_url"):
+        payload[field] = payload[field].replace("https://beads.example", "http://localhost:8000")
+    deployment_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ReleaseQualityError, match="only HTTPS URLs"):
+        evaluate(path, deployment_report_path=deployment_path)
 
 
 def test_release_quality_rejects_pending_physical_builds_even_after_40_reviews(tmp_path):
@@ -187,13 +266,67 @@ def test_release_quality_rejects_pending_physical_builds_even_after_40_reviews(t
         evaluate(path, physical_results_path=physical_path)
 
 
-def test_management_command_rejects_the_repository_table_while_review_is_pending():
+@pytest.mark.django_db
+def test_management_command_rejects_the_repository_table_while_review_is_pending(tmp_path):
     with pytest.raises(CommandError, match="Human review is incomplete for 40 cases"):
         call_command(
             "check_release_quality",
-            generation_attempts=100,
-            automatic_retries=0,
-            wrong_charges=0,
-            open_critical_issues=0,
-            deployment_smoke="passed",
+            deployment_report=tmp_path / "not-reached.json",
         )
+
+
+@pytest.mark.django_db
+def test_management_command_passes_only_with_database_and_file_evidence(
+    tmp_path,
+    django_user_model,
+    capsys,
+):
+    results_path = tmp_path / "results.csv"
+    physical_path = tmp_path / "physical.csv"
+    deployment_path = tmp_path / "deployment.json"
+    issues_path = tmp_path / "issues.csv"
+    write_results(results_path, reviewed_rows())
+    write_complete_physical_results(physical_path)
+    write_valid_deployment_report(deployment_path)
+    issues_path.write_text("issue_id,severity,status,title\n", encoding="utf-8")
+
+    user = django_user_model.objects.create_user(username="release-command-user")
+    plan = MembershipPlan.objects.create(
+        level=MembershipLevel.REGISTERED,
+        name="Registered",
+        quota_period=QuotaPeriodType.MONTHLY,
+        generation_limit=10,
+    )
+    quota = GenerationQuotaPeriod.objects.create(
+        user=user,
+        plan=plan,
+        starts_at=timezone.now(),
+        total_limit=10,
+        used_count=1,
+    )
+    task = GenerationTask.objects.create(
+        user=user,
+        quota_period=quota,
+        status=GenerationStatus.SUCCEEDED,
+        idempotency_key="release-command-task",
+        started_at=timezone.now(),
+        completed_at=timezone.now(),
+    )
+    for event in (QuotaLedgerEvent.RESERVE, QuotaLedgerEvent.CONSUME):
+        GenerationQuotaLedger.objects.create(
+            quota_period=quota,
+            task_reference=task.id,
+            event=event,
+            amount=1,
+            idempotency_key=f"release-command-{event}",
+        )
+
+    call_command(
+        "check_release_quality",
+        results=results_path,
+        physical_results=physical_path,
+        issues=issues_path,
+        deployment_report=deployment_path,
+    )
+
+    assert "Release quality passed" in capsys.readouterr().out
