@@ -101,6 +101,20 @@ uv run python manage.py check_release_quality \
 
 默认 `rules` 分析和 `mock` 高级创作保证离线可演示。配置真实 OpenAI 兼容服务时，把密钥放入环境变量，并在 Admin 新建模型路由版本。模型失败只记录错误类型；日志和数据库不保存密钥。
 
+真实候选模型评测必须使用 2～3 个模型和同一目录下 10～15 张已获授权的 JPG/PNG，并显式确认可能产生 API 费用：
+
+```bash
+uv run python manage.py evaluate_ai_models \
+  --capability analysis \
+  --models gpt-5.6-luna gpt-5.6-terra \
+  --image-dir evaluation-images \
+  --output-dir docs/model-evaluations \
+  --run-id analysis-2026-08 \
+  --confirm-billable
+```
+
+高级图像编辑把 `--capability` 改为 `advanced`，并选择服务实际提供的图像编辑模型。命令会先查询当前服务模型列表；模型不存在时在任何付费调用前失败。完整字段和人工评分步骤见 [模型评测说明](docs/model-evaluation.md)。
+
 ## 安全与商业边界
 
 - 不接真实支付，不保存支付资料；

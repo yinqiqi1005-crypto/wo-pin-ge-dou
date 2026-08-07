@@ -21,6 +21,8 @@
 
 后台的 `simulated_cost_per_call` 只用于作品集运营看板演示，可随配置版本修改，不代表供应商真实价格，也不会向用户收费。
 
+真实高级模型比较同样通过 `evaluate_ai_models --capability advanced` 执行。每个模型使用同一批 10～15 张输入图，输出图片单独保存，报告记录自动主体复查指标并保留身份忠实度、指令符合度和安全性的人工 `pending` 字段。没有完成真人复查的报告不能作为选型结论。
+
 ## Prompt 与复查
 
 创作 Prompt 版本是 `advanced-creation-v1.0`，明确分开“必须保留”和“允许修改”，并把图片内文字限定为内容。视觉复查版本是 `visual-review-v1.0`，记录主体关键区域相似度、有效变化比例和结论：`passed`、`warning`、`retry` 或 `failed`。
