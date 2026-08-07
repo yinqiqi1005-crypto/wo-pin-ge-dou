@@ -18,10 +18,32 @@ def test_human_review_pack_contains_all_sources_effects_grids_and_manifest_data(
 
     manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
     html = (destination / "index.html").read_text(encoding="utf-8")
+    javascript = (destination / "review.js").read_text(encoding="utf-8")
+    data_script = (destination / "review-data.js").read_text(encoding="utf-8")
+    review_data = json.loads(
+        data_script.removeprefix("window.WPGD_REVIEW_DATA = ").removesuffix(";\n")
+    )
     assert manifest["case_count"] == 40
     assert len(manifest["cases"]) == 40
     assert html.count('<article class="case"') == 40
     assert "本页面不自动判定人工指标" in html
+    assert html.count('value="pending" checked') == 160
+    assert '<button type="button" id="download-final" disabled>' in html
+    assert "finalButton.disabled = complete !== current.length" in javascript
+    assert "human_review = fields.every" in javascript
+    assert "localStorage.setItem" in javascript
+    assert "fetch(" not in javascript
+    assert "http://" not in html and "https://" not in html
+    assert review_data["resultsFilename"] == "test-results-40.csv"
+    assert len(review_data["rows"]) == 40
+    assert all(row["human_review"] == "pending" for row in review_data["rows"])
+    assert set(manifest["review_assets"]) == {
+        "index.html",
+        "review.css",
+        "review-data.js",
+        "review.js",
+    }
+    assert all(len(digest) == 64 for digest in manifest["review_assets"].values())
 
     for entry in manifest["cases"]:
         assert entry["case_id"] in html
@@ -44,6 +66,7 @@ def test_human_review_pack_contains_all_sources_effects_grids_and_manifest_data(
     assert len(list((destination / "sources").glob("*.png"))) == 40
     assert len(list((destination / "effects").glob("*.png"))) == 40
     assert len(list((destination / "grids").glob("*.png"))) == 40
+    assert len(list(destination.rglob("*.*"))) == 125
 
 
 def test_human_review_pack_never_overwrites_an_existing_review_round(tmp_path):
