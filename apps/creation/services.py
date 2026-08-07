@@ -1,9 +1,26 @@
+from io import BytesIO
+
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.db import transaction
 
 from apps.memberships.models import MembershipPlan, MembershipSubscription
+from apps.patterns.models import Pattern, PatternVersion
+from services.image_processing import (
+    apply_basic_background,
+    create_pattern,
+    render_effect_preview,
+    render_grid_preview,
+)
+from services.image_processing.normalize import load_normalized_image
 
-from .models import GenerationMode, GenerationTask
+from .models import (
+    GenerationMode,
+    GenerationSettings,
+    GenerationStatus,
+    GenerationTask,
+    ImageAnalysisResult,
+)
 
 User = get_user_model()
 
@@ -36,3 +53,109 @@ def create_generation_task(
         configuration_snapshot={"membership": plan.snapshot()},
     )
     return task, True
+
+
+def create_mock_analysis(task: GenerationTask) -> ImageAnalysisResult:
+    return ImageAnalysisResult.objects.create(
+        task=task,
+        quality_level="usable",
+        suitability_level="suitable",
+        primary_subject="主要主体",
+        subject_count=1,
+        subject_region={"x": 0.15, "y": 0.1, "width": 0.7, "height": 0.8},
+        confidence_level="medium",
+        issues=["当前为规则分析结果，后续阶段将接入真实多模态分析。"],
+        recommendations={
+            "grid_size": 50,
+            "color_limit": 24,
+            "background_mode": "simplify",
+            "reason": "50×50 能在制作难度和主体细节之间取得平衡。",
+        },
+        requires_subject_confirmation=False,
+        model_name="rule-based-mock",
+        prompt_version="mock-v1",
+    )
+
+
+def _image_content(image, *, name: str) -> ContentFile:
+    output = BytesIO()
+    image.save(output, format="PNG")
+    return ContentFile(output.getvalue(), name=name)
+
+
+@transaction.atomic
+def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -> PatternVersion:
+    if not task.input_image:
+        raise ValueError("Generation task has no input image.")
+
+    task.status = GenerationStatus.GENERATING
+    task.current_stage = "pattern_conversion"
+    task.progress_message = "正在生成正式拼豆图纸。"
+    task.save(update_fields=("status", "current_stage", "progress_message", "updated_at"))
+
+    with task.input_image.open("rb") as source:
+        normalized = load_normalized_image(source)
+    prepared = apply_basic_background(normalized, mode=settings.background_mode)
+    prepared_source = BytesIO()
+    prepared.save(prepared_source, format="PNG")
+    prepared_source.seek(0)
+    result = create_pattern(
+        prepared_source,
+        size=settings.grid_size,
+        color_limit=settings.color_limit,
+    )
+
+    effect = render_effect_preview(result.grid, palette=result.palette)
+    grid_preview = render_grid_preview(result.grid, palette=result.palette)
+    pattern = Pattern.objects.create(owner=task.user, title="未命名图纸", is_saved=False)
+    version = PatternVersion(
+        pattern=pattern,
+        version_number=1,
+        grid_data={
+            "width": result.grid.width,
+            "height": result.grid.height,
+            "cells": result.grid.cells,
+            "palette": result.palette.code,
+        },
+        material_counts=result.material_counts,
+        settings_snapshot={
+            "grid_size": settings.grid_size,
+            "color_limit": settings.color_limit,
+            "background_mode": settings.background_mode,
+        },
+        validation_result={"technical": "passed"},
+    )
+    source_extension = task.input_image.name.rsplit(".", 1)[-1].lower()
+    with task.input_image.open("rb") as source:
+        source_content = ContentFile(source.read())
+    version.source_image.save(
+        f"task-{task.pk}-source.{source_extension}",
+        source_content,
+        save=False,
+    )
+    version.effect_preview.save(
+        f"task-{task.pk}-effect.png",
+        _image_content(effect, name="effect.png"),
+        save=False,
+    )
+    version.grid_preview.save(
+        f"task-{task.pk}-grid.png",
+        _image_content(grid_preview, name="grid.png"),
+        save=False,
+    )
+    version.save()
+
+    task.status = GenerationStatus.SUCCEEDED
+    task.result_version = version
+    task.current_stage = "completed"
+    task.progress_message = "图纸生成完成。"
+    task.save(
+        update_fields=(
+            "status",
+            "result_version",
+            "current_stage",
+            "progress_message",
+            "updated_at",
+        )
+    )
+    return version

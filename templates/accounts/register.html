@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}注册 · 我拼个豆{% endblock %}
+{% block content %}
+<section class="narrow-card">
+  <h1>创建账号</h1>
+  <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">注册并开始创作</button></form>
+</section>
+{% endblock %}
+

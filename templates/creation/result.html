@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}图纸预览 · 我拼个豆{% endblock %}
+{% block content %}
+{% include "creation/_steps.html" with step=5 %}
+<section class="content-card">
+  <h1>图纸已经生成</h1>
+  <div class="two-column result-layout">
+    <div><img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="拼豆效果预览"></div>
+    <div>
+      <dl class="summary-list">
+        <div><dt>尺寸</dt><dd>{{ version.grid_data.width }}×{{ version.grid_data.height }}</dd></div>
+        <div><dt>颜色</dt><dd>{{ version.material_counts|length }} 色</dd></div>
+        <div><dt>预计用豆</dt><dd>{{ version.total_beads }} 颗</dd></div>
+      </dl>
+      <h2>材料清单</h2>
+      <ul class="material-list">{% for code, count in version.material_counts.items %}<li><span>{{ code }}</span><strong>{{ count }} 颗</strong></li>{% endfor %}</ul>
+      <p><a href="{{ version.grid_preview.url }}" target="_blank">查看带编号网格图</a></p>
+      <a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

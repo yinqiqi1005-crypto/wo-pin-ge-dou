@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ pattern.title }} · 我拼个豆{% endblock %}
+{% block content %}
+<section class="content-card">
+  <p class="eyebrow">已保存图纸</p><h1>{{ pattern.title }}</h1>{% if pattern.note %}<p>{{ pattern.note }}</p>{% endif %}
+  <div class="two-column result-layout">
+    <img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}效果预览">
+    <div><h2>v{{ version.version_number }}</h2><p>{{ version.grid_data.width }}×{{ version.grid_data.height }} · {{ version.material_counts|length }} 色</p><a class="button" href="{{ version.grid_preview.url }}" target="_blank">查看网格图</a></div>
+  </div>
+</section>
+{% endblock %}
+

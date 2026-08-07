@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}上传图片 · 我拼个豆{% endblock %}
+{% block content %}
+{% include "creation/_steps.html" with step=1 %}
+<section class="content-card center">
+  <h1>上传一张想变成拼豆的图片</h1>
+  <p class="muted">主体清楚、背景简单的图片，生成效果通常更好。</p>
+  <form method="post" enctype="multipart/form-data" class="upload-box">{% csrf_token %}{{ form.as_p }}<button class="button">上传并分析</button></form>
+  <p class="muted small">支持 JPG、PNG，最大 10 MB。</p>
+</section>
+{% endblock %}
+

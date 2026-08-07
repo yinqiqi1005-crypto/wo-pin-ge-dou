@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}确认设置 · 我拼个豆{% endblock %}
+{% block content %}
+{% include "creation/_steps.html" with step=3 %}
+<section class="content-card">
+  <div class="two-column">
+    <div><img class="source-preview" src="{{ task.input_image.url }}" alt="原始图片"></div>
+    <div>
+      <h1>确认生成设置</h1>
+      <p class="notice">当前阶段使用基础生成，AI 高级创作将在后续里程碑接入。</p>
+      <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">开始生成 1 张图纸</button></form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

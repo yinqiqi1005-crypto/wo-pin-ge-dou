@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">AI Bead Pattern Creator</p>
+  <h1>把喜欢的图片，变成真的可以制作的拼豆图纸</h1>
+  <p>上传图片，获得网格、颜色编号、用豆清单和制作建议。</p>
+  <a class="button" href="{% url 'creation:upload' %}">开始创作</a>
+</section>
+{% endblock %}
+

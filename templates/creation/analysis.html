@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}智能分析 · 我拼个豆{% endblock %}
+{% block content %}
+{% include "creation/_steps.html" with step=2 %}
+<section class="content-card">
+  <div class="two-column">
+    <div><img class="source-preview" src="{{ task.input_image.url }}" alt="上传图片预览"></div>
+    <div>
+      <span class="status good">适合生成</span>
+      <h1>智能分析完成</h1>
+      <dl class="summary-list">
+        <div><dt>主要主体</dt><dd>{{ analysis.primary_subject }}</dd></div>
+        <div><dt>推荐尺寸</dt><dd>{{ analysis.recommendations.grid_size }}×{{ analysis.recommendations.grid_size }}</dd></div>
+        <div><dt>推荐颜色</dt><dd>{{ analysis.recommendations.color_limit }} 色</dd></div>
+      </dl>
+      <p>{{ analysis.recommendations.reason }}</p>
+      {% for issue in analysis.issues %}<p class="notice">{{ issue }}</p>{% endfor %}
+      <a class="button" href="{% url 'creation:settings' task.id %}">确认生成设置</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

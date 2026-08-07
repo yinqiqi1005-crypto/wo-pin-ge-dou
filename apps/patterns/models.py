@@ -50,6 +50,7 @@ class Pattern(models.Model):
     )
     title = models.CharField(max_length=120)
     note = models.TextField(blank=True)
+    is_saved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -95,6 +96,10 @@ class PatternVersion(models.Model):
 
     def __str__(self) -> str:
         return f"{self.pattern} · v{self.version_number}"
+
+    @property
+    def total_beads(self) -> int:
+        return sum(int(count) for count in self.material_counts.values())
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError

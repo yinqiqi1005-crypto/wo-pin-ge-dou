@@ -17,7 +17,8 @@ class PaletteAdmin(admin.ModelAdmin):
 
 @admin.register(Pattern)
 class PatternAdmin(admin.ModelAdmin):
-    list_display = ("title", "owner", "created_at", "updated_at")
+    list_display = ("title", "owner", "is_saved", "created_at", "updated_at")
+    list_filter = ("is_saved",)
     search_fields = ("title", "owner__username")
 
 

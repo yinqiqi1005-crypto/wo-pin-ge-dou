@@ -13,8 +13,10 @@ __all__ = (
     "PatternGrid",
     "PatternResult",
     "PatternValidationError",
+    "apply_basic_background",
     "create_pattern",
     "render_effect_preview",
     "render_grid_preview",
     "validate_pattern",
 )
+from .background import apply_basic_background

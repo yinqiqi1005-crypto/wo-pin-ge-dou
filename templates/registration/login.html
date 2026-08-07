@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}登录 · 我拼个豆{% endblock %}
+{% block content %}
+<section class="narrow-card">
+  <h1>登录</h1>
+  <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">登录</button></form>
+  <p>还没有账号？<a href="{% url 'accounts:register' %}">立即注册</a></p>
+</section>
+{% endblock %}
+

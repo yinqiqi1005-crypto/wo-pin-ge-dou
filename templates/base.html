@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}我拼个豆{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark">▦</span>我拼个豆</a>
+    <nav aria-label="主导航">
+      <a href="{% url 'creation:upload' %}">AI 创作</a>
+      {% if user.is_authenticated %}<a href="{% url 'library:list' %}">我的图纸</a>{% endif %}
+    </nav>
+    <div class="account-nav">
+      {% if user.is_authenticated %}
+        <span>{{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-button">退出</button></form>
+      {% else %}
+        <a href="{% url 'login' %}">登录</a>
+        <a class="button small" href="{% url 'accounts:register' %}">注册</a>
+      {% endif %}
+    </div>
+  </header>
+  <main class="page-shell">{% block content %}{% endblock %}</main>
+</body>
+</html>
+
