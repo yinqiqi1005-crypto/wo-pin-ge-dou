@@ -1,3 +1,4 @@
+from celery import group
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
@@ -21,7 +22,8 @@ class Command(BaseCommand):
         if redis.ping() is not True:
             raise CommandError("Redis ping failed.")
 
-        result = infrastructure_echo.delay("worker-pong")
-        if result.get(timeout=20) != "worker-pong":
-            raise CommandError("Celery worker round trip failed.")
+        values = [f"worker-pong-{index}" for index in range(4)]
+        result = group(infrastructure_echo.s(value) for value in values).apply_async()
+        if result.get(timeout=20) != values:
+            raise CommandError("Concurrent Celery worker round trips failed.")
         self.stdout.write(self.style.SUCCESS("PostgreSQL, Redis and Celery are ready."))

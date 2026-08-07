@@ -181,3 +181,49 @@ def test_advanced_failure_retries_once_releases_quota_and_preserves_old_version(
     assert pattern.latest_version.pk == source.pk
     assert quota.used_count == used_before
     assert quota.reserved_count == 0
+
+
+@override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-m7-media")
+def test_pro_local_edit_requires_and_persists_an_explicit_region(client, django_user_model):
+    user = django_user_model.objects.create_user(username="local-editor")
+    subscribe(user, "pro")
+    client.force_login(user)
+    pattern, _ = create_saved_pattern(client, user)
+    source = pattern.latest_version
+    url = f"/patterns/{pattern.pk}/versions/{source.version_number}/advanced/"
+    base_data = {
+        "operation": "local_edit",
+        "instruction": "在右下角增加一个红色装饰",
+        "preserve_content": "主体身份,姿态",
+        "editable_content": "右下角装饰区域",
+    }
+
+    invalid = client.post(url, base_data)
+    assert invalid.status_code == 200
+    assert "局部编辑必须完整填写编辑区域" in invalid.content.decode()
+    assert not GenerationTask.objects.filter(user=user, mode=GenerationMode.ADVANCED).exists()
+
+    response = client.post(
+        url,
+        {
+            **base_data,
+            "region_x": 0.72,
+            "region_y": 0.72,
+            "region_width": 0.18,
+            "region_height": 0.18,
+        },
+    )
+    task = GenerationTask.objects.get(user=user, mode=GenerationMode.ADVANCED)
+
+    assert response.status_code == 302
+    assert task.status == GenerationStatus.SUCCEEDED
+    assert task.advanced_request.edit_region == {
+        "x": 0.72,
+        "y": 0.72,
+        "width": 0.18,
+        "height": 0.18,
+    }
+    review = task.advanced_request.review_result
+    assert review["subject_preserved"] is True
+    assert review["requested_change_detected"] is True
+    assert review["edit_scope_respected"] is True

@@ -87,3 +87,21 @@ def test_openai_edit_adapter_sends_preservation_prompt_and_returns_png():
     assert images.kwargs["model"] == "configured-image-model"
     assert "必须保留：['宠物身份']" in images.kwargs["prompt"]
     assert images.kwargs["output_format"] == "png"
+
+
+def test_visual_review_fails_output_with_unmappable_dimensions():
+    source = source_image_bytes()
+    with Image.open(BytesIO(source)) as image:
+        resized = image.resize((80, 80))
+        output = BytesIO()
+        resized.save(output, format="PNG")
+
+    review = review_advanced_result(
+        source,
+        output.getvalue(),
+        operation="local_edit",
+        instruction="只修改右下角",
+    )
+
+    assert review.status == "failed"
+    assert review.edit_scope_respected is False

@@ -21,7 +21,13 @@ from services.image_processing import (
 )
 from services.image_processing.normalize import load_normalized_image
 
-from .models import GenerationStatus, GenerationTask, ModelCallLog, ModelCapability
+from .models import (
+    GenerationErrorCode,
+    GenerationStatus,
+    GenerationTask,
+    ModelCallLog,
+    ModelCapability,
+)
 from .state import transition_task
 
 logger = logging.getLogger(__name__)
@@ -159,7 +165,12 @@ def execute_advanced_task(task_id: str) -> GenerationTask:
                     retry_number=attempt,
                     internal_cost=route.get("simulated_cost_per_call", 0),
                 )
-                review = review_advanced_result(source_bytes, result.image_bytes)
+                review = review_advanced_result(
+                    source_bytes,
+                    result.image_bytes,
+                    operation=request.operation,
+                    instruction=request.instruction,
+                )
                 ModelCallLog.objects.create(
                     task=task,
                     capability=ModelCapability.VISUAL_REVIEW,
@@ -242,7 +253,7 @@ def execute_advanced_task(task_id: str) -> GenerationTask:
         release_generation(task)
         task.status = GenerationStatus.FAILED
         task.current_stage = "advanced_failed"
-        task.failure_code = type(exc).__name__
+        task.failure_code = GenerationErrorCode.ADVANCED_FAILED
         task.failure_message = "高级创作服务暂时不可用。"
         task.progress_message = "高级创作未完成，旧版本已保留，预留张数已经释放。"
         task.completed_at = timezone.now()

@@ -13,6 +13,7 @@ from PIL import Image
 from apps.creation.analysis import execute_analysis_task
 from apps.creation.models import GenerationSettings, GenerationStatus, GenerationTask
 from apps.creation.services import create_generation_task
+from apps.creation.services import generate_basic_pattern as real_generate_basic_pattern
 from apps.creation.state import InvalidTaskTransition, transition_task
 from apps.creation.tasks import execute_generation_task
 from apps.memberships.models import GenerationQuotaLedger, QuotaLedgerEvent
@@ -23,6 +24,8 @@ from apps.memberships.services import (
     release_generation,
     reserve_generation,
 )
+from services.image_processing import render_effect_preview as real_render_effect_preview
+from services.image_processing.exceptions import PatternValidationError
 
 pytestmark = pytest.mark.django_db
 
@@ -118,6 +121,32 @@ def test_successful_background_task_consumes_one_image(user):
     assert completed.quota_period.used_count == 1
     assert completed.quota_period.reserved_count == 0
     assert completed.retry_count == 0
+    assert completed.started_at is not None
+
+
+@override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-task-test-media")
+def test_generation_commits_validation_stage_before_rendering_previews(user):
+    task = task_with_image(user)
+    reserve_generation(task)
+    observed = {}
+
+    def inspect_validation_stage(grid, *, palette):
+        persisted = GenerationTask.objects.get(pk=task.pk)
+        observed["status"] = persisted.status
+        observed["stage"] = persisted.current_stage
+        return real_render_effect_preview(grid, palette=palette)
+
+    with patch(
+        "apps.creation.services.render_effect_preview",
+        side_effect=inspect_validation_stage,
+    ):
+        completed = execute_generation_task(str(task.pk))
+
+    assert completed.status == GenerationStatus.SUCCEEDED
+    assert observed == {
+        "status": GenerationStatus.VALIDATING,
+        "stage": "technical_validation",
+    }
 
 
 def test_failed_background_task_retries_once_and_releases_quota(user):
@@ -136,6 +165,50 @@ def test_failed_background_task_retries_once_and_releases_quota(user):
     assert completed.quota_period.used_count == 0
     assert completed.quota_period.reserved_count == 0
     assert completed.progress_message == "本次生成未完成，预留张数已经释放。"
+    assert completed.failure_code == "generation_failed"
+
+
+def test_validation_failure_uses_specific_error_code_and_releases_quota(user):
+    task = task_with_image(user)
+    reserve_generation(task)
+
+    with patch(
+        "apps.creation.tasks.generate_basic_pattern",
+        side_effect=PatternValidationError("invalid material total"),
+    ):
+        completed = execute_generation_task(str(task.pk))
+    completed.quota_period.refresh_from_db()
+
+    assert completed.status == GenerationStatus.FAILED
+    assert completed.failure_code == "validation_failed"
+    assert completed.quota_period.reserved_count == 0
+    assert completed.quota_period.used_count == 0
+
+
+@override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-task-test-media")
+def test_first_generation_failure_then_automatic_retry_succeeds_without_second_reservation(user):
+    task = task_with_image(user)
+    reserve_generation(task)
+    attempts = 0
+
+    def fail_once(task_arg, settings_arg):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise RuntimeError("temporary processing error")
+        return real_generate_basic_pattern(task_arg, settings_arg)
+
+    with patch("apps.creation.tasks.generate_basic_pattern", side_effect=fail_once):
+        completed = execute_generation_task(str(task.pk))
+    completed.quota_period.refresh_from_db()
+
+    assert attempts == 2
+    assert completed.status == GenerationStatus.SUCCEEDED
+    assert completed.retry_count == 1
+    assert completed.quota_period.used_count == 1
+    assert completed.quota_period.reserved_count == 0
+    assert GenerationQuotaLedger.objects.filter(event=QuotaLedgerEvent.RESERVE).count() == 1
+    assert GenerationQuotaLedger.objects.filter(event=QuotaLedgerEvent.CONSUME).count() == 1
 
 
 def test_illegal_task_state_transition_is_rejected(user):

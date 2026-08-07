@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from apps.creation.models import GenerationMode
+from apps.creation.models import GenerationMode, GenerationTask, ModelCallLog
 from apps.creation.services import create_generation_task
 from apps.memberships.models import (
     Feature,
@@ -217,3 +217,15 @@ def test_configuration_revision_is_unique_per_version(django_user_model):
             value={"sizes": [30]},
             created_by=admin_user,
         )
+
+
+def test_high_volume_business_queries_have_explicit_database_indexes():
+    assert {index.name for index in GenerationTask._meta.indexes} >= {
+        "task_user_status_created",
+        "task_status_created",
+    }
+    assert {index.name for index in ModelCallLog._meta.indexes} >= {"model_call_cap_success"}
+    assert {index.name for index in Pattern._meta.indexes} >= {"pattern_owner_library"}
+    assert {index.name for index in ConfigurationRevision._meta.indexes} >= {
+        "config_active_revision"
+    }

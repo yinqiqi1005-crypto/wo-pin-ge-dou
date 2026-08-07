@@ -8,8 +8,10 @@ from pydantic import ValidationError
 
 from services.ai import get_analysis_provider
 from services.ai.providers.rules import RuleBasedAnalysisProvider
+from services.image_processing import apply_basic_background
 
 from .models import (
+    GenerationErrorCode,
     GenerationStatus,
     GenerationTask,
     ImageAnalysisResult,
@@ -49,12 +51,18 @@ def _record_call(
 
 def _save_subject_mask(analysis_record, image_bytes, region):
     with Image.open(BytesIO(image_bytes)) as source:
-        mask = Image.new("L", source.size, 0)
+        normalized = source.convert("RGBA")
+    segmented = apply_basic_background(normalized, mode="remove")
+    mask = segmented.getchannel("A")
     x = round(region.x * mask.width)
     y = round(region.y * mask.height)
     right = round((region.x + region.width) * mask.width)
     bottom = round((region.y + region.height) * mask.height)
-    ImageDraw.Draw(mask).rectangle((x, y, right, bottom), fill=255)
+    region_mask = Image.new("L", mask.size, 0)
+    ImageDraw.Draw(region_mask).rectangle((x, y, right, bottom), fill=255)
+    mask = Image.composite(mask, Image.new("L", mask.size, 0), region_mask)
+    if mask.getbbox() is None:
+        ImageDraw.Draw(mask).rectangle((x, y, right, bottom), fill=255)
     output = BytesIO()
     mask.save(output, format="PNG")
     analysis_record.subject_mask.save(
@@ -83,7 +91,31 @@ def _persist_result(task, result, image_bytes):
         },
     )
     if analysis.requires_subject_confirmation or analysis.subject_count > 1:
-        _save_subject_mask(record, image_bytes, analysis.subject_region)
+        try:
+            _save_subject_mask(record, image_bytes, analysis.subject_region)
+            ModelCallLog.objects.create(
+                task=task,
+                capability=ModelCapability.SEGMENTATION,
+                provider="rules",
+                model_name="corner-foreground-mask-v1",
+                prompt_version="segmentation-rules-v1",
+                latency_ms=1,
+                success=True,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Optional subject segmentation failed",
+                extra={"error_type": type(exc).__name__},
+            )
+            ModelCallLog.objects.create(
+                task=task,
+                capability=ModelCapability.SEGMENTATION,
+                provider="rules",
+                model_name="corner-foreground-mask-v1",
+                prompt_version="segmentation-rules-v1",
+                success=False,
+                error_type=type(exc).__name__,
+            )
     record.save()
     return record
 
@@ -178,7 +210,7 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
     if result is None:
         task.status = GenerationStatus.FAILED
         task.current_stage = "analysis_failed"
-        task.failure_code = "AnalysisUnavailable"
+        task.failure_code = GenerationErrorCode.ANALYSIS_UNAVAILABLE
         task.failure_message = "图片分析暂时不可用，请重新上传或稍后再试。"
         task.progress_message = task.failure_message
         task.save(

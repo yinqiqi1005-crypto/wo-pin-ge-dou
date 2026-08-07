@@ -7,12 +7,13 @@
   <h1>上传一张想变成拼豆的图片</h1>
   <p class="muted">主体清楚、背景简单的图片，生成效果通常更好。</p>
   <p class="quota-line">{{ quota.plan.name }} · 本周期还可生成 <strong>{{ quota.remaining_count }}</strong> 张</p>
-  <form method="post" enctype="multipart/form-data" class="upload-box" data-drop-upload>{% csrf_token %}
+  <form method="post" enctype="multipart/form-data" class="upload-box" data-drop-upload data-submit-state>{% csrf_token %}
     {{ form.non_field_errors }}
     <label class="upload-label" for="{{ form.image.id_for_label }}"><strong>拖拽图片到这里，或点击选择</strong><span>建议主体完整、光线均匀、背景简洁</span></label>
     {{ form.image.errors }}{{ form.image }}
+    <img class="upload-preview" data-upload-preview hidden alt="待上传图片预览">
     <p class="selected-file" aria-live="polite">尚未选择图片</p>
-    <button class="button">上传并分析</button>
+    <button class="button" data-submitting-label="正在上传……">上传并分析</button>
   </form>
   <p class="muted small">支持 JPG、PNG，最大 10 MB。</p>
 </section>
@@ -23,4 +24,3 @@
   </ul>
 </section>{% endif %}
 {% endblock %}
-{% block scripts %}<script src="{% static 'js/creation.js' %}" defer></script>{% endblock %}

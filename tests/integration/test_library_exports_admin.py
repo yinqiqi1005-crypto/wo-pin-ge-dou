@@ -165,6 +165,16 @@ def test_regular_user_cannot_enter_operations_admin(creator):
     assert response.url.startswith("/admin/login/")
 
 
+def test_superuser_can_enter_operations_admin(client, django_user_model):
+    operator = django_user_model.objects.create_superuser(username="admin-access")
+    client.force_login(operator)
+
+    response = client.get("/admin/")
+
+    assert response.status_code == 200
+    assert "站点管理" in response.content.decode()
+
+
 def test_admin_quota_adjustment_creates_audited_ledger(django_user_model):
     operator = django_user_model.objects.create_superuser(username="quota-admin")
     user = django_user_model.objects.create_user(username="quota-target")

@@ -1,9 +1,11 @@
 import uuid
 
+from django.db import DatabaseError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.accounts.models import UserProfile
+from apps.memberships.models import FeatureCode
 from apps.memberships.services import (
     InsufficientGenerationQuota,
     get_or_create_current_quota,
@@ -18,7 +20,12 @@ from .forms import (
     SavePatternForm,
     SubjectSelectionForm,
 )
-from .models import GenerationSettings, GenerationStatus, GenerationTask
+from .models import (
+    GenerationErrorCode,
+    GenerationSettings,
+    GenerationStatus,
+    GenerationTask,
+)
 from .services import create_generation_task, pattern_making_guidance
 from .state import transition_task
 from .tasks import run_analysis_task, run_generation_task
@@ -74,10 +81,35 @@ def analysis(request, task_id):
             },
         )
         return redirect("creation:settings", task_id=task.pk)
+    suitability_labels = {
+        "suitable": "适合生成",
+        "try": "可以尝试",
+        "not_suitable": "不太适合",
+        "unprocessable": "无法处理",
+    }
+    region_percent = None
+    if analysis_result:
+        region = analysis_result.subject_region
+        region_percent = {
+            "left": float(region.get("x", 0)) * 100,
+            "top": float(region.get("y", 0)) * 100,
+            "width": float(region.get("width", 0)) * 100,
+            "height": float(region.get("height", 0)) * 100,
+        }
     return render(
         request,
         "creation/analysis.html",
-        {"task": task, "analysis": analysis_result, "subject_form": subject_form},
+        {
+            "task": task,
+            "analysis": analysis_result,
+            "subject_form": subject_form,
+            "suitability_label": suitability_labels.get(
+                analysis_result.suitability_level, "未知状态"
+            )
+            if analysis_result
+            else "",
+            "region_percent": region_percent,
+        },
     )
 
 
@@ -100,14 +132,19 @@ def settings(request, task_id):
         enabled_options=task.configuration_snapshot.get("generation", {}).get("enabled_options"),
     )
     if request.method == "POST" and form.is_valid():
-        form.save()
-        try:
-            reserve_generation(task)
-        except InsufficientGenerationQuota as exc:
-            form.add_error(None, str(exc))
+        if FeatureCode.BASIC_GENERATION not in task.configuration_snapshot.get(
+            "membership", {}
+        ).get("features", []):
+            form.add_error(None, "当前会员配置未开放基础生成功能。")
         else:
-            run_generation_task.delay(str(task.pk))
-            return redirect("creation:progress", task_id=task.pk)
+            form.save()
+            try:
+                reserve_generation(task)
+            except InsufficientGenerationQuota as exc:
+                form.add_error(None, str(exc))
+            else:
+                run_generation_task.delay(str(task.pk))
+                return redirect("creation:progress", task_id=task.pk)
     quota = get_or_create_current_quota(creation_user)
     membership = task.configuration_snapshot.get("membership", {})
     return render(
@@ -193,8 +230,22 @@ def save_pattern(request, task_id):
         pattern.title = form.cleaned_data["title"]
         pattern.note = form.cleaned_data["note"]
         pattern.is_saved = True
-        pattern.save(update_fields=("title", "note", "is_saved", "updated_at"))
+        try:
+            pattern.save(update_fields=("title", "note", "is_saved", "updated_at"))
+        except DatabaseError:
+            task.failure_code = GenerationErrorCode.SAVE_FAILED
+            task.failure_message = "作品暂时无法保存，请稍后重试。"
+            task.save(update_fields=("failure_code", "failure_message", "updated_at"))
+            form.add_error(None, task.failure_message)
+            pattern.refresh_from_db()
+            return render(
+                request,
+                "creation/save.html",
+                {"task": task, "pattern": pattern, "form": form},
+            )
         task.status = GenerationStatus.SAVED
-        task.save(update_fields=("status", "updated_at"))
+        task.failure_code = ""
+        task.failure_message = ""
+        task.save(update_fields=("status", "failure_code", "failure_message", "updated_at"))
         return redirect("library:detail", pattern_id=pattern.pk)
     return render(request, "creation/save.html", {"task": task, "pattern": pattern, "form": form})

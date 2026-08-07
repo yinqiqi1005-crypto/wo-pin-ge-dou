@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from io import BytesIO
 
-from PIL import Image, ImageDraw
+import numpy as np
+from PIL import Image, ImageEnhance, ImageOps
+from skimage import data
 
 
 @dataclass(frozen=True)
@@ -12,7 +14,16 @@ class ImageCase:
     expected_risk: str
     grid_size: int
     color_limit: int
+    source_name: str
 
+
+SOURCES = {
+    "person": ("astronaut", "camera", "lfw_subset"),
+    "pet": ("cat", "horse", "chelsea"),
+    "object": ("coffee", "coins", "clock", "rocket"),
+    "illustration": ("logo", "colorwheel", "checkerboard", "binary_blobs"),
+    "special": ("page", "text", "hubble_deep_field", "retina"),
+}
 
 CASES = tuple(
     ImageCase(
@@ -22,58 +33,57 @@ CASES = tuple(
         expected_risk=risk if index in {7, 8} else "none",
         grid_size=(30, 50, 70)[(index - 1) % 3],
         color_limit=(12, 24, 36)[(index - 1) % 3],
+        source_name=SOURCES[category][(index - 1) % len(SOURCES[category])],
     )
     for category, subject, risk in (
-        ("person", "中心人物", "low_contrast"),
-        ("pet", "中心宠物", "dark_image"),
-        ("object", "中心物品", "small_detail"),
-        ("illustration", "中心插画", "many_colors"),
-        ("special", "特殊图片主体", "transparency_or_text"),
+        ("person", "人物或人脸", "low_contrast"),
+        ("pet", "猫或马", "dark_image"),
+        ("object", "日常物品", "small_detail"),
+        ("illustration", "图形或插画", "many_colors"),
+        ("special", "复杂特殊内容", "transparency_or_text"),
     )
     for index in range(1, 9)
 )
 
 
-def build_case_image(case: ImageCase) -> bytes:
-    index = int(case.case_id[-2:])
-    size = 96 if index == 8 else 256
-    mode = "RGBA" if case.category == "special" else "RGB"
-    background = (235, 230, 220, 0) if mode == "RGBA" else (235, 230, 220)
-    image = Image.new(mode, (size, size), background)
-    draw = ImageDraw.Draw(image)
-    scale = size / 256
-
-    def box(values):
-        return tuple(round(value * scale) for value in values)
-
-    accent = (65 + index * 12, 85 + index * 8, 175 - index * 5, 255)
-    if mode == "RGB":
-        accent = accent[:3]
-    if case.category == "person":
-        draw.ellipse(box((88, 35, 168, 115)), fill=accent)
-        draw.rounded_rectangle(box((68, 105, 188, 235)), radius=round(22 * scale), fill=accent)
-    elif case.category == "pet":
-        draw.polygon([box((65, 85)), box((90, 28)), box((120, 85))], fill=accent)
-        draw.polygon([box((136, 85)), box((166, 28)), box((192, 85))], fill=accent)
-        draw.ellipse(box((58, 65, 198, 215)), fill=accent)
-    elif case.category == "object":
-        draw.rounded_rectangle(box((48, 58, 208, 208)), radius=round(26 * scale), fill=accent)
-        draw.rectangle(box((92, 25, 164, 68)), fill=accent)
-    elif case.category == "illustration":
-        draw.regular_polygon((128 * scale, 128 * scale, 88 * scale), 5, rotation=18, fill=accent)
-        draw.ellipse(
-            box((98, 98, 158, 158)), fill=(245, 185, 75, 255) if mode == "RGBA" else (245, 185, 75)
-        )
+def _to_pillow(array, *, variant):
+    if array.ndim == 3 and array.shape[0] > 10 and array.shape[1] <= 32:
+        array = array[variant % array.shape[0]]
+    if array.dtype == np.bool_:
+        array = array.astype(np.uint8) * 255
+    elif np.issubdtype(array.dtype, np.floating):
+        maximum = float(array.max()) or 1
+        array = np.clip(array / maximum * 255, 0, 255).astype(np.uint8)
     else:
-        draw.ellipse(box((55, 55, 201, 201)), fill=accent)
-        draw.rectangle(box((112, 75, 144, 181)), fill=(45, 45, 45, 255))
-        draw.rectangle(box((75, 112, 181, 144)), fill=(45, 45, 45, 255))
+        array = np.clip(array, 0, 255).astype(np.uint8)
+    image = Image.fromarray(array)
+    if image.mode not in {"RGB", "RGBA"}:
+        image = image.convert("RGB")
+    centering = ((0.35, 0.5), (0.5, 0.5), (0.65, 0.5))[variant % 3]
+    return ImageOps.fit(image, (256, 256), method=Image.Resampling.LANCZOS, centering=centering)
 
-    if index == 7:
-        overlay = Image.new(
-            mode, image.size, (225, 225, 220, 170) if mode == "RGBA" else (225, 225, 220)
-        )
-        image = Image.blend(image.convert("RGBA"), overlay.convert("RGBA"), 0.55)
+
+def build_case_image(case: ImageCase) -> bytes:
+    variant = int(case.case_id[-2:])
+    source = getattr(data, case.source_name)()
+    image = _to_pillow(source, variant=variant)
+    if variant % 2 == 0:
+        image = ImageOps.mirror(image)
+
+    if case.expected_risk == "low_contrast":
+        image = ImageEnhance.Contrast(image).enhance(0.22)
+    elif case.expected_risk == "dark_image":
+        image = ImageEnhance.Brightness(image).enhance(0.2)
+    elif case.expected_risk == "small_detail":
+        thumbnail = image.resize((96, 96), Image.Resampling.LANCZOS)
+        image = Image.new("RGB", (256, 256), (245, 245, 245))
+        image.paste(thumbnail.convert("RGB"), (80, 80))
+    elif case.expected_risk == "transparency_or_text":
+        image = image.convert("RGBA")
+        image.putalpha(Image.new("L", image.size, 210 if variant == 7 else 150))
+
+    if variant == 8:
+        image = image.resize((96, 96), Image.Resampling.LANCZOS)
     output = BytesIO()
     image.save(output, format="PNG")
     return output.getvalue()

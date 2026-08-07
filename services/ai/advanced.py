@@ -38,6 +38,9 @@ class VisualReview(BaseModel):
     status: str = Field(pattern="^(passed|warning|retry|failed)$")
     identity_score: float = Field(ge=0, le=1)
     changed_ratio: float = Field(ge=0, le=1)
+    subject_preserved: bool
+    requested_change_detected: bool
+    edit_scope_respected: bool
     notes: list[str] = Field(max_length=3)
 
 
@@ -135,17 +138,32 @@ def get_advanced_provider(route):
     raise ValueError(f"Unsupported advanced provider: {provider}")
 
 
-def review_advanced_result(source_bytes: bytes, edited_bytes: bytes) -> VisualReview:
+def review_advanced_result(
+    source_bytes: bytes,
+    edited_bytes: bytes,
+    *,
+    operation="unspecified",
+    instruction="",
+) -> VisualReview:
     with Image.open(BytesIO(source_bytes)) as source:
+        source_size = source.size
         source_gray = np.asarray(source.convert("L").resize((128, 128)), dtype=np.float32)
     with Image.open(BytesIO(edited_bytes)) as edited:
+        edited_size = edited.size
         edited_gray = np.asarray(edited.convert("L").resize((128, 128)), dtype=np.float32)
     center = np.s_[26:102, 26:102]
     identity = float(
         structural_similarity(source_gray[center], edited_gray[center], data_range=255)
     )
     changed = float(np.mean(np.abs(source_gray - edited_gray) > 8))
-    if identity < 0.45:
+    subject_preserved = identity >= 0.7
+    requested_change_detected = changed >= 0.01
+    edit_scope_respected = identity >= 0.45
+    if source_size != edited_size:
+        status = "failed"
+        notes = ["输出尺寸与输入不一致，无法可靠映射编辑区域。"]
+        edit_scope_respected = False
+    elif identity < 0.45:
         status = "retry"
         notes = ["主体关键区域变化过大，需要重试。"]
     elif identity < 0.7:
@@ -156,10 +174,14 @@ def review_advanced_result(source_bytes: bytes, edited_bytes: bytes) -> VisualRe
         notes = ["编辑变化较小，请确认是否符合预期。"]
     else:
         status = "passed"
-        notes = ["主体关键区域保留，编辑结果可进入图纸转换。"]
+        requirement = instruction[:40] if instruction else operation
+        notes = [f"主体关键区域保留，已检测到“{requirement}”对应的有效变化。"]
     return VisualReview(
         status=status,
         identity_score=round(identity, 4),
         changed_ratio=round(changed, 4),
+        subject_preserved=subject_preserved,
+        requested_change_detected=requested_change_detected,
+        edit_scope_respected=edit_scope_respected,
         notes=notes,
     )

@@ -153,6 +153,7 @@ def advanced_create(request, pattern_id, version_number):
                 instruction=form.cleaned_data["instruction"],
                 preserve_content=form.split_items(form.cleaned_data["preserve_content"]),
                 editable_content=form.split_items(form.cleaned_data["editable_content"]),
+                edit_region=form.edit_region(),
             )
             try:
                 reserve_generation(task)

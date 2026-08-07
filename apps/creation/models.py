@@ -23,6 +23,16 @@ class GenerationStatus(models.TextChoices):
     CANCELLED = "cancelled", "已取消"
 
 
+class GenerationErrorCode(models.TextChoices):
+    UPLOAD_INVALID = "upload_invalid", "上传文件无效"
+    ANALYSIS_UNAVAILABLE = "analysis_unavailable", "图片分析不可用"
+    QUOTA_INSUFFICIENT = "quota_insufficient", "生成张数不足"
+    GENERATION_FAILED = "generation_failed", "图纸生成失败"
+    VALIDATION_FAILED = "validation_failed", "图纸校验失败"
+    SAVE_FAILED = "save_failed", "作品保存失败"
+    ADVANCED_FAILED = "advanced_failed", "高级创作失败"
+
+
 class GenerationTask(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
@@ -67,6 +77,10 @@ class GenerationTask(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=("user", "status", "-created_at"), name="task_user_status_created"),
+            models.Index(fields=("status", "-created_at"), name="task_status_created"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=("user", "idempotency_key"),
@@ -140,6 +154,12 @@ class ModelCallLog(models.Model):
 
     class Meta:
         ordering = ("created_at", "id")
+        indexes = [
+            models.Index(
+                fields=("capability", "success", "-created_at"),
+                name="model_call_cap_success",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.task_id} · {self.capability} · {self.model_name}"

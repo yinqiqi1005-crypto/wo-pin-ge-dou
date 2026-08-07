@@ -57,6 +57,12 @@ class Pattern(models.Model):
 
     class Meta:
         ordering = ("-updated_at", "-id")
+        indexes = [
+            models.Index(
+                fields=("owner", "is_saved", "deleted_at", "-updated_at"),
+                name="pattern_owner_library",
+            )
+        ]
 
     def __str__(self) -> str:
         return self.title

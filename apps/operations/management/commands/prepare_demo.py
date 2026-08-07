@@ -3,12 +3,12 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.memberships.models import MembershipPlan, MembershipSubscription
 from services.demo_assets import build_demo_images
+from services.storage import DjangoStorageBackend
 
 
 class Command(BaseCommand):
@@ -44,10 +44,11 @@ class Command(BaseCommand):
                 )
 
         for filename, _, content in build_demo_images():
+            storage = DjangoStorageBackend()
             path = f"demo-assets/{filename}"
-            if default_storage.exists(path):
-                default_storage.delete(path)
-            default_storage.save(path, ContentFile(content))
+            if storage.exists(path):
+                storage.delete(path)
+            storage.save(path, ContentFile(content))
 
         self.stdout.write(
             self.style.SUCCESS(f"Demo accounts and images are ready under {settings.MEDIA_ROOT}.")

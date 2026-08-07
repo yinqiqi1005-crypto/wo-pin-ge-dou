@@ -44,6 +44,9 @@ input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var
 .upload-box.dragging { background: #ffe0d2; border-style: solid; }
 .upload-label { display: grid; gap: 4px; margin-bottom: 14px; cursor: pointer; }
 .selected-file { min-height: 1.5em; }
+.upload-preview { display: block; width: min(100%, 320px); max-height: 260px; margin: 12px auto; object-fit: contain; border-radius: 10px; }
+.subject-image-frame { position: relative; }
+.subject-region { position: absolute; border: 3px solid #146c94; background: rgb(20 108 148 / 12%); box-shadow: 0 0 0 1px white; pointer-events: none; }
 .muted { color: var(--muted); }
 .small { font-size: .9rem; }
 .notice { padding: 11px 13px; border-radius: 9px; background: var(--accent-soft); }

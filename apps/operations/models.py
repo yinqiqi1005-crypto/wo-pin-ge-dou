@@ -19,6 +19,12 @@ class ConfigurationRevision(models.Model):
 
     class Meta:
         ordering = ("namespace", "key", "-version")
+        indexes = [
+            models.Index(
+                fields=("namespace", "key", "is_active", "-version"),
+                name="config_active_revision",
+            )
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=("namespace", "key", "version"),

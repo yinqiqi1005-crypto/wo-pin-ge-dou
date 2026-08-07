@@ -87,7 +87,6 @@ def pattern_making_guidance(version: PatternVersion) -> dict:
     return {"difficulty": difficulty, "advice": advice}
 
 
-@transaction.atomic
 def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -> PatternVersion:
     if not task.input_image:
         raise ValueError("Generation task has no input image.")
@@ -107,6 +106,11 @@ def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -
         size=settings.grid_size,
         color_limit=settings.color_limit,
     )
+
+    task.status = GenerationStatus.VALIDATING
+    task.current_stage = "technical_validation"
+    task.progress_message = "正在校验网格、色号和材料数量。"
+    task.save(update_fields=("status", "current_stage", "progress_message", "updated_at"))
 
     effect = render_effect_preview(result.grid, palette=result.palette)
     grid_preview = render_grid_preview(result.grid, palette=result.palette)

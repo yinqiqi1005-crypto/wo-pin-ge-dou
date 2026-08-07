@@ -4,10 +4,11 @@ from celery import shared_task
 from django.utils import timezone
 
 from apps.memberships.services import consume_generation, release_generation
+from services.image_processing.exceptions import PatternValidationError
 
 from .advanced import execute_advanced_task
 from .analysis import execute_analysis_task
-from .models import GenerationStatus, GenerationTask
+from .models import GenerationErrorCode, GenerationStatus, GenerationTask
 from .services import generate_basic_pattern
 from .state import transition_task
 
@@ -34,6 +35,9 @@ def execute_generation_task(task_id: str) -> GenerationTask:
                 stage="preparing",
                 message="正在准备图片。",
             )
+            if task.started_at is None:
+                task.started_at = timezone.now()
+                task.save(update_fields=("started_at", "updated_at"))
 
         try:
             if task.result_version_id is None:
@@ -50,7 +54,11 @@ def execute_generation_task(task_id: str) -> GenerationTask:
             )
             task.refresh_from_db()
             task.retry_count = attempt + 1
-            task.failure_code = type(exc).__name__
+            task.failure_code = (
+                GenerationErrorCode.VALIDATION_FAILED
+                if isinstance(exc, PatternValidationError)
+                else GenerationErrorCode.GENERATION_FAILED
+            )
             task.failure_message = "图纸生成处理出现异常。"
             if attempt + 1 < max_attempts:
                 task.status = GenerationStatus.QUEUED
