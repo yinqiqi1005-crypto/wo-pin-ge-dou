@@ -14,6 +14,47 @@ jobs:
           python-version: "3.12"
       - run: sudo apt-get update && sudo apt-get install -y poppler-utils fonts-noto-cjk
       - run: uv sync --dev
+      - run: uv run playwright install --with-deps chromium
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest
+  infrastructure:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: wo_pin_ge_dou
+          POSTGRES_USER: wo_pin_ge_dou
+          POSTGRES_PASSWORD: ci-only-database-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U wo_pin_ge_dou"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_ENGINE: postgresql
+      DB_NAME: wo_pin_ge_dou
+      DB_USER: wo_pin_ge_dou
+      DB_PASSWORD: ci-only-database-password
+      DB_HOST: 127.0.0.1
+      REDIS_URL: redis://127.0.0.1:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --dev
+      - run: uv run python manage.py migrate --noinput
+      - run: uv run celery -A config worker -l warning --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
+      - run: uv run python manage.py check_infrastructure

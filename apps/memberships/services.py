@@ -27,6 +27,8 @@ class InvalidQuotaState(ValueError):
 
 
 def current_plan_for_user(user) -> MembershipPlan:
+    if getattr(getattr(user, "profile", None), "is_guest", False):
+        return MembershipPlan.objects.get(level=MembershipLevel.VISITOR, is_active=True)
     subscription = (
         MembershipSubscription.objects.select_related("plan")
         .filter(user=user, is_active=True)

@@ -21,7 +21,16 @@ from .state import transition_task
 logger = logging.getLogger(__name__)
 
 
-def _record_call(task, result=None, *, provider="", model_name="", error=None, retry=0):
+def _record_call(
+    task,
+    result=None,
+    *,
+    provider="",
+    model_name="",
+    error=None,
+    retry=0,
+    internal_cost=None,
+):
     ModelCallLog.objects.create(
         task=task,
         capability=ModelCapability.ANALYSIS,
@@ -31,7 +40,9 @@ def _record_call(task, result=None, *, provider="", model_name="", error=None, r
         latency_ms=result.latency_ms if result else 0,
         success=error is None,
         retry_number=retry,
-        internal_cost=result.internal_cost if result else 0,
+        internal_cost=(
+            internal_cost if internal_cost is not None else result.internal_cost if result else 0
+        ),
         error_type=type(error).__name__ if error else "",
     )
 
@@ -108,7 +119,10 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
     try:
         provider = get_analysis_provider(route)
     except Exception as exc:
-        logger.warning("Analysis provider configuration failed", exc_info=True)
+        logger.warning(
+            "Analysis provider configuration failed",
+            extra={"error_type": type(exc).__name__},
+        )
         _record_call(
             task,
             provider=configured_provider,
@@ -123,7 +137,11 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
         for retry in range(max_attempts):
             try:
                 result = provider.analyze(image_bytes, media_type=media_type)
-                _record_call(task, result)
+                _record_call(
+                    task,
+                    result,
+                    internal_cost=route.get("simulated_cost_per_call", 0),
+                )
                 break
             except Exception as exc:
                 _record_call(
@@ -135,7 +153,10 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
                 )
                 if isinstance(exc, (ValidationError, ValueError, TypeError, KeyError)):
                     break
-                logger.warning("Analysis provider attempt failed", exc_info=True)
+                logger.warning(
+                    "Analysis provider attempt failed",
+                    extra={"error_type": type(exc).__name__},
+                )
 
     if result is None and configured_provider != "rules":
         fallback = RuleBasedAnalysisProvider(

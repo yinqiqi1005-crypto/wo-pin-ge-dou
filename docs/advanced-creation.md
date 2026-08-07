@@ -19,6 +19,8 @@
 
 默认后台路由为本地 mock，便于没有密钥的开发环境完整运行。把路由切到 `openai` 后，供应商故障只会有限重试一次，不降级到 mock。官方图像生成与编辑能力依据：<https://developers.openai.com/api/docs/guides/image-generation>。
 
+后台的 `simulated_cost_per_call` 只用于作品集运营看板演示，可随配置版本修改，不代表供应商真实价格，也不会向用户收费。
+
 ## Prompt 与复查
 
 创作 Prompt 版本是 `advanced-creation-v1.0`，明确分开“必须保留”和“允许修改”，并把图片内文字限定为内容。视觉复查版本是 `visual-review-v1.0`，记录主体关键区域相似度、有效变化比例和结论：`passed`、`warning`、`retry` 或 `failed`。

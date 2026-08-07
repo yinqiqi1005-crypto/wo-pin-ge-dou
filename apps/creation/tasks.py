@@ -44,11 +44,14 @@ def execute_generation_task(task_id: str) -> GenerationTask:
             task.save(update_fields=("completed_at", "updated_at"))
             return task
         except Exception as exc:
-            logger.exception("Generation attempt failed", extra={"task_id": str(task.pk)})
+            logger.warning(
+                "Generation attempt failed",
+                extra={"task_id": str(task.pk), "error_type": type(exc).__name__},
+            )
             task.refresh_from_db()
             task.retry_count = attempt + 1
             task.failure_code = type(exc).__name__
-            task.failure_message = str(exc)[:500]
+            task.failure_message = "图纸生成处理出现异常。"
             if attempt + 1 < max_attempts:
                 task.status = GenerationStatus.QUEUED
                 task.current_stage = "automatic_retry"

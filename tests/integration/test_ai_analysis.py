@@ -80,3 +80,4 @@ def test_analysis_is_idempotent_after_success(analysis_task):
 
     provider_factory.assert_not_called()
     assert ModelCallLog.objects.filter(task=analysis_task).count() == 1
+    assert str(ModelCallLog.objects.get(task=analysis_task).internal_cost) == "0.006000"

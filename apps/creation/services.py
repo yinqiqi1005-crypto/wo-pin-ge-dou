@@ -43,6 +43,8 @@ def create_generation_task(
     )
     if subscription:
         plan = subscription.plan
+    elif getattr(getattr(user, "profile", None), "is_guest", False):
+        plan = MembershipPlan.objects.get(level="visitor", is_active=True)
     else:
         plan = MembershipPlan.objects.get(level="registered", is_active=True)
 

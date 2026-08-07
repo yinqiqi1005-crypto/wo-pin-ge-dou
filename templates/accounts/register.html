@@ -3,7 +3,6 @@
 {% block content %}
 <section class="narrow-card">
   <h1>创建账号</h1>
-  <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">注册并开始创作</button></form>
+  <form method="post" class="stacked-form">{% csrf_token %}{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}{{ form.as_p }}<button class="button">注册并开始创作</button></form>
 </section>
 {% endblock %}
-

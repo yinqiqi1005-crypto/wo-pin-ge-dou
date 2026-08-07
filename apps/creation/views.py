@@ -1,9 +1,9 @@
 import uuid
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from apps.accounts.models import UserProfile
 from apps.memberships.services import (
     InsufficientGenerationQuota,
     get_or_create_current_quota,
@@ -11,6 +11,7 @@ from apps.memberships.services import (
     reserve_generation,
 )
 
+from .access import effective_creation_user
 from .forms import (
     GenerationSettingsForm,
     ImageUploadForm,
@@ -31,17 +32,17 @@ def _user_task_or_404(user, task_id):
     )
 
 
-@login_required
 def upload(request):
+    creation_user = effective_creation_user(request)
     form = ImageUploadForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
-        task, _ = create_generation_task(user=request.user, idempotency_key=uuid.uuid4().hex)
+        task, _ = create_generation_task(user=creation_user, idempotency_key=uuid.uuid4().hex)
         task.input_image = form.cleaned_data["image"]
         task.save(update_fields=("input_image", "updated_at"))
         run_analysis_task.delay(str(task.pk))
         return redirect("creation:analysis", task_id=task.pk)
-    quota = get_or_create_current_quota(request.user)
-    recent_tasks = GenerationTask.objects.filter(user=request.user)[:5]
+    quota = get_or_create_current_quota(creation_user)
+    recent_tasks = GenerationTask.objects.filter(user=creation_user)[:5]
     return render(
         request,
         "creation/upload.html",
@@ -49,9 +50,8 @@ def upload(request):
     )
 
 
-@login_required
 def analysis(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    task = _user_task_or_404(effective_creation_user(request), task_id)
     analysis_result = getattr(task, "analysis", None)
     initial = analysis_result.subject_region if analysis_result else None
     subject_form = SubjectSelectionForm(request.POST or None, initial=initial)
@@ -81,9 +81,9 @@ def analysis(request, task_id):
     )
 
 
-@login_required
 def settings(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    creation_user = effective_creation_user(request)
+    task = _user_task_or_404(creation_user, task_id)
     recommendations = task.analysis.recommendations
     instance, _ = GenerationSettings.objects.get_or_create(
         task=task,
@@ -108,7 +108,7 @@ def settings(request, task_id):
         else:
             run_generation_task.delay(str(task.pk))
             return redirect("creation:progress", task_id=task.pk)
-    quota = get_or_create_current_quota(request.user)
+    quota = get_or_create_current_quota(creation_user)
     membership = task.configuration_snapshot.get("membership", {})
     return render(
         request,
@@ -123,15 +123,13 @@ def settings(request, task_id):
     )
 
 
-@login_required
 def progress(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    task = _user_task_or_404(effective_creation_user(request), task_id)
     return render(request, "creation/progress.html", {"task": task})
 
 
-@login_required
 def task_status(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    task = _user_task_or_404(effective_creation_user(request), task_id)
     return JsonResponse(
         {
             "status": task.status,
@@ -147,9 +145,8 @@ def task_status(request, task_id):
     )
 
 
-@login_required
 def cancel_task(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    task = _user_task_or_404(effective_creation_user(request), task_id)
     if request.method == "POST" and task.status in {
         GenerationStatus.QUOTA_RESERVED,
         GenerationStatus.QUEUED,
@@ -164,9 +161,8 @@ def cancel_task(request, task_id):
     return redirect("creation:progress", task_id=task.pk)
 
 
-@login_required
 def result(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    task = _user_task_or_404(effective_creation_user(request), task_id)
     if task.status != GenerationStatus.SUCCEEDED or not task.result_version:
         return redirect("creation:settings", task_id=task.pk)
     return render(
@@ -180,11 +176,13 @@ def result(request, task_id):
     )
 
 
-@login_required
 def save_pattern(request, task_id):
-    task = _user_task_or_404(request.user, task_id)
+    creation_user = effective_creation_user(request)
+    task = _user_task_or_404(creation_user, task_id)
     if not task.result_version:
         return redirect("creation:settings", task_id=task.pk)
+    if UserProfile.objects.filter(user=creation_user, is_guest=True).exists():
+        return redirect(f"/accounts/register/?next=/create/{task.pk}/save/")
 
     pattern = task.result_version.pattern
     form = SavePatternForm(

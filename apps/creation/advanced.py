@@ -157,6 +157,7 @@ def execute_advanced_task(task_id: str) -> GenerationTask:
                     latency_ms=result.latency_ms,
                     success=True,
                     retry_number=attempt,
+                    internal_cost=route.get("simulated_cost_per_call", 0),
                 )
                 review = review_advanced_result(source_bytes, result.image_bytes)
                 ModelCallLog.objects.create(
@@ -234,12 +235,15 @@ def execute_advanced_task(task_id: str) -> GenerationTask:
                 raise
         raise ValueError("Advanced result did not pass visual review.")
     except Exception as exc:
-        logger.exception("Advanced creation failed", extra={"task_id": str(task.pk)})
+        logger.warning(
+            "Advanced creation failed",
+            extra={"task_id": str(task.pk), "error_type": type(exc).__name__},
+        )
         release_generation(task)
         task.status = GenerationStatus.FAILED
         task.current_stage = "advanced_failed"
         task.failure_code = type(exc).__name__
-        task.failure_message = str(exc)[:500]
+        task.failure_message = "高级创作服务暂时不可用。"
         task.progress_message = "高级创作未完成，旧版本已保留，预留张数已经释放。"
         task.completed_at = timezone.now()
         task.save(

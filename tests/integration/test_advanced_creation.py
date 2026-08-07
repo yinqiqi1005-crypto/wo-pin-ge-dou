@@ -112,6 +112,7 @@ def test_plus_content_creation_adds_child_version_and_consumes_one(client, djang
     }
     assert quota.used_count == used_before + 1
     assert basic_task.result_version_id == source.pk
+    assert str(task.model_calls.get(capability="image_edit").internal_cost) == "0.040000"
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-m7-media")

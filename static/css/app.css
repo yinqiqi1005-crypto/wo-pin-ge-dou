@@ -23,6 +23,9 @@ a { color: inherit; }
 .page-shell { width: min(1120px, 92vw); margin: 0 auto; padding: 48px 0 80px; }
 .hero { padding: 10vh 0; max-width: 720px; }
 .hero h1 { font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: 1.08; margin: 12px 0 20px; }
+.decision-section { padding: 40px 0 80px; }
+.decision-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.decision-grid article { padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
 .button { display: inline-block; border: 0; border-radius: 10px; padding: 11px 18px; background: var(--ink); color: white; text-decoration: none; cursor: pointer; font: inherit; }
 .button.small { padding: 7px 12px; }
@@ -84,5 +87,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .analysis-stages { grid-template-columns: 1fr; }
   .content-card, .narrow-card { padding: 18px; }
   .compact-grid p { grid-template-columns: 1fr; }
+  .decision-grid { grid-template-columns: 1fr; }
   img { max-width: 100%; }
 }
