@@ -5,35 +5,35 @@
   "workflow": "test",
   "event": "push",
   "branch": "main",
-  "commit_sha": "91020c45eeaa48cc144cb138621ed70d9e254d9c",
-  "run_id": 31212392462,
-  "run_url": "https://github.com/yinqiqi1005-crypto/wo-pin-ge-dou/actions/runs/31212392462",
+  "commit_sha": "fd65969d757c2ecaf1f03a2883dae27e9e5cd4bc",
+  "run_id": 31215298153,
+  "run_url": "https://github.com/yinqiqi1005-crypto/wo-pin-ge-dou/actions/runs/31215298153",
   "status": "completed",
   "conclusion": "success",
-  "checked_at": "2026-08-07T19:40:45+00:00",
+  "checked_at": "2026-08-07T20:20:36+00:00",
   "jobs": [
     {
       "name": "test",
-      "job_id": 92978019024,
+      "job_id": 92987320966,
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-07T19:39:02+00:00",
-      "completed_at": "2026-08-07T19:40:44+00:00",
+      "started_at": "2026-08-07T20:18:51+00:00",
+      "completed_at": "2026-08-07T20:20:35+00:00",
       "verified_steps": [
         "uv sync --dev",
         "playwright install --with-deps chromium",
         "ruff check",
         "ruff format --check",
-        "pytest: 256 passed"
+        "pytest: 262 passed"
       ]
     },
     {
       "name": "infrastructure",
-      "job_id": 92978018955,
+      "job_id": 92987320967,
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-07T19:39:01+00:00",
-      "completed_at": "2026-08-07T19:39:48+00:00",
+      "started_at": "2026-08-07T20:18:43+00:00",
+      "completed_at": "2026-08-07T20:19:30+00:00",
       "verified_steps": [
         "PostgreSQL and Redis service health",
         "Django migrations",

@@ -40,6 +40,6 @@ def test_committed_github_actions_evidence_proves_both_jobs_passed():
         assert datetime.fromisoformat(job["completed_at"]).tzinfo is not None
         assert job["verified_steps"]
 
-    assert "pytest: 256 passed" in jobs["test"]["verified_steps"]
+    assert "pytest: 262 passed" in jobs["test"]["verified_steps"]
     assert "10 concurrent infrastructure round trips" in jobs["infrastructure"]["verified_steps"]
     assert "queued task survives worker restart" in jobs["infrastructure"]["verified_steps"]
