@@ -68,7 +68,7 @@ def test_registered_user_can_generate_save_and_view_pattern(signed_in_client):
     task.refresh_from_db()
 
     assert response.status_code == 302
-    assert response.url == f"/create/{task.pk}/result/"
+    assert response.url == f"/create/{task.pk}/progress/"
     assert task.status == GenerationStatus.SUCCEEDED
     version = task.result_version
     assert version.grid_data["width"] == 30

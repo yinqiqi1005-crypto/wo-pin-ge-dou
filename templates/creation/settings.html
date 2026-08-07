@@ -8,6 +8,7 @@
     <div>
       <h1>确认生成设置</h1>
       <p class="notice">当前阶段使用基础生成，AI 高级创作将在后续里程碑接入。</p>
+      <p>本周期还可生成 <strong>{{ quota.remaining_count }}</strong> 张，本次成功后使用 1 张。</p>
       <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">开始生成 1 张图纸</button></form>
     </div>
   </div>

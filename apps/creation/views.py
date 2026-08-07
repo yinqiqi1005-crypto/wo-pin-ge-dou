@@ -1,11 +1,21 @@
 import uuid
 
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+
+from apps.memberships.services import (
+    InsufficientGenerationQuota,
+    get_or_create_current_quota,
+    release_generation,
+    reserve_generation,
+)
 
 from .forms import GenerationSettingsForm, ImageUploadForm, SavePatternForm
 from .models import GenerationSettings, GenerationStatus, GenerationTask
-from .services import create_generation_task, create_mock_analysis, generate_basic_pattern
+from .services import create_generation_task, create_mock_analysis
+from .state import transition_task
+from .tasks import run_generation_task
 
 
 def _user_task_or_404(user, task_id):
@@ -26,7 +36,8 @@ def upload(request):
         task.save(update_fields=("input_image", "status", "updated_at"))
         create_mock_analysis(task)
         return redirect("creation:analysis", task_id=task.pk)
-    return render(request, "creation/upload.html", {"form": form})
+    quota = get_or_create_current_quota(request.user)
+    return render(request, "creation/upload.html", {"form": form, "quota": quota})
 
 
 @login_required
@@ -49,10 +60,61 @@ def settings(request, task_id):
     )
     form = GenerationSettingsForm(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
-        settings_object = form.save()
-        generate_basic_pattern(task, settings_object)
-        return redirect("creation:result", task_id=task.pk)
-    return render(request, "creation/settings.html", {"task": task, "form": form})
+        form.save()
+        try:
+            reserve_generation(task)
+        except InsufficientGenerationQuota as exc:
+            form.add_error(None, str(exc))
+        else:
+            run_generation_task.delay(str(task.pk))
+            return redirect("creation:progress", task_id=task.pk)
+    quota = get_or_create_current_quota(request.user)
+    return render(
+        request,
+        "creation/settings.html",
+        {"task": task, "form": form, "quota": quota},
+    )
+
+
+@login_required
+def progress(request, task_id):
+    task = _user_task_or_404(request.user, task_id)
+    return render(request, "creation/progress.html", {"task": task})
+
+
+@login_required
+def task_status(request, task_id):
+    task = _user_task_or_404(request.user, task_id)
+    return JsonResponse(
+        {
+            "status": task.status,
+            "stage": task.current_stage,
+            "message": task.progress_message,
+            "retry_count": task.retry_count,
+            "result_url": (
+                f"/create/{task.pk}/result/"
+                if task.status in {GenerationStatus.SUCCEEDED, GenerationStatus.SAVED}
+                else None
+            ),
+        }
+    )
+
+
+@login_required
+def cancel_task(request, task_id):
+    task = _user_task_or_404(request.user, task_id)
+    if request.method == "POST" and task.status in {
+        GenerationStatus.QUOTA_RESERVED,
+        GenerationStatus.QUEUED,
+    }:
+        release_generation(task)
+        transition_task(
+            task,
+            GenerationStatus.CANCELLED,
+            stage="cancelled",
+            message="排队任务已取消，预留张数已经释放。",
+        )
+    return redirect("creation:progress", task_id=task.pk)
 
 
 @login_required

@@ -88,10 +88,9 @@ def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -
     if not task.input_image:
         raise ValueError("Generation task has no input image.")
 
-    task.status = GenerationStatus.GENERATING
     task.current_stage = "pattern_conversion"
     task.progress_message = "正在生成正式拼豆图纸。"
-    task.save(update_fields=("status", "current_stage", "progress_message", "updated_at"))
+    task.save(update_fields=("current_stage", "progress_message", "updated_at"))
 
     with task.input_image.open("rb") as source:
         normalized = load_normalized_image(source)

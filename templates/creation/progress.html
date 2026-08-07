@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}生成图纸 · 我拼个豆{% endblock %}
+{% block content %}
+{% include "creation/_steps.html" with step=4 %}
+<section class="narrow-card center" data-status-url="{% url 'creation:status' task.id %}">
+  <p class="eyebrow">{{ task.get_status_display }}</p>
+  <h1>{{ task.progress_message|default:"正在准备生成任务……" }}</h1>
+  {% if task.status == "succeeded" or task.status == "saved" %}
+    <a class="button" href="{% url 'creation:result' task.id %}">查看生成结果</a>
+  {% elif task.status == "failed" %}
+    <p class="notice">本次生成未完成，没有使用你的生成张数。</p>
+    <a class="button" href="{% url 'creation:settings' task.id %}">调整设置</a>
+  {% elif task.status == "cancelled" %}
+    <a class="button" href="{% url 'creation:settings' task.id %}">返回设置</a>
+  {% else %}
+    <p class="muted">可以离开页面，任务会在后台继续。</p>
+    {% if task.status == "quota_reserved" or task.status == "queued" %}
+      <form method="post" action="{% url 'creation:cancel' task.id %}">{% csrf_token %}<button class="link-button">取消排队</button></form>
+    {% endif %}
+    <script>setTimeout(() => window.location.reload(), 2000);</script>
+  {% endif %}
+</section>
+{% endblock %}
+
