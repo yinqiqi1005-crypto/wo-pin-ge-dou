@@ -42,6 +42,7 @@ CSV 中对应写 `physical-validation-photos/per-01.png` 等相对路径。照�
 uv run python manage.py check_release_quality \
   --results docs/test-results-40.csv \
   --physical-results docs/physical-validation.csv \
+  --usability-results docs/usability-walkthrough.csv \
   --issues docs/issues.csv \
   --deployment-report docs/deployment-smoke/production-2026-08.json
 ```

@@ -1,0 +1,7 @@
+session_id,tester_alias,participant_type,session_date,device,task_id,completion_status,assistance_count,completion_seconds,confusion_severity,observation,reviewer,status
+pending-session,,external_human,,desktop,upload-and-feedback,,,,,,,pending
+pending-session,,external_human,,desktop,confirm-subject,,,,,,,pending
+pending-session,,external_human,,desktop,choose-settings,,,,,,,pending
+pending-session,,external_human,,desktop,generate-and-recover,,,,,,,pending
+pending-session,,external_human,,desktop,inspect-pattern,,,,,,,pending
+pending-session,,external_human,,desktop,save-and-find,,,,,,,pending

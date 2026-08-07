@@ -89,8 +89,8 @@
     {
       "requirements": "M5-02..M5-04",
       "status": "paid_model_review_pending",
-      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md", "tests/unit/test_evaluate_ai_models_command.py"],
-      "remaining": "当前已配置服务不提供所需图像模型；需要授权的多模态服务、费用确认和 10～15 图真人评分。"
+      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "apps/operations/management/commands/probe_ai_service.py", "docs/model-evaluation.md", "docs/model-evaluations/service-capability-2026-08-08.json", "tests/unit/test_evaluate_ai_models_command.py", "tests/unit/test_probe_ai_service_command.py"],
+      "remaining": "非计费实跑和官方能力资料确认当前服务仅提供 text-only 模型；需要授权的多模态服务、费用确认和 10～15 图真人评分。"
     },
     {
       "requirements": "M5-05..M5-18",
@@ -119,8 +119,8 @@
     {
       "requirements": "M7-02..M7-04",
       "status": "paid_model_review_pending",
-      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md", "tests/unit/test_evaluate_ai_models_command.py"],
-      "remaining": "需要可用的图像编辑模型、费用确认和人工身份保留/指令符合/安全评分。"
+      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "apps/operations/management/commands/probe_ai_service.py", "docs/model-evaluation.md", "docs/model-evaluations/service-capability-2026-08-08.json", "tests/unit/test_evaluate_ai_models_command.py", "tests/unit/test_probe_ai_service_command.py"],
+      "remaining": "非计费实跑和官方能力资料确认当前服务没有图像编辑能力；需要可用图像编辑模型、费用确认和人工身份保留/指令符合/安全评分。"
     },
     {
       "requirements": "M7-05..M7-26",
@@ -223,20 +223,20 @@
     {
       "gate": "M5-real-multimodal-analysis",
       "status": "paid_model_review_pending",
-      "evidence": ["services/ai/providers/openai_responses.py", "apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md"],
-      "remaining": "需要可用多模态模型、授权密钥、费用确认和真人比较。"
+      "evidence": ["services/ai/providers/openai_responses.py", "apps/operations/management/commands/evaluate_ai_models.py", "apps/operations/management/commands/probe_ai_service.py", "docs/model-evaluation.md", "docs/model-evaluations/service-capability-2026-08-08.json"],
+      "remaining": "当前已配置服务经非计费实跑确认不支持图片；需要可用多模态模型、授权密钥、费用确认和真人比较。"
     },
     {
       "gate": "M6-first-usability-walkthrough",
       "status": "human_review_pending",
-      "evidence": ["docs/page-state-acceptance.md", "tests/e2e/test_creation_journey.py"],
-      "remaining": "需要邀请真实测试者完成首次可用性走查并记录反馈。"
+      "evidence": ["docs/page-state-acceptance.md", "docs/usability-walkthrough.csv", "apps/operations/usability_walkthrough.py", "apps/operations/management/commands/check_usability_walkthrough.py", "tests/unit/test_usability_walkthrough.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": "固定六任务模板和硬校验已完成；需要邀请项目外真人测试者完成首次可用性走查并记录反馈。"
     },
     {
       "gate": "M7-real-advanced-model-demo",
       "status": "paid_model_review_pending",
-      "evidence": ["services/ai/advanced.py", "apps/operations/management/commands/evaluate_ai_models.py", "docs/advanced-creation.md"],
-      "remaining": "需要可用图像编辑模型、费用确认和真人身份保留/安全评审。"
+      "evidence": ["services/ai/advanced.py", "apps/operations/management/commands/evaluate_ai_models.py", "apps/operations/management/commands/probe_ai_service.py", "docs/model-evaluations/service-capability-2026-08-08.json", "docs/advanced-creation.md"],
+      "remaining": "当前已配置服务经非计费实跑确认没有图像编辑能力；需要可用图像编辑模型、费用确认和真人身份保留/安全评审。"
     },
     {
       "gate": "M8-rendered-printable-pdf",

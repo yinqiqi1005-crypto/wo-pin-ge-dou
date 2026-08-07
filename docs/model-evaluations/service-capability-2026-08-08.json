@@ -1,0 +1,25 @@
+{
+  "available_models": [
+    "deepseek-v4-flash",
+    "deepseek-v4-pro"
+  ],
+  "capabilities": {
+    "image_analysis": false,
+    "image_edit": false
+  },
+  "check": "ai-service-capability",
+  "checked_at": "2026-08-07T18:31:43.239578+00:00",
+  "official_sources": [
+    "https://api-docs.deepseek.com/api/list-models",
+    "https://api-docs.deepseek.com/quick_start/agent_integrations/github_copilot/"
+  ],
+  "provider": "deepseek",
+  "request_scope": {
+    "billable_generation_calls": 0,
+    "images_uploaded": 0,
+    "models_list_calls": 1
+  },
+  "required_capabilities_available": false,
+  "result": "insufficient",
+  "schema_version": 1
+}

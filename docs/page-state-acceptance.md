@@ -46,3 +46,24 @@
 | 生成最终失败且释放预留张数 | `test_browser_shows_final_generation_failure_and_releases_reserved_image` |
 
 浏览器测试同时查数据库中的任务状态、重试次数、预留/使用流水和剩余张数，不只判断页面是否出现某段文字。
+
+## 第一次真人可用性走查
+
+M6 完成门槛要求一名项目开发之外的真人测试者依次完成以下六个固定任务：
+
+1. 上传图片并理解质量反馈；
+2. 确认或重新选择主体；
+3. 选择尺寸/颜色并理解本次张数；
+4. 等待生成并能从任务状态恢复；
+5. 查看效果、编号网格和材料清单；
+6. 保存作品并在“我的图纸”中重新找到。
+
+使用匿名代号填写 [`usability-walkthrough.csv`](usability-walkthrough.csv)，不要记录姓名、联系方式或其他个人信息。每个任务必须记录完成状态、协助次数、用时、困惑严重度和观察；项目成员只可担任记录人，不能代替外部测试者。存在 `pending`、任务缺失/重复、未完成任务、重大/严重困惑、无观察记录或超过 90 天的记录时，以下命令会失败：
+
+```bash
+uv run python manage.py check_usability_walkthrough \
+  --results docs/usability-walkthrough.csv \
+  --report docs/usability-walkthroughs/session-YYYY-MM-DD.json
+```
+
+报告采用排他创建，不能覆盖旧证据。走查发现的问题必须进入 `docs/issues.csv`；不能为了让命令通过而把未完成任务写成已完成。

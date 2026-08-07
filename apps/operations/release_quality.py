@@ -11,6 +11,10 @@ from apps.operations.release_evidence import (
     ReleaseEvidenceError,
     validate_deployment_report,
 )
+from apps.operations.usability_walkthrough import (
+    UsabilityWalkthroughError,
+    evaluate_usability_walkthrough,
+)
 
 
 class ReleaseQualityError(ValueError):
@@ -27,6 +31,7 @@ class ReleaseQualitySummary:
     advanced_conformance_rate: float
     automatic_retry_rate: float
     physical_case_count: int
+    usability_task_count: int
 
 
 REQUIRED_COLUMNS = {
@@ -59,6 +64,7 @@ def evaluate_release_quality(
     open_critical_issues,
     deployment_report_path,
     physical_results_path,
+    usability_results_path,
 ):
     path = Path(results_path)
     with path.open(newline="", encoding="utf-8") as source:
@@ -105,8 +111,9 @@ def evaluate_release_quality(
 
     try:
         physical_summary = evaluate_physical_validation(physical_results_path)
+        usability_summary = evaluate_usability_walkthrough(usability_results_path)
         validate_deployment_report(deployment_report_path)
-    except (PhysicalValidationError, ReleaseEvidenceError) as exc:
+    except (PhysicalValidationError, ReleaseEvidenceError, UsabilityWalkthroughError) as exc:
         raise ReleaseQualityError(str(exc)) from exc
 
     summary = ReleaseQualitySummary(
@@ -122,6 +129,7 @@ def evaluate_release_quality(
         ),
         automatic_retry_rate=operational_metrics.automatic_retry_rate,
         physical_case_count=physical_summary.case_count,
+        usability_task_count=usability_summary.task_count,
     )
 
     failures = []

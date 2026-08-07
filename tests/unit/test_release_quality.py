@@ -50,6 +50,29 @@ PHYSICAL_FIELDS = (
     "status",
     "notes",
 )
+USABILITY_FIELDS = (
+    "session_id",
+    "tester_alias",
+    "participant_type",
+    "session_date",
+    "device",
+    "task_id",
+    "completion_status",
+    "assistance_count",
+    "completion_seconds",
+    "confusion_severity",
+    "observation",
+    "reviewer",
+    "status",
+)
+USABILITY_TASKS = (
+    "upload-and-feedback",
+    "confirm-subject",
+    "choose-settings",
+    "generate-and-recover",
+    "inspect-pattern",
+    "save-and-find",
+)
 
 
 def reviewed_rows():
@@ -130,6 +153,31 @@ def write_valid_deployment_report(path):
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
+def write_complete_usability_results(path):
+    rows = [
+        {
+            "session_id": "release-session",
+            "tester_alias": "external-tester-01",
+            "participant_type": "external_human",
+            "session_date": date.today().isoformat(),
+            "device": "desktop",
+            "task_id": task_id,
+            "completion_status": "completed",
+            "assistance_count": 0,
+            "completion_seconds": 45,
+            "confusion_severity": "none",
+            "observation": "测试者独立完成任务。",
+            "reviewer": "moderator-01",
+            "status": "complete",
+        }
+        for task_id in USABILITY_TASKS
+    ]
+    with path.open("w", encoding="utf-8", newline="") as destination:
+        writer = csv.DictWriter(destination, fieldnames=USABILITY_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def evaluate(path, **overrides):
     physical_path = overrides.pop("physical_results_path", path.parent / "physical.csv")
     if not physical_path.exists():
@@ -140,6 +188,12 @@ def evaluate(path, **overrides):
     )
     if not deployment_path.exists():
         write_valid_deployment_report(deployment_path)
+    usability_path = overrides.pop(
+        "usability_results_path",
+        path.parent / "usability.csv",
+    )
+    if not usability_path.exists():
+        write_complete_usability_results(usability_path)
     arguments = {
         "operational_metrics": OperationalMetrics(
             generation_attempts=100,
@@ -150,6 +204,7 @@ def evaluate(path, **overrides):
         "open_critical_issues": 0,
         "deployment_report_path": deployment_path,
         "physical_results_path": physical_path,
+        "usability_results_path": usability_path,
     }
     arguments.update(overrides)
     return evaluate_release_quality(path, **arguments)
@@ -167,6 +222,7 @@ def test_release_quality_accepts_exact_thresholds_without_rounding_them_down(tmp
     assert summary.making_feasible_rate == 0.85
     assert summary.automatic_retry_rate == 0.14
     assert summary.physical_case_count == 3
+    assert summary.usability_task_count == 6
 
 
 @pytest.mark.parametrize(
@@ -266,6 +322,23 @@ def test_release_quality_rejects_pending_physical_builds_even_after_40_reviews(t
         evaluate(path, physical_results_path=physical_path)
 
 
+def test_release_quality_rejects_pending_usability_walkthrough(tmp_path):
+    path = tmp_path / "results.csv"
+    write_results(path, reviewed_rows())
+    usability_path = tmp_path / "usability.csv"
+    write_complete_usability_results(usability_path)
+    with usability_path.open(encoding="utf-8", newline="") as source:
+        usability_rows = list(csv.DictReader(source))
+    usability_rows[0]["status"] = "pending"
+    with usability_path.open("w", encoding="utf-8", newline="") as destination:
+        writer = csv.DictWriter(destination, fieldnames=USABILITY_FIELDS)
+        writer.writeheader()
+        writer.writerows(usability_rows)
+
+    with pytest.raises(ReleaseQualityError, match="Usability walkthrough is incomplete"):
+        evaluate(path, usability_results_path=usability_path)
+
+
 @pytest.mark.django_db
 def test_management_command_rejects_the_repository_table_while_review_is_pending(tmp_path):
     with pytest.raises(CommandError, match="Human review is incomplete for 40 cases"):
@@ -284,10 +357,12 @@ def test_management_command_passes_only_with_database_and_file_evidence(
     results_path = tmp_path / "results.csv"
     physical_path = tmp_path / "physical.csv"
     deployment_path = tmp_path / "deployment.json"
+    usability_path = tmp_path / "usability.csv"
     issues_path = tmp_path / "issues.csv"
     write_results(results_path, reviewed_rows())
     write_complete_physical_results(physical_path)
     write_valid_deployment_report(deployment_path)
+    write_complete_usability_results(usability_path)
     issues_path.write_text("issue_id,severity,status,title\n", encoding="utf-8")
 
     user = django_user_model.objects.create_user(username="release-command-user")
@@ -325,6 +400,7 @@ def test_management_command_passes_only_with_database_and_file_evidence(
         "check_release_quality",
         results=results_path,
         physical_results=physical_path,
+        usability_results=usability_path,
         issues=issues_path,
         deployment_report=deployment_path,
     )

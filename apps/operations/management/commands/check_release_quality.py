@@ -14,6 +14,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--results", default="docs/test-results-40.csv")
         parser.add_argument("--physical-results", default="docs/physical-validation.csv")
+        parser.add_argument("--usability-results", default="docs/usability-walkthrough.csv")
         parser.add_argument("--issues", default="docs/issues.csv")
         parser.add_argument("--deployment-report", required=True)
 
@@ -27,6 +28,7 @@ class Command(BaseCommand):
                 open_critical_issues=open_critical_issues,
                 deployment_report_path=options["deployment_report"],
                 physical_results_path=options["physical_results"],
+                usability_results_path=options["usability_results"],
             )
         except (OSError, ReleaseEvidenceError, ReleaseQualityError) as exc:
             raise CommandError(str(exc)) from exc
@@ -39,5 +41,6 @@ class Command(BaseCommand):
                 f"severe errors {summary.severe_subject_error_rate:.1%}, "
                 f"making feasible {summary.making_feasible_rate:.1%}."
                 f" Physical builds {summary.physical_case_count}."
+                f" Usability tasks {summary.usability_task_count}."
             )
         )

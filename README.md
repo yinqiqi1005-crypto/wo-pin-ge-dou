@@ -138,11 +138,12 @@ CI 会安装 Poppler 和 Noto CJK 字体，实际渲染三种尺寸的 PDF 后�
 ```bash
 uv run python manage.py check_release_quality \
   --physical-results docs/physical-validation.csv \
+  --usability-results docs/usability-walkthrough.csv \
   --issues docs/issues.csv \
   --deployment-report docs/deployment-smoke/production-2026-08.json
 ```
 
-命令会直接从数据库的生成任务和张数流水计算尝试数、重试率、错误扣减与未完成任务；从 `docs/issues.csv` 读取 P0/P1；并校验 7 天内的真实 HTTPS 部署报告。这些值不再允许由发布人手填。存在任何 `pending`、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、三类实体制作证据不完整、自动重试率达到 15%、错误扣减、未完成生成、P0/P1 问题或部署证据失效时，命令都会失败。实体制作步骤见 [实物验证说明](docs/physical-validation.md)。
+命令会直接从数据库的生成任务和张数流水计算尝试数、重试率、错误扣减与未完成任务；从 `docs/issues.csv` 读取 P0/P1；并校验首次外部真人可用性走查、三类实体制作和 7 天内的真实 HTTPS 部署报告。这些值不再允许由发布人手填。存在任何 `pending`、可用性任务缺失或未完成、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、三类实体制作证据不完整、自动重试率达到 15%、错误扣减、未完成生成、P0/P1 问题或部署证据失效时，命令都会失败。走查步骤见 [页面与可用性验收](docs/page-state-acceptance.md)，实体制作步骤见 [实物验证说明](docs/physical-validation.md)。
 
 开始真人评分前生成不可覆盖的 40 图对照包：
 

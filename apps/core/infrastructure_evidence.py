@@ -7,7 +7,7 @@ class EvidenceWriteError(RuntimeError):
     pass
 
 
-def write_evidence(path, payload):
+def write_evidence(path, payload, *, label="infrastructure"):
     if not path:
         return
 
@@ -23,4 +23,4 @@ def write_evidence(path, payload):
             json.dump(report, report_file, ensure_ascii=False, indent=2, sort_keys=True)
             report_file.write("\n")
     except OSError as exc:
-        raise EvidenceWriteError(f"Cannot create infrastructure evidence: {exc}") from exc
+        raise EvidenceWriteError(f"Cannot create {label} evidence: {exc}") from exc
