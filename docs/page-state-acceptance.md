@@ -33,3 +33,16 @@
 - 手机视口必须保留“AI 创作/我的图纸”主导航，首页、结果和图纸详情不得横向溢出；
 - 纯键盘 Chromium 路径先验证“跳到主要内容”，再使用焦点 + Enter 激活主要按钮和链接；
 - 结果页由 JavaScript 增强为 `tablist/tab/tabpanel`，支持左右方向键和 Home/End；JavaScript 不可用时，三个结果区仍全部出现在服务器 HTML 中。
+
+## 异常端到端验收
+
+| 开发计划场景 | Chromium 证据 |
+|---|---|
+| 上传损坏文件 | `test_browser_rejects_damaged_upload_next_to_the_file_control` |
+| 主体不确定后重新选择 | `test_browser_reselects_an_uncertain_subject_without_reuploading` |
+| 剩余张数不足且保留设置 | `test_browser_keeps_settings_when_generation_images_are_exhausted` |
+| 首次生成失败、免费自动重试成功 | `test_browser_explains_free_retry_and_recovers_from_save_failure` |
+| 保存失败不破坏结果，再次保存成功 | `test_browser_explains_free_retry_and_recovers_from_save_failure` |
+| 生成最终失败且释放预留张数 | `test_browser_shows_final_generation_failure_and_releases_reserved_image` |
+
+浏览器测试同时查数据库中的任务状态、重试次数、预留/使用流水和剩余张数，不只判断页面是否出现某段文字。

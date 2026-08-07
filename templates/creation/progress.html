@@ -6,6 +6,7 @@
   <p class="eyebrow">{{ task.get_status_display }}</p>
   <h1>{{ task.progress_message|default:"正在准备生成任务……" }}</h1>
   {% if task.status == "succeeded" or task.status == "saved" %}
+    {% if task.retry_count %}<p class="notice" role="status">结果已经过 {{ task.retry_count }} 次免费自动优化，没有重复计算张数。</p>{% endif %}
     <a class="button" href="{% url 'creation:result' task.id %}">查看生成结果</a>
   {% elif task.status == "failed" %}
     <p class="notice">本次生成未完成，没有使用你的生成张数。</p>

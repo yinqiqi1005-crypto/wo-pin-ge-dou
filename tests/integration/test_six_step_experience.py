@@ -122,6 +122,7 @@ def test_quota_error_keeps_generation_settings_and_explains_one_image_cost(creat
     assert response.context["form"].data["grid_size"] == "70"
     content = response.content.decode()
     assert "已经用完" in content
+    assert content.count("你本周期的生成张数已经用完。") == 1
     assert "本次成功后使用 1 张" in content
 
 
@@ -203,7 +204,9 @@ def test_save_database_failure_preserves_generated_result_for_retry(creator):
     task.refresh_from_db()
 
     assert response.status_code == 200
-    assert "作品暂时无法保存，请稍后重试" in response.content.decode()
+    content = response.content.decode()
+    assert "作品暂时无法保存，请稍后重试" in content
+    assert content.count("作品暂时无法保存，请稍后重试。") == 1
     assert task.status == GenerationStatus.SUCCEEDED
     assert task.failure_code == "save_failed"
     assert task.result_version.pattern.is_saved is False
