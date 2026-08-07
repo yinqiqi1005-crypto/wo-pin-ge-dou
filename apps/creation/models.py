@@ -89,6 +89,7 @@ class ImageAnalysisResult(models.Model):
     issues = models.JSONField(default=list)
     recommendations = models.JSONField(default=dict)
     requires_subject_confirmation = models.BooleanField(default=False)
+    subject_mask = models.ImageField(upload_to="creation/masks/%Y/%m/", blank=True)
     model_name = models.CharField(max_length=120, blank=True)
     prompt_version = models.CharField(max_length=40, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

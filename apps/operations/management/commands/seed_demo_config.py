@@ -8,6 +8,7 @@ from apps.memberships.models import (
     MembershipPlan,
     QuotaPeriodType,
 )
+from apps.operations.models import ConfigurationRevision
 from apps.patterns.models import Palette, PaletteColor
 from services.image_processing.palette import DEFAULT_PALETTE
 
@@ -111,5 +112,21 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
+
+        ConfigurationRevision.objects.get_or_create(
+            namespace="model_routes",
+            key="analysis",
+            version=1,
+            defaults={
+                "value": {
+                    "provider": "rules",
+                    "model": "gpt-5.6-luna",
+                    "fallback_provider": "rules",
+                    "timeout_seconds": 20,
+                    "max_attempts": 2,
+                },
+                "is_active": True,
+            },
+        )
 
         self.stdout.write(self.style.SUCCESS("Demo configuration is ready."))

@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 
 from apps.memberships.models import MembershipPlan, MembershipSubscription
+from apps.operations.models import ConfigurationRevision
 from apps.patterns.models import Pattern, PatternVersion
 from services.image_processing import (
     apply_basic_background,
@@ -19,7 +20,6 @@ from .models import (
     GenerationSettings,
     GenerationStatus,
     GenerationTask,
-    ImageAnalysisResult,
 )
 
 User = get_user_model()
@@ -46,35 +46,25 @@ def create_generation_task(
     else:
         plan = MembershipPlan.objects.get(level="registered", is_active=True)
 
+    model_route = (
+        ConfigurationRevision.objects.filter(
+            namespace="model_routes", key="analysis", is_active=True
+        )
+        .order_by("-version")
+        .values_list("value", flat=True)
+        .first()
+        or {}
+    )
     task = GenerationTask.objects.create(
         user=user,
         idempotency_key=idempotency_key,
         mode=mode,
-        configuration_snapshot={"membership": plan.snapshot()},
+        configuration_snapshot={
+            "membership": plan.snapshot(),
+            "model_routes": {"analysis": model_route},
+        },
     )
     return task, True
-
-
-def create_mock_analysis(task: GenerationTask) -> ImageAnalysisResult:
-    return ImageAnalysisResult.objects.create(
-        task=task,
-        quality_level="usable",
-        suitability_level="suitable",
-        primary_subject="主要主体",
-        subject_count=1,
-        subject_region={"x": 0.15, "y": 0.1, "width": 0.7, "height": 0.8},
-        confidence_level="medium",
-        issues=["当前为规则分析结果，后续阶段将接入真实多模态分析。"],
-        recommendations={
-            "grid_size": 50,
-            "color_limit": 24,
-            "background_mode": "simplify",
-            "reason": "50×50 能在制作难度和主体细节之间取得平衡。",
-        },
-        requires_subject_confirmation=False,
-        model_name="rule-based-mock",
-        prompt_version="mock-v1",
-    )
 
 
 def _image_content(image, *, name: str) -> ContentFile:

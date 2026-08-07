@@ -13,9 +13,9 @@ from apps.memberships.services import (
 
 from .forms import GenerationSettingsForm, ImageUploadForm, SavePatternForm
 from .models import GenerationSettings, GenerationStatus, GenerationTask
-from .services import create_generation_task, create_mock_analysis
+from .services import create_generation_task
 from .state import transition_task
-from .tasks import run_generation_task
+from .tasks import run_analysis_task, run_generation_task
 
 
 def _user_task_or_404(user, task_id):
@@ -32,9 +32,8 @@ def upload(request):
     if request.method == "POST" and form.is_valid():
         task, _ = create_generation_task(user=request.user, idempotency_key=uuid.uuid4().hex)
         task.input_image = form.cleaned_data["image"]
-        task.status = GenerationStatus.AWAITING_CONFIRMATION
-        task.save(update_fields=("input_image", "status", "updated_at"))
-        create_mock_analysis(task)
+        task.save(update_fields=("input_image", "updated_at"))
+        run_analysis_task.delay(str(task.pk))
         return redirect("creation:analysis", task_id=task.pk)
     quota = get_or_create_current_quota(request.user)
     return render(request, "creation/upload.html", {"form": form, "quota": quota})
@@ -43,7 +42,12 @@ def upload(request):
 @login_required
 def analysis(request, task_id):
     task = _user_task_or_404(request.user, task_id)
-    return render(request, "creation/analysis.html", {"task": task, "analysis": task.analysis})
+    analysis_result = getattr(task, "analysis", None)
+    return render(
+        request,
+        "creation/analysis.html",
+        {"task": task, "analysis": analysis_result},
+    )
 
 
 @login_required

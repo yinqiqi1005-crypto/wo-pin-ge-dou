@@ -32,7 +32,7 @@ def signed_in_client(client, django_user_model):
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-test-media")
-def test_upload_creates_task_and_mock_analysis(signed_in_client):
+def test_upload_creates_task_and_structured_analysis(signed_in_client):
     client, user = signed_in_client
 
     response = client.post("/create/", {"image": uploaded_png()})

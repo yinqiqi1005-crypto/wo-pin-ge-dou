@@ -10,8 +10,9 @@ from django.db import close_old_connections
 from django.test import override_settings
 from PIL import Image
 
+from apps.creation.analysis import execute_analysis_task
 from apps.creation.models import GenerationSettings, GenerationStatus, GenerationTask
-from apps.creation.services import create_generation_task, create_mock_analysis
+from apps.creation.services import create_generation_task
 from apps.creation.state import InvalidTaskTransition, transition_task
 from apps.creation.tasks import execute_generation_task
 from apps.memberships.models import GenerationQuotaLedger, QuotaLedgerEvent
@@ -42,9 +43,9 @@ def task_with_image(user, *, key="task-one"):
     output = BytesIO()
     image.save(output, format="PNG")
     task.input_image = SimpleUploadedFile("sample.png", output.getvalue(), content_type="image/png")
-    task.status = GenerationStatus.AWAITING_CONFIRMATION
-    task.save(update_fields=("input_image", "status", "updated_at"))
-    create_mock_analysis(task)
+    task.save(update_fields=("input_image", "updated_at"))
+    execute_analysis_task(str(task.pk))
+    task.refresh_from_db()
     GenerationSettings.objects.create(
         task=task,
         grid_size=30,

@@ -46,6 +46,9 @@ def test_seed_demo_config_is_repeatable():
     assert MembershipPlan.objects.get(level=MembershipLevel.PRO).features.count() == len(
         FeatureCode
     )
+    route = ConfigurationRevision.objects.get(namespace="model_routes", key="analysis")
+    assert route.value["provider"] == "rules"
+    assert route.value["model"] == "gpt-5.6-luna"
 
 
 def test_membership_permissions_come_from_database_configuration():
@@ -82,6 +85,17 @@ def test_generation_task_keeps_membership_configuration_snapshot(django_user_mod
     assert created is True
     assert task.configuration_snapshot["membership"]["generation_limit"] == 10
     assert task.configuration_snapshot["membership"]["features"] == [FeatureCode.BASIC_GENERATION]
+
+
+def test_generation_task_keeps_model_route_snapshot(django_user_model):
+    call_command("seed_demo_config", verbosity=0)
+    user = django_user_model.objects.create_user(username="route-snapshot-user")
+    task, _ = create_generation_task(user=user, idempotency_key="route-snapshot")
+    route = ConfigurationRevision.objects.get(namespace="model_routes", key="analysis")
+    route.value["model"] = "changed-after-task-created"
+    route.save(update_fields=("value",))
+
+    assert task.configuration_snapshot["model_routes"]["analysis"]["model"] == "gpt-5.6-luna"
 
 
 def test_generation_task_creation_is_idempotent(django_user_model):
