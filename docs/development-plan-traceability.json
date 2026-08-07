@@ -1,0 +1,260 @@
+{
+  "plan": "development-plan.md",
+  "statuses": {
+    "verified_local": "实现和本机自动证据都已验证",
+    "target_run_pending": "实现已完成，需要目标基础设施或远程 CI 成功记录",
+    "paid_model_review_pending": "工具和适配层已完成，需要授权密钥、费用确认和真人模型评审",
+    "human_review_pending": "证据模板和硬校验已完成，需要真人观察或实体制作",
+    "public_deployment_pending": "部署和冒烟工具已完成，需要公网平台、域名和授权凭据"
+  },
+  "entries": [
+    {
+      "requirements": "M0-01..M0-04",
+      "status": "verified_local",
+      "evidence": [".gitignore", "pyproject.toml", "manage.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M0-05..M0-06",
+      "status": "target_run_pending",
+      "evidence": ["docker-compose.yml", "config/settings.py", "apps/core/management/commands/check_infrastructure.py"],
+      "remaining": "在 PostgreSQL 16、Redis 7 和非 eager Celery Worker 环境产生成功记录。"
+    },
+    {
+      "requirements": "M0-07..M0-08",
+      "status": "verified_local",
+      "evidence": [".env.example", "pyproject.toml", "tests/unit/test_repository_hygiene.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M0-09",
+      "status": "target_run_pending",
+      "evidence": [".github/workflows/test.yml", "tests/unit/test_worker_recovery_command.py"],
+      "remaining": "仓库尚未连接远程，需要至少一次 GitHub Actions 成功记录。"
+    },
+    {
+      "requirements": "M0-10..M0-11",
+      "status": "verified_local",
+      "evidence": ["apps/core/views.py", "tests/unit/test_health.py", "README.md"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M0-12",
+      "status": "target_run_pending",
+      "evidence": ["README.md", "tests/integration/test_library_exports_admin.py"],
+      "remaining": "部署环境需由运营者设置独立强密码并创建真实超级管理员。"
+    },
+    {
+      "requirements": "M1-01..M1-17",
+      "status": "verified_local",
+      "evidence": ["services/image_processing/pipeline.py", "docs/pattern-engine.md", "tests/unit/image_processing/test_40_case_regression.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M2-01..M2-18",
+      "status": "verified_local",
+      "evidence": ["apps/memberships/models.py", "apps/creation/models.py", "apps/patterns/models.py", "docs/data-model.md", "tests/integration/test_configuration_models.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M3-01..M3-19",
+      "status": "verified_local",
+      "evidence": ["apps/creation/views.py", "templates/creation/result.html", "tests/integration/test_basic_creation_flow.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M4-01..M4-02",
+      "status": "verified_local",
+      "evidence": ["apps/creation/models.py", "apps/creation/state.py", "tests/integration/test_quota_and_tasks.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M4-03",
+      "status": "target_run_pending",
+      "evidence": ["apps/creation/tasks.py", ".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py"],
+      "remaining": "需要真实 Redis/Celery Worker 的远程 CI 成功记录。"
+    },
+    {
+      "requirements": "M4-04..M4-17",
+      "status": "verified_local",
+      "evidence": ["apps/creation/tasks.py", "apps/memberships/services.py", "tests/integration/test_quota_and_tasks.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M5-01",
+      "status": "verified_local",
+      "evidence": ["docs/ai-analysis.md", "docs/model-evaluation.md"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M5-02..M5-04",
+      "status": "paid_model_review_pending",
+      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md", "tests/unit/test_evaluate_ai_models_command.py"],
+      "remaining": "当前已配置服务不提供所需图像模型；需要授权的多模态服务、费用确认和 10～15 图真人评分。"
+    },
+    {
+      "requirements": "M5-05..M5-18",
+      "status": "verified_local",
+      "evidence": ["services/ai/providers/openai_responses.py", "services/ai/prompts.py", "services/ai/schemas.py", "tests/integration/test_ai_analysis.py", "tests/unit/ai/test_openai_provider.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M5-19..M5-23",
+      "status": "verified_local",
+      "evidence": ["docs/ai-analysis.md", "apps/creation/analysis.py", "tests/integration/test_ai_analysis.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M6-01..M6-30",
+      "status": "verified_local",
+      "evidence": ["docs/page-state-acceptance.md", "static/js/creation.js", "static/css/app.css", "tests/integration/test_six_step_experience.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M7-01",
+      "status": "verified_local",
+      "evidence": ["docs/advanced-creation.md", "docs/model-evaluation.md"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M7-02..M7-04",
+      "status": "paid_model_review_pending",
+      "evidence": ["apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md", "tests/unit/test_evaluate_ai_models_command.py"],
+      "remaining": "需要可用的图像编辑模型、费用确认和人工身份保留/指令符合/安全评分。"
+    },
+    {
+      "requirements": "M7-05..M7-26",
+      "status": "verified_local",
+      "evidence": ["services/ai/advanced.py", "apps/creation/advanced.py", "docs/advanced-creation.md", "tests/integration/test_advanced_creation.py", "tests/unit/ai/test_advanced.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M8-01..M8-27",
+      "status": "verified_local",
+      "evidence": ["apps/library/views.py", "apps/library/exports.py", "services/exports/pdf.py", "docs/export-and-retention.md", "tests/integration/test_library_exports_admin.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-01..M9-13",
+      "status": "verified_local",
+      "evidence": ["services/evaluation/image_cases.py", "docs/test-results-40.csv", "tests/unit/image_processing/test_40_case_regression.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-14..M9-15",
+      "status": "human_review_pending",
+      "evidence": ["apps/operations/human_review.py", "docs/test-results-40.csv", "tests/unit/test_human_review_pack.py"],
+      "remaining": "真人需要在已生成的 40 图对照包中完成主体可辨认性和制作可行性评分。"
+    },
+    {
+      "requirements": "M9-16",
+      "status": "verified_local",
+      "evidence": ["docs/test-results-40.csv", "tests/unit/image_processing/test_40_case_regression.py", "apps/operations/release_quality.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-17..M9-18",
+      "status": "human_review_pending",
+      "evidence": ["docs/test-results-40.csv", "docs/physical-validation.csv", "docs/physical-validation.md", "tests/unit/test_physical_validation.py"],
+      "remaining": "需要真人完成高级创作符合度评分，并实际制作人物、宠物、物品三张 30×30 拼豆及照片。"
+    },
+    {
+      "requirements": "M9-19..M9-20",
+      "status": "verified_local",
+      "evidence": ["docs/test-report.md", "docs/performance.md", "docs/performance/local-2026-08-08.json", "tests/unit/test_release_performance.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-21..M9-22",
+      "status": "target_run_pending",
+      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_infrastructure.py", "apps/core/management/commands/check_worker_recovery.py", "tests/unit/test_worker_recovery_command.py"],
+      "remaining": "需要远程 CI 在 PostgreSQL/Redis/真实 Celery Worker 上运行并发和离线入队后重启恢复。"
+    },
+    {
+      "requirements": "M9-23..M9-25",
+      "status": "verified_local",
+      "evidence": ["tests/integration/test_ai_analysis.py", "tests/integration/test_operational_acceptance.py", "tests/unit/test_evaluate_ai_models_command.py"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-26..M9-31",
+      "status": "verified_local",
+      "evidence": ["apps/operations/management/commands/prepare_demo.py", "services/demo_assets.py", "templates/core/home.html", "docs/demo-runbook.md", "docs/demo-recordings/basic-flow.webm", "docs/architecture.md", "README.md"],
+      "remaining": ""
+    },
+    {
+      "requirements": "M9-32..M9-33",
+      "status": "public_deployment_pending",
+      "evidence": ["Dockerfile", "docker-compose.yml", "apps/operations/deployment_smoke.py", "tests/unit/test_deployment_smoke.py"],
+      "remaining": "需要用户选择云平台和域名、提供部署授权，再生成 7 天内的公网 HTTPS 冒烟报告。"
+    }
+  ],
+  "completion_gates": [
+    {
+      "gate": "M0-repeatable-target-environment",
+      "status": "target_run_pending",
+      "evidence": ["README.md", "Dockerfile", "docker-compose.yml", ".github/workflows/test.yml"],
+      "remaining": "需要一次全新目标环境启动和远程 CI 成功记录。"
+    },
+    {
+      "gate": "M1-deterministic-pattern-core",
+      "status": "verified_local",
+      "evidence": ["tests/unit/image_processing/test_sample_set.py", "tests/unit/image_processing/test_40_case_regression.py"],
+      "remaining": ""
+    },
+    {
+      "gate": "M2-configurable-data-foundation",
+      "status": "verified_local",
+      "evidence": ["tests/integration/test_configuration_models.py", "docs/data-model.md"],
+      "remaining": ""
+    },
+    {
+      "gate": "M3-recorded-internal-demo",
+      "status": "verified_local",
+      "evidence": ["docs/demo-recordings/basic-flow.webm", "tests/e2e/test_demo_recording.py", "tests/e2e/test_creation_journey.py"],
+      "remaining": ""
+    },
+    {
+      "gate": "M4-real-queue-and-worker",
+      "status": "target_run_pending",
+      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py"],
+      "remaining": "需要 PostgreSQL/Redis/非 eager Celery 目标环境成功记录。"
+    },
+    {
+      "gate": "M5-real-multimodal-analysis",
+      "status": "paid_model_review_pending",
+      "evidence": ["services/ai/providers/openai_responses.py", "apps/operations/management/commands/evaluate_ai_models.py", "docs/model-evaluation.md"],
+      "remaining": "需要可用多模态模型、授权密钥、费用确认和真人比较。"
+    },
+    {
+      "gate": "M6-first-usability-walkthrough",
+      "status": "human_review_pending",
+      "evidence": ["docs/page-state-acceptance.md", "tests/e2e/test_creation_journey.py"],
+      "remaining": "需要邀请真实测试者完成首次可用性走查并记录反馈。"
+    },
+    {
+      "gate": "M7-real-advanced-model-demo",
+      "status": "paid_model_review_pending",
+      "evidence": ["services/ai/advanced.py", "apps/operations/management/commands/evaluate_ai_models.py", "docs/advanced-creation.md"],
+      "remaining": "需要可用图像编辑模型、费用确认和真人身份保留/安全评审。"
+    },
+    {
+      "gate": "M8-rendered-printable-pdf",
+      "status": "verified_local",
+      "evidence": ["services/exports/pdf.py", "tests/integration/test_library_exports_admin.py", "docs/export-and-retention.md"],
+      "remaining": ""
+    },
+    {
+      "gate": "M9-human-quality-and-physical-build",
+      "status": "human_review_pending",
+      "evidence": ["docs/test-results-40.csv", "docs/physical-validation.csv", "apps/operations/release_quality.py"],
+      "remaining": "需要 40 图真人评分、高级创作评审和三张实体拼豆照片。"
+    },
+    {
+      "gate": "M9-public-release",
+      "status": "public_deployment_pending",
+      "evidence": ["apps/operations/deployment_smoke.py", "apps/operations/release_quality.py", "docs/issues.csv"],
+      "remaining": "需要公网 HTTPS 部署、7 天内冒烟报告和发布门槛通过记录。"
+    }
+  ]
+}

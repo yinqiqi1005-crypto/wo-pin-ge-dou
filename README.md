@@ -19,6 +19,8 @@ AI 负责理解图片和创作底图，确定性算法负责最终网格、合�
 
 详见 [架构说明](docs/architecture.md)、[PRD](prd.md)、[开发计划](development-plan.md) 和 [测试报告](docs/test-report.md)。
 
+开发计划的 222 个任务编号和 11 个未编号完成门槛均有可机检的证据映射，见 [开发计划证据表](docs/development-plan-traceability.json)。该文件明确区分本机已验证与目标环境、付费模型、真人或公网待验收，不用“已实现”代替“已验收”。
+
 ## 最小本地启动（SQLite + 同步任务）
 
 需要 Python 3.12 和 uv。
@@ -92,6 +94,16 @@ uv run python manage.py prepare_demo --password 'your-temporary-demo-password'
 ```
 
 命令创建注册、Plus、Pro 三个账号；免费游客直接未登录访问。三张稳定素材写入 `media/demo-assets/`。完整演示路径见 [演示手册](docs/demo-runbook.md)。
+
+可选地从已通过的 Chromium 桌面主流程生成不可覆盖的 WebM 内部演示录像：
+
+```bash
+E2E_RECORD_VIDEO_PATH=docs/demo-recordings/basic-flow.webm \
+E2E_BROWSER_EXECUTABLE=/absolute/path/to/chromium \
+uv run pytest tests/e2e/test_creation_journey.py -k six_step -q
+```
+
+只有 1280px 桌面鼠标路径会写入指定文件；手机和键盘路径仍照常执行验收。输出已存在时测试直接失败，防止覆盖原始演示证据。
 
 ## 质量检查
 

@@ -1,5 +1,7 @@
+import os
 import re
 from io import BytesIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -64,6 +66,36 @@ def choose_basic_settings(page, *, size="30", colors="12", background="keep"):
     page.get_by_label("背景处理").select_option(background)
 
 
+def main_journey_page(browser, viewport, interaction):
+    destination_value = os.getenv("E2E_RECORD_VIDEO_PATH", "")
+    should_record = (
+        bool(destination_value) and viewport["width"] == 1280 and interaction == "pointer"
+    )
+    if not should_record:
+        return browser.new_page(viewport=viewport), None, None
+    destination = Path(destination_value)
+    if destination.exists():
+        raise AssertionError(f"Demo recording already exists: {destination}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    context = browser.new_context(
+        viewport=viewport,
+        record_video_dir=str(destination.parent),
+        record_video_size=viewport,
+    )
+    return context.new_page(), context, destination
+
+
+def close_main_journey_page(page, recording_context, recording_destination):
+    if recording_context is None:
+        page.close()
+        return
+    video = page.video
+    recording_context.close()
+    generated_path = Path(video.path())
+    generated_path.rename(recording_destination)
+    assert recording_destination.stat().st_size > 0
+
+
 @pytest.mark.parametrize(
     ("viewport", "interaction"),
     [
@@ -85,7 +117,11 @@ def test_real_browser_completes_six_step_creation_and_save(
     username = f"e2e-{viewport['width']}-{interaction}"
     password = "E2E-safe-password"
     django_user_model.objects.create_user(username=username, password=password)
-    page = browser.new_page(viewport=viewport)
+    page, recording_context, recording_destination = main_journey_page(
+        browser,
+        viewport,
+        interaction,
+    )
 
     page.goto(f"{live_server.url}/accounts/login/")
     if interaction == "keyboard":
@@ -157,7 +193,7 @@ def test_real_browser_completes_six_step_creation_and_save(
     assert page.evaluate(
         "document.documentElement.scrollWidth <= document.documentElement.clientWidth"
     )
-    page.close()
+    close_main_journey_page(page, recording_context, recording_destination)
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-e2e-invalid-media")
