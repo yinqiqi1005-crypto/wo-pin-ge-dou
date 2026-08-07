@@ -135,4 +135,4 @@ SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "false").lower() == "true"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-SERVE_MEDIA = os.getenv("DJANGO_SERVE_MEDIA", "false").lower() == "true"
+SERVE_MEDIA = os.getenv("DJANGO_SERVE_MEDIA", str(DEBUG)).lower() == "true"

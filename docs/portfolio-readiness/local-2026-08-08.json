@@ -1,0 +1,50 @@
+{
+  "check": "portfolio-demo-readiness",
+  "checked_at": "2026-08-07T20:13:27.479813+00:00",
+  "demo_accounts": {
+    "demo_plus": "plus",
+    "demo_pro": "pro",
+    "demo_registered": "registered"
+  },
+  "generated_patterns": [
+    {
+      "asset": "demo-assets/demo-person.png",
+      "color_count": 4,
+      "grid_size": 30,
+      "total_beads": 900
+    },
+    {
+      "asset": "demo-assets/demo-pet.png",
+      "color_count": 4,
+      "grid_size": 30,
+      "total_beads": 900
+    },
+    {
+      "asset": "demo-assets/demo-object.png",
+      "color_count": 3,
+      "grid_size": 30,
+      "total_beads": 900
+    }
+  ],
+  "media_serving_enabled": true,
+  "membership_levels": [
+    "plus",
+    "pro",
+    "registered",
+    "visitor"
+  ],
+  "model_routes": {
+    "advanced_creation": "mock",
+    "analysis": "rules"
+  },
+  "page_checks": {
+    "/": 200,
+    "/accounts/login/": 200,
+    "/health/": 200
+  },
+  "portfolio_demo_requires_external_validation": false,
+  "production_validation_status": "not_evaluated",
+  "profile": "local-offline-portfolio",
+  "result": "passed",
+  "schema_version": 1
+}

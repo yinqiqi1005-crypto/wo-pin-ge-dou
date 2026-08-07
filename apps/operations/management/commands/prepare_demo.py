@@ -42,6 +42,10 @@ class Command(BaseCommand):
                         "is_active": True,
                     },
                 )
+            else:
+                MembershipSubscription.objects.filter(user=user, is_active=True).update(
+                    is_active=False
+                )
 
         for filename, _, content in build_demo_images():
             storage = DjangoStorageBackend()

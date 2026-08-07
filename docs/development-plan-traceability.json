@@ -179,7 +179,7 @@
     {
       "requirements": "M9-26..M9-31",
       "status": "verified_local",
-      "evidence": ["apps/operations/management/commands/prepare_demo.py", "services/demo_assets.py", "templates/core/home.html", "docs/demo-runbook.md", "docs/demo-recordings/basic-flow.webm", "docs/architecture.md", "README.md"],
+      "evidence": ["apps/operations/management/commands/prepare_demo.py", "apps/operations/management/commands/check_portfolio_demo.py", "services/demo_assets.py", "templates/core/home.html", "docs/demo-runbook.md", "docs/portfolio-demo.md", "docs/portfolio-readiness/local-2026-08-08.json", "docs/demo-recordings/basic-flow.webm", "docs/architecture.md", "README.md"],
       "remaining": ""
     },
     {
@@ -211,7 +211,7 @@
     {
       "gate": "M3-recorded-internal-demo",
       "status": "verified_local",
-      "evidence": ["docs/demo-recordings/basic-flow.webm", "tests/e2e/test_demo_recording.py", "tests/e2e/test_creation_journey.py"],
+      "evidence": ["docs/demo-recordings/basic-flow.webm", "docs/portfolio-readiness/local-2026-08-08.json", "tests/e2e/test_demo_recording.py", "tests/e2e/test_creation_journey.py", "tests/integration/test_portfolio_readiness.py"],
       "remaining": ""
     },
     {
