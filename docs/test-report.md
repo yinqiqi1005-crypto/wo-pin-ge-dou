@@ -13,6 +13,7 @@
 - 端到端：Chromium 桌面与 390px 手机视口完成登录、上传、分析、设置、生成、预览、保存和图纸库；
 - 运维：健康检查、超大文件、密钥日志脱敏、演示数据、迁移检查、Ruff 和 Django system check。
 - 发布门槛：40 图人工评分完整性、主体可辨认率、严重主体错误率、可制作率、高级创作符合率、重试率、错误扣减、P0/P1 和部署冒烟统一硬校验。
+- 实体制作证据：人物、宠物、物品三类 30×30 图纸，计划/实际豆数、差值、制作时长、熨烫结果、评审人、日期、有效成品图片和路径边界硬校验。
 - 部署冒烟工具：HTTPS、预期主机、健康页、产品首页、指纹 CSS/JavaScript、HSTS、点击劫持、MIME 嗅探、Referrer Policy、跨域重定向和不可覆盖 JSON 证据。
 
 ## 40 图固定集
@@ -23,13 +24,13 @@
 
 自动化通过标准是零失败、零跳过、零 xfail。任何失败必须修复实现或明确修复错误测试数据，不允许删除测试或放宽业务标准。最终测试命令和实际数量记录在交付说明中。
 
-2026-08-08 最终本机结果：`170 passed in 17.24s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、SQLite 并发张数测试、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/手机端到端流程。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和指纹静态资源冒烟通过。
+2026-08-08 最终本机结果：`181 passed in 17.27s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、三类实体制作证据门槛、SQLite 并发张数测试、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/手机端到端流程。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和指纹静态资源冒烟通过。
 
 PostgreSQL、Redis 与真实 Celery Worker 的端到端检查已固化为 `check_infrastructure`，CI 使用 PostgreSQL 16 与 Redis 7 服务执行，任何一环不可用都会失败，不会退回 SQLite 冒充通过。当前本机没有 Docker、PostgreSQL 或 Redis 可执行文件，因此本次本机报告不声明这三项已经运行。
 
 ## 现实世界验证
 
-软件已提供打印 PDF、材料清单、人工评分字段、40 图交互式 HTML 对照包和严格的 `check_release_quality` 命令。本机评审入口为 `media/human-review/round-3/index.html`，其中所有人工结果仍保持 `pending`。“按图购买拼豆并完成熨烫作品”需要人类在现实环境执行，不能由自动化测试冒充。建议选择 30×30 人物、宠物、物品各一张，记录实际用豆差异、颜色替代、制作时长、断裂/熨烫问题和成品照片，再把结论追加到本报告。
+软件已提供打印 PDF、材料清单、人工评分字段、40 图交互式 HTML 对照包、实体制作模板和严格的 `check_release_quality` 命令。本机评审入口为 `media/human-review/round-3/index.html`，其中所有人工结果仍保持 `pending`。`docs/physical-validation.csv` 的三项实体制作记录同样为 `pending`；自动测试只证明校验器会拒绝缺失或矛盾证据，不能冒充已经购买拼豆、完成熨烫并拍摄成品。
 
 外部公网部署同样需要用户指定云平台、域名和授权凭据；仓库已提供容器、PostgreSQL/Redis/Celery 配置、静态文件、安全开关和冒烟步骤。
 

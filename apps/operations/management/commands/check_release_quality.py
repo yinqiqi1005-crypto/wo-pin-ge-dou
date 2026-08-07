@@ -8,6 +8,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--results", default="docs/test-results-40.csv")
+        parser.add_argument("--physical-results", default="docs/physical-validation.csv")
         parser.add_argument("--generation-attempts", required=True, type=int)
         parser.add_argument("--automatic-retries", required=True, type=int)
         parser.add_argument("--wrong-charges", required=True, type=int)
@@ -27,6 +28,7 @@ class Command(BaseCommand):
                 wrong_charges=options["wrong_charges"],
                 open_critical_issues=options["open_critical_issues"],
                 deployment_smoke_passed=options["deployment_smoke"] == "passed",
+                physical_results_path=options["physical_results"],
             )
         except (OSError, ReleaseQualityError) as exc:
             raise CommandError(str(exc)) from exc
@@ -38,5 +40,6 @@ class Command(BaseCommand):
                 f"recognizable {summary.subject_recognizable_rate:.1%}, "
                 f"severe errors {summary.severe_subject_error_rate:.1%}, "
                 f"making feasible {summary.making_feasible_rate:.1%}."
+                f" Physical builds {summary.physical_case_count}."
             )
         )

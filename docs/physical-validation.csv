@@ -1,0 +1,4 @@
+case_id,category,grid_size,planned_beads,actual_beads,bead_difference,color_substitutions,making_minutes,ironing_result,finished_photo,reviewer,review_date,status,notes
+per-01,person,30,900,,,,,pending,,,,pending,
+pet-01,pet,30,900,,,,,pending,,,,pending,
+obj-01,object,30,900,,,,,pending,,,,pending,

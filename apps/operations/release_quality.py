@@ -2,6 +2,11 @@ import csv
 from dataclasses import dataclass
 from pathlib import Path
 
+from apps.operations.physical_validation import (
+    PhysicalValidationError,
+    evaluate_physical_validation,
+)
+
 
 class ReleaseQualityError(ValueError):
     pass
@@ -16,6 +21,7 @@ class ReleaseQualitySummary:
     making_feasible_rate: float
     advanced_conformance_rate: float
     automatic_retry_rate: float
+    physical_case_count: int
 
 
 REQUIRED_COLUMNS = {
@@ -49,6 +55,7 @@ def evaluate_release_quality(
     wrong_charges,
     open_critical_issues,
     deployment_smoke_passed,
+    physical_results_path,
 ):
     path = Path(results_path)
     with path.open(newline="", encoding="utf-8") as source:
@@ -89,6 +96,11 @@ def evaluate_release_quality(
     if len(advanced_rows) < 3:
         raise ReleaseQualityError("At least 3 advanced creation cases must be reviewed.")
 
+    try:
+        physical_summary = evaluate_physical_validation(physical_results_path)
+    except PhysicalValidationError as exc:
+        raise ReleaseQualityError(str(exc)) from exc
+
     summary = ReleaseQualitySummary(
         case_count=len(rows),
         file_success_rate=_rate(rows, "formal_conversion", "pass"),
@@ -101,6 +113,7 @@ def evaluate_release_quality(
             "pass",
         ),
         automatic_retry_rate=automatic_retries / generation_attempts,
+        physical_case_count=physical_summary.case_count,
     )
 
     failures = []
