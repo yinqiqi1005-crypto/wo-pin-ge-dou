@@ -56,5 +56,46 @@ jobs:
           python-version: "3.12"
       - run: uv sync --dev
       - run: uv run python manage.py migrate --noinput
-      - run: uv run celery -A config worker -l warning --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
-      - run: uv run python manage.py check_infrastructure
+      - name: Start Celery worker
+        run: uv run celery -A config worker -l warning --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
+      - name: Verify concurrent infrastructure round trips
+        run: uv run python manage.py check_infrastructure
+      - name: Verify queued task survives worker restart
+        shell: bash
+        run: |
+          first_worker_pid="$(cat /tmp/wo-pin-ge-dou-celery.pid)"
+          kill "$first_worker_pid"
+          for attempt in {1..20}; do
+            if ! kill -0 "$first_worker_pid" 2>/dev/null; then
+              break
+            fi
+            sleep 0.25
+          done
+          if kill -0 "$first_worker_pid" 2>/dev/null; then
+            echo "First Celery worker did not stop."
+            exit 1
+          fi
+          rm -f /tmp/wo-pin-ge-dou-celery.pid
+          uv run python manage.py check_worker_recovery \
+            --queued-signal /tmp/wo-pin-ge-dou-worker-recovery.queued \
+            --timeout 30 &
+          recovery_check_pid=$!
+          for attempt in {1..20}; do
+            if test -f /tmp/wo-pin-ge-dou-worker-recovery.queued; then
+              break
+            fi
+            if ! kill -0 "$recovery_check_pid" 2>/dev/null; then
+              wait "$recovery_check_pid"
+            fi
+            sleep 0.25
+          done
+          if ! test -f /tmp/wo-pin-ge-dou-worker-recovery.queued; then
+            echo "Recovery task was not queued before the replacement worker started."
+            kill "$recovery_check_pid" 2>/dev/null || true
+            exit 1
+          fi
+          uv run celery -A config worker -l warning \
+            --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
+          wait "$recovery_check_pid"
+      - name: Verify replacement worker concurrency
+        run: uv run python manage.py check_infrastructure

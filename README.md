@@ -52,6 +52,15 @@ docker compose run --rm web uv run python manage.py migrate
 docker compose up --build web worker
 ```
 
+目标环境启动后，使用真实 PostgreSQL、Redis 和 Celery Worker 执行：
+
+```bash
+DB_ENGINE=postgresql CELERY_TASK_ALWAYS_EAGER=false \
+  uv run python manage.py check_infrastructure
+```
+
+CI 还会停止第一个 Worker，在无 Worker 时把验收任务写入 Redis，再启动替代 Worker 并等待同一任务返回。这一步用于验证排队任务可在 Worker 重启后恢复，不使用 eager 模式代替真实队列。
+
 公网部署完成后，用真实 HTTPS 域名运行并保存不可覆盖的验收证据：
 
 ```bash
