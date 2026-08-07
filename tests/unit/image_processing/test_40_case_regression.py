@@ -50,9 +50,12 @@ def test_40_case_result_table_covers_every_fixed_case_without_false_human_claims
         for row in rows
     )
     assert all(row["formal_conversion"] == "pass" for row in rows)
-    assert all(row["making_feasibility"] == "technical_pass" for row in rows)
     assert all(row["material_consistency"] == "pass" for row in rows)
     assert all(row["human_review"] == "pending" for row in rows)
+    assert all(row["human_subject_recognizable"] == "pending" for row in rows)
+    assert all(row["human_severe_subject_error"] == "pending" for row in rows)
+    assert all(row["human_making_feasible"] == "pending" for row in rows)
+    assert all(row["human_advanced_conformance"] == "pending" for row in rows)
 
 
 def test_multiple_image_conversions_run_concurrently_without_cross_task_state():

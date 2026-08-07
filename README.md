@@ -82,6 +82,21 @@ uv run pytest tests/e2e -q
 
 CI 会安装 Poppler 和 Noto CJK 字体，实际渲染三种尺寸的 PDF 后再验收。健康检查位于 `/health/`。
 
+## M9 发布质量门槛
+
+`docs/test-results-40.csv` 将自动化技术结果与真人观察结果分栏保存。真人完成 40 图评审、至少 3 个高级创作案例、生产环境冒烟和运营指标统计后运行：
+
+```bash
+uv run python manage.py check_release_quality \
+  --generation-attempts 100 \
+  --automatic-retries 10 \
+  --wrong-charges 0 \
+  --open-critical-issues 0 \
+  --deployment-smoke passed
+```
+
+存在任何 `pending`、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、自动重试率达到 15%、错误扣减、P0/P1 问题或部署冒烟失败时，命令都会失败。示例数字仅展示命令格式，正式发布必须填入真实统计值。
+
 ## 真实模型配置
 
 默认 `rules` 分析和 `mock` 高级创作保证离线可演示。配置真实 OpenAI 兼容服务时，把密钥放入环境变量，并在 Admin 新建模型路由版本。模型失败只记录错误类型；日志和数据库不保存密钥。
