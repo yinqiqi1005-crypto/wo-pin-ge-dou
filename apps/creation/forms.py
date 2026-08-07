@@ -39,6 +39,32 @@ class GenerationSettingsForm(forms.ModelForm):
         model = GenerationSettings
         fields = ("grid_size", "color_limit", "background_mode")
 
+    def __init__(self, *args, has_subject=True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.has_subject = has_subject
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("background_mode") == "remove" and not self.has_subject:
+            self.add_error("background_mode", "未识别到主体时不能移除背景，请先选择主体。")
+        return cleaned
+
+
+class SubjectSelectionForm(forms.Form):
+    x = forms.FloatField(label="主体左边界", min_value=0, max_value=1)
+    y = forms.FloatField(label="主体上边界", min_value=0, max_value=1)
+    width = forms.FloatField(label="主体宽度", min_value=0.01, max_value=1)
+    height = forms.FloatField(label="主体高度", min_value=0.01, max_value=1)
+
+    def clean(self):
+        cleaned = super().clean()
+        if not self.errors:
+            if cleaned["x"] + cleaned["width"] > 1:
+                raise forms.ValidationError("主体区域不能超出图片右侧。")
+            if cleaned["y"] + cleaned["height"] > 1:
+                raise forms.ValidationError("主体区域不能超出图片底部。")
+        return cleaned
+
 
 class SavePatternForm(forms.Form):
     title = forms.CharField(label="图纸名称", max_length=120)

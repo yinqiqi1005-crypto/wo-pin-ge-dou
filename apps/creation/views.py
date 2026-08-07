@@ -11,9 +11,14 @@ from apps.memberships.services import (
     reserve_generation,
 )
 
-from .forms import GenerationSettingsForm, ImageUploadForm, SavePatternForm
+from .forms import (
+    GenerationSettingsForm,
+    ImageUploadForm,
+    SavePatternForm,
+    SubjectSelectionForm,
+)
 from .models import GenerationSettings, GenerationStatus, GenerationTask
-from .services import create_generation_task
+from .services import create_generation_task, pattern_making_guidance
 from .state import transition_task
 from .tasks import run_analysis_task, run_generation_task
 
@@ -36,17 +41,43 @@ def upload(request):
         run_analysis_task.delay(str(task.pk))
         return redirect("creation:analysis", task_id=task.pk)
     quota = get_or_create_current_quota(request.user)
-    return render(request, "creation/upload.html", {"form": form, "quota": quota})
+    recent_tasks = GenerationTask.objects.filter(user=request.user)[:5]
+    return render(
+        request,
+        "creation/upload.html",
+        {"form": form, "quota": quota, "recent_tasks": recent_tasks},
+    )
 
 
 @login_required
 def analysis(request, task_id):
     task = _user_task_or_404(request.user, task_id)
     analysis_result = getattr(task, "analysis", None)
+    initial = analysis_result.subject_region if analysis_result else None
+    subject_form = SubjectSelectionForm(request.POST or None, initial=initial)
+    if request.method == "POST" and analysis_result and subject_form.is_valid():
+        analysis_result.subject_region = subject_form.cleaned_data
+        analysis_result.requires_subject_confirmation = False
+        analysis_result.save(
+            update_fields=("subject_region", "requires_subject_confirmation", "updated_at")
+        )
+        GenerationSettings.objects.update_or_create(
+            task=task,
+            defaults={
+                "selected_subject": subject_form.cleaned_data,
+                "crop": subject_form.cleaned_data,
+                "grid_size": analysis_result.recommendations.get("grid_size", 50),
+                "color_limit": analysis_result.recommendations.get("color_limit", 24),
+                "background_mode": analysis_result.recommendations.get(
+                    "background_mode", "simplify"
+                ),
+            },
+        )
+        return redirect("creation:settings", task_id=task.pk)
     return render(
         request,
         "creation/analysis.html",
-        {"task": task, "analysis": analysis_result},
+        {"task": task, "analysis": analysis_result, "subject_form": subject_form},
     )
 
 
@@ -62,7 +93,11 @@ def settings(request, task_id):
             "background_mode": recommendations.get("background_mode", "simplify"),
         },
     )
-    form = GenerationSettingsForm(request.POST or None, instance=instance)
+    form = GenerationSettingsForm(
+        request.POST or None,
+        instance=instance,
+        has_subject=task.analysis.subject_count > 0,
+    )
     if request.method == "POST" and form.is_valid():
         form.save()
         try:
@@ -73,10 +108,17 @@ def settings(request, task_id):
             run_generation_task.delay(str(task.pk))
             return redirect("creation:progress", task_id=task.pk)
     quota = get_or_create_current_quota(request.user)
+    membership = task.configuration_snapshot.get("membership", {})
     return render(
         request,
         "creation/settings.html",
-        {"task": task, "form": form, "quota": quota},
+        {
+            "task": task,
+            "form": form,
+            "quota": quota,
+            "membership": membership,
+            "features": membership.get("features", []),
+        },
     )
 
 
@@ -129,7 +171,11 @@ def result(request, task_id):
     return render(
         request,
         "creation/result.html",
-        {"task": task, "version": task.result_version},
+        {
+            "task": task,
+            "version": task.result_version,
+            "guidance": pattern_making_guidance(task.result_version),
+        },
     )
 
 

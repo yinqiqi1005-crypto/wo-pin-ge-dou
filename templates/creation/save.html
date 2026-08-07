@@ -4,7 +4,7 @@
 {% include "creation/_steps.html" with step=6 %}
 <section class="narrow-card">
   <h1>保存到我的图纸</h1>
-  <form method="post" class="stacked-form">{% csrf_token %}{{ form.as_p }}<button class="button">确认保存</button></form>
+  <p class="muted">保存后可以在“我的图纸”继续查看、导出和创作新版本。</p>
+  <form method="post" class="stacked-form" novalidate>{% csrf_token %}{{ form.non_field_errors }}{{ form.as_p }}<button class="button">确认保存</button></form>
 </section>
 {% endblock %}
-

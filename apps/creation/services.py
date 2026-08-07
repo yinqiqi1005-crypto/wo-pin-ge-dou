@@ -73,6 +73,21 @@ def _image_content(image, *, name: str) -> ContentFile:
     return ContentFile(output.getvalue(), name=name)
 
 
+def pattern_making_guidance(version: PatternVersion) -> dict:
+    size = version.grid_data.get("width", 50)
+    color_count = len(version.material_counts)
+    if size <= 30 and color_count <= 12:
+        difficulty = "入门"
+        advice = "建议先从轮廓开始，再按颜色编号由深到浅填充。"
+    elif size >= 70 or color_count > 24:
+        difficulty = "进阶"
+        advice = "建议分区制作并逐区核对坐标，完成一块后再熨烫拼接。"
+    else:
+        difficulty = "适中"
+        advice = "建议从主体中心向外制作，每完成一行核对一次编号。"
+    return {"difficulty": difficulty, "advice": advice}
+
+
 @transaction.atomic
 def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -> PatternVersion:
     if not task.input_image:

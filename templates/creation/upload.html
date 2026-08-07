@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}上传图片 · 我拼个豆{% endblock %}
 {% block content %}
 {% include "creation/_steps.html" with step=1 %}
@@ -6,7 +7,20 @@
   <h1>上传一张想变成拼豆的图片</h1>
   <p class="muted">主体清楚、背景简单的图片，生成效果通常更好。</p>
   <p class="quota-line">本周期还可生成 <strong>{{ quota.remaining_count }}</strong> 张</p>
-  <form method="post" enctype="multipart/form-data" class="upload-box">{% csrf_token %}{{ form.as_p }}<button class="button">上传并分析</button></form>
+  <form method="post" enctype="multipart/form-data" class="upload-box" data-drop-upload>{% csrf_token %}
+    {{ form.non_field_errors }}
+    <label class="upload-label" for="{{ form.image.id_for_label }}"><strong>拖拽图片到这里，或点击选择</strong><span>建议主体完整、光线均匀、背景简洁</span></label>
+    {{ form.image.errors }}{{ form.image }}
+    <p class="selected-file" aria-live="polite">尚未选择图片</p>
+    <button class="button">上传并分析</button>
+  </form>
   <p class="muted small">支持 JPG、PNG，最大 10 MB。</p>
 </section>
+{% if recent_tasks %}<section class="recent-tasks" aria-labelledby="recent-heading">
+  <h2 id="recent-heading">最近的创作任务</h2><ul>
+  {% for item in recent_tasks %}<li><span>{{ item.created_at|date:"m-d H:i" }} · {{ item.get_status_display }}</span>
+    {% if item.status == "uploaded" or item.status == "analyzing" or item.status == "awaiting_confirmation" %}<a href="{% url 'creation:analysis' item.id %}">继续</a>{% else %}<a href="{% url 'creation:progress' item.id %}">查看</a>{% endif %}</li>{% endfor %}
+  </ul>
+</section>{% endif %}
 {% endblock %}
+{% block scripts %}<script src="{% static 'js/creation.js' %}" defer></script>{% endblock %}

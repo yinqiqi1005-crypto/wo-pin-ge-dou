@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
   <header class="site-header">
     <a class="brand" href="{% url 'home' %}"><span class="brand-mark">▦</span>我拼个豆</a>
     <nav aria-label="主导航">
@@ -24,7 +25,7 @@
       {% endif %}
     </div>
   </header>
-  <main class="page-shell">{% block content %}{% endblock %}</main>
+  <main class="page-shell" id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+  {% block scripts %}{% endblock %}
 </body>
 </html>
-

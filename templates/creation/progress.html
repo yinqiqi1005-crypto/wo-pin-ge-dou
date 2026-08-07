@@ -13,6 +13,10 @@
   {% elif task.status == "cancelled" %}
     <a class="button" href="{% url 'creation:settings' task.id %}">返回设置</a>
   {% else %}
+    <ol class="generation-stages" aria-label="生成进度">
+      <li class="done">准备图片</li><li>优化颜色</li><li>生成网格</li><li>校验图纸</li><li>保存结果</li>
+    </ol>
+    {% if task.retry_count %}<p class="notice" role="status">系统正在免费自动优化，不会重复计算张数。</p>{% endif %}
     <p class="muted">可以离开页面，任务会在后台继续。</p>
     {% if task.status == "quota_reserved" or task.status == "queued" %}
       <form method="post" action="{% url 'creation:cancel' task.id %}">{% csrf_token %}<button class="link-button">取消排队</button></form>
@@ -21,4 +25,3 @@
   {% endif %}
 </section>
 {% endblock %}
-

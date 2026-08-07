@@ -4,7 +4,8 @@
 {% include "creation/_steps.html" with step=5 %}
 <section class="content-card">
   <h1>图纸已经生成</h1>
-  <div class="two-column result-layout">
+  <nav class="result-tabs" aria-label="结果内容"><a href="#effect">效果图</a><a href="#grid">网格图</a><a href="#materials">材料与建议</a></nav>
+  <div class="two-column result-layout" id="effect">
     <div><img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="拼豆效果预览"></div>
     <div>
       <dl class="summary-list">
@@ -12,9 +13,11 @@
         <div><dt>颜色</dt><dd>{{ version.material_counts|length }} 色</dd></div>
         <div><dt>预计用豆</dt><dd>{{ version.total_beads }} 颗</dd></div>
       </dl>
-      <h2>材料清单</h2>
+      <h2 id="materials">材料清单</h2>
       <ul class="material-list">{% for code, count in version.material_counts.items %}<li><span>{{ code }}</span><strong>{{ count }} 颗</strong></li>{% endfor %}</ul>
-      <p><a href="{{ version.grid_preview.url }}" target="_blank">查看带编号网格图</a></p>
+      <section class="guidance"><h2>制作建议</h2><p><strong>难度：{{ guidance.difficulty }}</strong></p><p>{{ guidance.advice }}</p></section>
+      <p id="grid"><a href="{{ version.grid_preview.url }}" target="_blank" rel="noopener">放大查看带编号网格图</a></p>
+      <p class="muted small">调整尺寸、颜色或背景属于参数调整；增加元素或改变内容会创建新版本，并在开始前确认使用 1 张。</p>
       <a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>
     </div>
   </div>
