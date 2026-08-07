@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from threading import Lock
 from time import sleep
 
 from django.db import IntegrityError, OperationalError, connection, transaction
@@ -24,6 +25,9 @@ class InsufficientGenerationQuota(ValueError):
 
 class InvalidQuotaState(ValueError):
     """Raised when quota settlement does not match the task state."""
+
+
+_sqlite_reservation_lock = Lock()
 
 
 def current_plan_for_user(user) -> MembershipPlan:
@@ -82,6 +86,14 @@ def get_or_create_current_quota(user) -> GenerationQuotaPeriod:
 
 
 def reserve_generation(task: GenerationTask, *, amount: int = 1) -> GenerationQuotaPeriod:
+    if connection.vendor == "sqlite":
+        # SQLite locks tables rather than rows, so serialize this short local-only path.
+        with _sqlite_reservation_lock:
+            return _reserve_generation_with_retry(task, amount=amount)
+    return _reserve_generation_atomic(task, amount=amount)
+
+
+def _reserve_generation_with_retry(task: GenerationTask, *, amount: int) -> GenerationQuotaPeriod:
     attempts = 3 if connection.vendor == "sqlite" else 1
     for attempt in range(attempts):
         try:
