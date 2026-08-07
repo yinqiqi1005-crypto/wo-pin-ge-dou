@@ -183,6 +183,8 @@ def test_ci_stops_first_worker_and_queues_before_starting_replacement():
     assert "--report artifacts/worker-recovery.json" in workflow
     assert workflow.count("actions/checkout@v7.0.1") == 2
     assert workflow.count("astral-sh/setup-uv@v9.0.0") == 2
+    assert "cache-suffix: test" in workflow
+    assert "cache-suffix: infrastructure" in workflow
     assert workflow.count("prune-cache: true") == 2
     assert "actions/upload-artifact@v7.0.1" in workflow
     assert "path: artifacts/*.json" in workflow

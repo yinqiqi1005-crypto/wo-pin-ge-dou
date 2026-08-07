@@ -12,6 +12,7 @@ jobs:
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           python-version: "3.12"
+          cache-suffix: test
           prune-cache: true
       - run: sudo apt-get update && sudo apt-get install -y poppler-utils fonts-noto-cjk
       - run: uv sync --dev
@@ -55,6 +56,7 @@ jobs:
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           python-version: "3.12"
+          cache-suffix: infrastructure
           prune-cache: true
       - run: uv sync --dev
       - run: uv run python manage.py migrate --noinput
