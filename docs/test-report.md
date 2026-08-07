@@ -27,11 +27,11 @@
 
 自动化通过标准是零失败、零跳过、零 xfail。任何失败必须修复实现或明确修复错误测试数据，不允许删除测试或放宽业务标准。最终测试命令和实际数量记录在交付说明中。
 
-2026-08-08 最终本机结果：`232 passed in 20.85s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、三类实体制作证据门槛、SQLite 并发张数测试、数据库运营指标取证、仓库卫生防护、开发计划全量追溯、内部演示录像解码、四阶段真实性能基线、Worker 离线入队/重启恢复协议、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/390px 手机/纯键盘主流程和 6 类异常恢复端到端证据。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和最新指纹 CSS/JavaScript 静态资源冒烟通过。
+2026-08-08 最终本机结果：`239 passed in 22.30s`。同一次全量运行包含 40 图正式转换、120 图交互式人工评审包生成与图像校验、三类实体制作证据门槛、SQLite 并发张数测试、真实 PostgreSQL/Redis/Celery 证据防伪、数据库运营指标取证、仓库卫生防护、开发计划全量追溯、内部演示录像解码、四阶段真实性能基线、Worker 离线入队/重启恢复协议、真实模型评测保护、严格发布门槛、公网部署冒烟保护、三尺寸 PDF 实际渲染，以及 Chromium 桌面/390px 手机/纯键盘主流程和 6 类异常恢复端到端证据。Ruff、格式、评审包 JavaScript 语法、迁移漂移、Django system check 和启用 HTTPS 参数后的 `check --deploy` 均为零错误；全部新增迁移已成功应用。Gunicorn 双 Worker 的 `/health/`、首页和最新指纹 CSS/JavaScript 静态资源冒烟通过。
 
 本地固定性能基线以 3 次迭代的最大值判定：存储上传/读回 `0.001s`、规则分析 `0.003s`、70×70/36 色图纸及 PNG `0.299s`、完整分页 PDF `0.175s`，均低于 2/2/10/10 秒固定上限。原始样本见 [`performance/local-2026-08-08.json`](performance/local-2026-08-08.json)。
 
-PostgreSQL、Redis 与真实 Celery Worker 的端到端检查已固化为 `check_infrastructure`，CI 使用 PostgreSQL 16 与 Redis 7 服务执行，任何一环不可用都会失败，不会退回 SQLite 冒充通过。当前本机没有 Docker、PostgreSQL 或 Redis 可执行文件，因此本次本机报告不声明这三项已经运行。
+PostgreSQL、Redis 与真实 Celery Worker 的端到端检查已固化为 `check_infrastructure`，任何一环不可用都会失败，不会退回 SQLite 或 eager 模式冒充通过。本轮从官方源码在隔离临时目录构建并启动 PostgreSQL 16.6 与 Redis 7.2.7，完成全部 Django 迁移、真实管理员创建、Celery 5.6.3 非 eager Worker 的 10 个并发往返，以及 Worker 停止后离线入队、替代 Worker 启动并取回同一任务的恢复验证。不可覆盖且不含连接地址、密码或密钥的报告见 [`infrastructure/local-2026-08-08.json`](infrastructure/local-2026-08-08.json) 与 [`infrastructure/worker-recovery-2026-08-08.json`](infrastructure/worker-recovery-2026-08-08.json)。
 
 ## 现实世界验证
 

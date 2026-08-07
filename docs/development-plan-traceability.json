@@ -16,9 +16,9 @@
     },
     {
       "requirements": "M0-05..M0-06",
-      "status": "target_run_pending",
-      "evidence": ["docker-compose.yml", "config/settings.py", "apps/core/management/commands/check_infrastructure.py"],
-      "remaining": "在 PostgreSQL 16、Redis 7 和非 eager Celery Worker 环境产生成功记录。"
+      "status": "verified_local",
+      "evidence": ["docker-compose.yml", "config/settings.py", "apps/core/management/commands/check_infrastructure.py", "docs/infrastructure/local-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "requirements": "M0-07..M0-08",
@@ -40,9 +40,9 @@
     },
     {
       "requirements": "M0-12",
-      "status": "target_run_pending",
-      "evidence": ["README.md", "tests/integration/test_library_exports_admin.py"],
-      "remaining": "部署环境需由运营者设置独立强密码并创建真实超级管理员。"
+      "status": "verified_local",
+      "evidence": ["README.md", "tests/integration/test_library_exports_admin.py", "docs/infrastructure/local-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "requirements": "M1-01..M1-17",
@@ -70,9 +70,9 @@
     },
     {
       "requirements": "M4-03",
-      "status": "target_run_pending",
-      "evidence": ["apps/creation/tasks.py", ".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py"],
-      "remaining": "需要真实 Redis/Celery Worker 的远程 CI 成功记录。"
+      "status": "verified_local",
+      "evidence": ["apps/creation/tasks.py", ".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py", "docs/infrastructure/local-2026-08-08.json", "docs/infrastructure/worker-recovery-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "requirements": "M4-04..M4-17",
@@ -166,9 +166,9 @@
     },
     {
       "requirements": "M9-21..M9-22",
-      "status": "target_run_pending",
-      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_infrastructure.py", "apps/core/management/commands/check_worker_recovery.py", "tests/unit/test_worker_recovery_command.py"],
-      "remaining": "需要远程 CI 在 PostgreSQL/Redis/真实 Celery Worker 上运行并发和离线入队后重启恢复。"
+      "status": "verified_local",
+      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_infrastructure.py", "apps/core/management/commands/check_worker_recovery.py", "tests/unit/test_worker_recovery_command.py", "docs/infrastructure/local-2026-08-08.json", "docs/infrastructure/worker-recovery-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "requirements": "M9-23..M9-25",
@@ -193,8 +193,8 @@
     {
       "gate": "M0-repeatable-target-environment",
       "status": "target_run_pending",
-      "evidence": ["README.md", "Dockerfile", "docker-compose.yml", ".github/workflows/test.yml"],
-      "remaining": "需要一次全新目标环境启动和远程 CI 成功记录。"
+      "evidence": ["README.md", "Dockerfile", "docker-compose.yml", ".github/workflows/test.yml", "docs/infrastructure/local-2026-08-08.json"],
+      "remaining": "全新本地 PostgreSQL/Redis/Celery 环境已验证；仍需要至少一次远程 CI 成功记录。"
     },
     {
       "gate": "M1-deterministic-pattern-core",
@@ -216,9 +216,9 @@
     },
     {
       "gate": "M4-real-queue-and-worker",
-      "status": "target_run_pending",
-      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py"],
-      "remaining": "需要 PostgreSQL/Redis/非 eager Celery 目标环境成功记录。"
+      "status": "verified_local",
+      "evidence": [".github/workflows/test.yml", "apps/core/management/commands/check_worker_recovery.py", "docs/infrastructure/local-2026-08-08.json", "docs/infrastructure/worker-recovery-2026-08-08.json"],
+      "remaining": ""
     },
     {
       "gate": "M5-real-multimodal-analysis",

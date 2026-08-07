@@ -58,8 +58,15 @@ docker compose up --build web worker
 
 ```bash
 DB_ENGINE=postgresql CELERY_TASK_ALWAYS_EAGER=false \
-  uv run python manage.py check_infrastructure
+  uv run python manage.py check_infrastructure \
+  --concurrent-tasks 10 \
+  --require-superuser \
+  --report docs/infrastructure/local-YYYY-MM-DD.json
 ```
+
+命令会硬性拒绝 SQLite、eager 模式、少于两个或多于 64 个并发任务、Redis
+版本读取失败和缺少管理员的环境。报告使用排他创建，不能覆盖既有验收证据，且不记录
+数据库地址、密码或密钥。
 
 CI 还会停止第一个 Worker，在无 Worker 时把验收任务写入 Redis，再启动替代 Worker 并等待同一任务返回。这一步用于验证排队任务可在 Worker 重启后恢复，不使用 eager 模式代替真实队列。
 

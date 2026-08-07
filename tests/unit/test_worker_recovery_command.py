@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -53,6 +54,56 @@ def test_worker_recovery_queues_before_signalling_and_waits_for_same_result(tmp_
 
     delay.assert_called_once()
     assert queued_value["value"].startswith("worker-recovery-")
+
+
+def test_worker_recovery_writes_non_overwritable_evidence(tmp_path):
+    signal_path = tmp_path / "worker-recovery.queued"
+    report_path = tmp_path / "worker-recovery.json"
+    result = Mock(id="task-result-id")
+    queued_value = {}
+
+    def queue(value):
+        queued_value["value"] = value
+        return result
+
+    result.get.side_effect = lambda **_kwargs: queued_value["value"]
+    database, celery_settings = command_dependencies()
+    with (
+        database,
+        celery_settings,
+        patch(
+            "apps.core.management.commands.check_worker_recovery.infrastructure_echo.delay",
+            side_effect=queue,
+        ),
+    ):
+        Command().handle(
+            queued_signal=signal_path,
+            timeout=30,
+            report=str(report_path),
+        )
+
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["result"] == "passed"
+    assert report["task_id"] == "task-result-id"
+    assert report["celery"]["queued_while_worker_offline"] is True
+    assert report["celery"]["same_task_result_verified"] is True
+
+    second_signal = tmp_path / "second.queued"
+    database, celery_settings = command_dependencies()
+    with (
+        database,
+        celery_settings,
+        patch(
+            "apps.core.management.commands.check_worker_recovery.infrastructure_echo.delay",
+            side_effect=queue,
+        ),
+        pytest.raises(CommandError, match="Cannot create infrastructure evidence"),
+    ):
+        Command().handle(
+            queued_signal=second_signal,
+            timeout=30,
+            report=str(report_path),
+        )
 
 
 @pytest.mark.parametrize(
@@ -128,3 +179,7 @@ def test_ci_stops_first_worker_and_queues_before_starting_replacement():
 
     assert stop_position < queue_position < queued_signal_position < replacement_position
     assert 'CELERY_TASK_ALWAYS_EAGER: "false"' in workflow
+    assert workflow.count("--concurrent-tasks 10") == 2
+    assert "--report artifacts/worker-recovery.json" in workflow
+    assert "actions/upload-artifact@v4" in workflow
+    assert "path: artifacts/*.json" in workflow

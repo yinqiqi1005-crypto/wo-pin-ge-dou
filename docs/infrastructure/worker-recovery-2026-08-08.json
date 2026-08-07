@@ -1,0 +1,16 @@
+{
+  "celery": {
+    "always_eager": false,
+    "queued_while_worker_offline": true,
+    "same_task_result_verified": true,
+    "timeout_seconds": 30.0
+  },
+  "check": "worker-restart-recovery",
+  "checked_at": "2026-08-07T18:22:46.492344+00:00",
+  "database": {
+    "engine": "postgresql"
+  },
+  "result": "passed",
+  "schema_version": 1,
+  "task_id": "f0e82d35-8cc5-4ef2-a346-a2f66deacf30"
+}

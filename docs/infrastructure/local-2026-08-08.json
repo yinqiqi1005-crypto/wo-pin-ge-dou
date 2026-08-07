@@ -1,0 +1,22 @@
+{
+  "admin": {
+    "active_superuser_count": 1,
+    "required": true
+  },
+  "celery": {
+    "always_eager": false,
+    "concurrent_round_trips": 10,
+    "version": "5.6.3"
+  },
+  "check": "target-infrastructure",
+  "checked_at": "2026-08-07T18:22:19.666099+00:00",
+  "database": {
+    "engine": "postgresql",
+    "version": "16.6"
+  },
+  "redis": {
+    "version": "7.2.7"
+  },
+  "result": "passed",
+  "schema_version": 1
+}

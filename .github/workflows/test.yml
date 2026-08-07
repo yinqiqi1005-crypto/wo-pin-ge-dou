@@ -59,7 +59,10 @@ jobs:
       - name: Start Celery worker
         run: uv run celery -A config worker -l warning --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
       - name: Verify concurrent infrastructure round trips
-        run: uv run python manage.py check_infrastructure
+        run: >-
+          uv run python manage.py check_infrastructure
+          --concurrent-tasks 10
+          --report artifacts/infrastructure-before-restart.json
       - name: Verify queued task survives worker restart
         shell: bash
         run: |
@@ -78,7 +81,8 @@ jobs:
           rm -f /tmp/wo-pin-ge-dou-celery.pid
           uv run python manage.py check_worker_recovery \
             --queued-signal /tmp/wo-pin-ge-dou-worker-recovery.queued \
-            --timeout 30 &
+            --timeout 30 \
+            --report artifacts/worker-recovery.json &
           recovery_check_pid=$!
           for attempt in {1..20}; do
             if test -f /tmp/wo-pin-ge-dou-worker-recovery.queued; then
@@ -98,4 +102,14 @@ jobs:
             --detach --pidfile=/tmp/wo-pin-ge-dou-celery.pid
           wait "$recovery_check_pid"
       - name: Verify replacement worker concurrency
-        run: uv run python manage.py check_infrastructure
+        run: >-
+          uv run python manage.py check_infrastructure
+          --concurrent-tasks 10
+          --report artifacts/infrastructure-after-restart.json
+      - name: Upload infrastructure acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-acceptance
+          path: artifacts/*.json
+          if-no-files-found: warn
