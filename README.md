@@ -108,6 +108,16 @@ uv run python manage.py check_release_quality \
 
 存在任何 `pending`、材料不一致、主体可辨认率低于 85%、严重主体错误率达到 5%、可制作率低于 85%、高级创作符合率低于 85%、自动重试率达到 15%、错误扣减、P0/P1 问题或部署冒烟失败时，命令都会失败。示例数字仅展示命令格式，正式发布必须填入真实统计值。
 
+开始真人评分前生成不可覆盖的 40 图对照包：
+
+```bash
+uv run python manage.py prepare_human_review \
+  --output-dir media/human-review/round-1 \
+  --results docs/test-results-40.csv
+```
+
+打开输出目录的 `index.html`，逐图比较原图、拼豆效果与高分辨率编号网格，再把真实结论填回 CSV。评审包会保存 120 张图片、技术参数、材料统计和 SHA-256 清单；再次运行必须使用新的轮次目录，不能覆盖旧证据。
+
 ## 真实模型配置
 
 默认 `rules` 分析和 `mock` 高级创作保证离线可演示。配置真实 OpenAI 兼容服务时，把密钥放入环境变量，并在 Admin 新建模型路由版本。模型失败只记录错误类型；日志和数据库不保存密钥。

@@ -4,8 +4,8 @@ from io import BytesIO
 from pathlib import Path
 from time import monotonic
 
+from services.evaluation import CASES, build_case_image
 from services.image_processing import create_pattern
-from tests.fixtures.image_cases import CASES, build_case_image
 
 
 def test_40_legal_images_pass_formal_conversion_and_data_consistency():
