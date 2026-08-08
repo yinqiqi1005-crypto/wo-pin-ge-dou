@@ -1,4 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const themeChoices = document.querySelectorAll("[data-theme-choice]");
+  themeChoices.forEach((choice) => {
+    choice.addEventListener("click", () => {
+      const theme = choice.dataset.themeChoice;
+      document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem("wpgd-theme", theme); } catch (error) { /* Keep the theme for this page. */ }
+      const picker = choice.closest("details");
+      if (picker) picker.removeAttribute("open");
+    });
+  });
   document.querySelectorAll("[data-submit-state]").forEach((statefulForm) => {
     statefulForm.addEventListener("submit", () => {
       statefulForm.setAttribute("aria-busy", "true");

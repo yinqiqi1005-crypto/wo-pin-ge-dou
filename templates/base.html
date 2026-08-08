@@ -1,21 +1,39 @@
 {% load static %}
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="zh-Hans" data-theme="garden">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}我拼个豆{% endblock %}</title>
+  <script>
+    (() => {
+      try {
+        const theme = localStorage.getItem("wpgd-theme");
+        if (theme) document.documentElement.dataset.theme = theme;
+      } catch (error) { /* Ignore unavailable storage and keep the default theme. */ }
+    })();
+  </script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body tabindex="-1">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
   <header class="site-header">
-    <a class="brand" href="{% url 'home' %}"><span class="brand-mark">▦</span>我拼个豆</a>
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true">✦</span><span>我拼个豆</span><small>BEAD LAB</small></a>
     <nav aria-label="主导航">
-      <a href="{% url 'creation:upload' %}">AI 创作</a>
-      {% if user.is_authenticated %}<a href="{% url 'library:list' %}">我的图纸</a>{% endif %}
+      <a class="nav-link" href="{% url 'creation:upload' %}">AI 创作 <span aria-hidden="true">↗</span></a>
+      {% if user.is_authenticated %}<a class="nav-link" href="{% url 'library:list' %}">我的图纸</a>{% endif %}
     </nav>
-    <div class="account-nav">
+    <div class="header-actions">
+      <details class="theme-picker">
+        <summary class="theme-toggle"><span class="theme-dot" aria-hidden="true"></span><span>换个风格</span><span aria-hidden="true">⌄</span></summary>
+        <div class="theme-menu" role="group" aria-label="选择页面风格">
+          <button type="button" class="theme-option" data-theme-choice="garden"><span class="theme-swatch swatch-garden" aria-hidden="true"></span><span><strong>豆豆乐园</strong><small>明亮 · 轻快</small></span></button>
+          <button type="button" class="theme-option" data-theme-choice="night"><span class="theme-swatch swatch-night" aria-hidden="true"></span><span><strong>像素夜</strong><small>深色 · 酷感</small></span></button>
+          <button type="button" class="theme-option" data-theme-choice="paper"><span class="theme-swatch swatch-paper" aria-hidden="true"></span><span><strong>纸张工坊</strong><small>温暖 · 手作</small></span></button>
+          <button type="button" class="theme-option" data-theme-choice="pixel"><span class="theme-swatch swatch-pixel" aria-hidden="true"></span><span><strong>像素可爱</strong><small>糖果 · 像素</small></span></button>
+        </div>
+      </details>
+      <div class="account-nav">
       {% if user.is_authenticated %}
         <span>{{ user.username }}</span>
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-button">退出</button></form>
@@ -23,6 +41,7 @@
         <a href="{% url 'login' %}">登录</a>
         <a class="button small" href="{% url 'accounts:register' %}">注册</a>
       {% endif %}
+      </div>
     </div>
   </header>
   <main class="page-shell" id="main-content" tabindex="-1">
