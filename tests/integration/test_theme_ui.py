@@ -9,6 +9,8 @@ def test_home_exposes_four_persistent_visual_themes(client):
 
     assert response.status_code == 200
     assert content.count("data-theme-choice=") == 4
+    assert 'aria-expanded="false"' in content
+    assert 'id="theme-menu"' in content
     for theme in ("garden", "night", "paper", "pixel"):
         assert f'data-theme-choice="{theme}"' in content
     assert 'localStorage.setItem("wpgd-theme", theme)' in content or "wpgd-theme" in content

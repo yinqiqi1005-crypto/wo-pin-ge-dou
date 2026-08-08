@@ -1,12 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const themeChoices = document.querySelectorAll("[data-theme-choice]");
-  themeChoices.forEach((choice) => {
-    choice.addEventListener("click", () => {
-      const theme = choice.dataset.themeChoice;
-      document.documentElement.dataset.theme = theme;
-      try { localStorage.setItem("wpgd-theme", theme); } catch (error) { /* Keep the theme for this page. */ }
-      const picker = choice.closest("details");
-      if (picker) picker.removeAttribute("open");
+  document.querySelectorAll("[data-theme-picker]").forEach((picker) => {
+    const toggle = picker.querySelector(".theme-toggle");
+    const menu = picker.querySelector(".theme-menu");
+    const setOpen = (open) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      menu.hidden = !open;
+    };
+    toggle.addEventListener("click", () => setOpen(menu.hidden));
+    picker.querySelectorAll("[data-theme-choice]").forEach((choice) => {
+      choice.addEventListener("click", () => {
+        const theme = choice.dataset.themeChoice;
+        document.documentElement.dataset.theme = theme;
+        try { localStorage.setItem("wpgd-theme", theme); } catch (error) { /* Keep the theme for this page. */ }
+        setOpen(false);
+      });
+    });
+    document.addEventListener("click", (event) => {
+      if (!picker.contains(event.target)) setOpen(false);
+    });
+    picker.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        toggle.focus();
+      }
     });
   });
   document.querySelectorAll("[data-submit-state]").forEach((statefulForm) => {
