@@ -127,6 +127,7 @@ class GenerationSettings(models.Model):
     preserve_content = models.JSONField(default=list)
     editable_content = models.JSONField(default=list)
     face_mode = models.CharField(max_length=30, default="composition")
+    finished_use = models.CharField(max_length=30, default="unsure")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

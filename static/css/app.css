@@ -152,6 +152,15 @@ input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var
 .result-tabs button[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
 .result-panel { margin-bottom: 26px; }
 .result-panel[hidden] { display: none; }
+.ironing-method-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ironing-method { padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+.ironing-method h3 { font-size: 1rem; margin: 10px 0 4px; }
+.ironing-method p { font-size: .9rem; color: var(--muted); }
+.ironing-example { aspect-ratio: 1; border-radius: 8px; background-image: url("../images/ironing-methods-comparison-v2.png"); background-size: 200% 200%; }
+.top-left .ironing-example { background-position: top left; }
+.top-right .ironing-example { background-position: top right; }
+.bottom-left .ironing-example { background-position: bottom left; }
+.bottom-right .ironing-example { background-position: bottom right; }
 .status.try, .status.not_suitable { color: #805b00; background: #fff3cc; }
 .status.unprocessable { color: #8a2d2d; background: #fde8e8; }
 .errorlist { color: #9c2f2f; text-align: left; }
@@ -170,6 +179,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .content-card, .narrow-card { padding: 18px; }
   .compact-grid p { grid-template-columns: 1fr; }
   .decision-grid { grid-template-columns: 1fr; }
+  .ironing-method-grid { grid-template-columns: repeat(2, 1fr); }
   .result-tabs { overflow-x: auto; padding-bottom: 4px; }
   .result-tabs button { flex: 0 0 auto; }
   img { max-width: 100%; }

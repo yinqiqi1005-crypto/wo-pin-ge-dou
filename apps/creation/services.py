@@ -151,6 +151,7 @@ def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -
             "color_limit": settings.color_limit,
             "background_mode": settings.background_mode,
             "face_mode": settings.face_mode,
+            "finished_use": settings.finished_use,
         },
         validation_result={"technical": "passed"},
     )

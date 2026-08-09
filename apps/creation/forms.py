@@ -50,6 +50,17 @@ class GenerationSettingsForm(forms.ModelForm):
         choices=(("face_detail", "脸部细节优先"), ("composition", "整体构图优先")),
         required=False,
     )
+    finished_use = forms.ChoiceField(
+        label="成品用途",
+        choices=(
+            ("display", "装框展示"),
+            ("daily", "挂件或日常使用"),
+            ("flat", "杯垫等平面用品"),
+            ("assembly", "大型拼接作品"),
+            ("unsure", "不确定"),
+        ),
+        required=False,
+    )
     color_limit = forms.TypedChoiceField(label="颜色数量", choices=COLOR_CHOICES, coerce=int)
     background_mode = forms.ChoiceField(label="背景处理", choices=BACKGROUND_CHOICES)
 
@@ -62,6 +73,7 @@ class GenerationSettingsForm(forms.ModelForm):
             "color_limit",
             "background_mode",
             "face_mode",
+            "finished_use",
         )
         widgets = {"grid_width": forms.HiddenInput(), "grid_height": forms.HiddenInput()}
 
@@ -74,6 +86,7 @@ class GenerationSettingsForm(forms.ModelForm):
         height = self.instance.grid_height or self.instance.grid_size
         self.fields["pattern_size"].initial = f"{width}x{height}"
         self.fields["face_mode"].initial = self.instance.face_mode
+        self.fields["finished_use"].initial = self.instance.finished_use
         enabled_options = enabled_options or {}
         if enabled_options:
             self.fields["color_limit"].choices = [
@@ -101,6 +114,7 @@ class GenerationSettingsForm(forms.ModelForm):
         cleaned["grid_height"] = height
         cleaned["grid_size"] = max(width, height)
         cleaned["face_mode"] = cleaned.get("face_mode") or "composition"
+        cleaned["finished_use"] = cleaned.get("finished_use") or "unsure"
         if cleaned.get("background_mode") == "remove" and not self.has_subject:
             self.add_error("background_mode", "未识别到主体时不能移除背景，请先选择主体。")
         return cleaned

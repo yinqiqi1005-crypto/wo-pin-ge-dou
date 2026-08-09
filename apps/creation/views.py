@@ -20,6 +20,7 @@ from .forms import (
     SavePatternForm,
     SubjectSelectionForm,
 )
+from .ironing import IRONING_METHODS, recommend_ironing_method
 from .models import (
     GenerationErrorCode,
     GenerationSettings,
@@ -127,6 +128,7 @@ def settings(request, task_id):
             "grid_height": 58,
             "color_limit": recommendations.get("color_limit", 24),
             "background_mode": recommendations.get("background_mode", "simplify"),
+            "finished_use": getattr(creation_user.profile, "default_finished_use", "unsure"),
         },
     )
     form = GenerationSettingsForm(
@@ -214,6 +216,12 @@ def result(request, task_id):
             "version": task.result_version,
             "guidance": pattern_making_guidance(task.result_version),
             "face_check": face_detail_check(task.result_version.settings_snapshot),
+            "ironing": recommend_ironing_method(
+                task.result_version.settings_snapshot.get("finished_use", "unsure"),
+                width=task.result_version.grid_data["width"],
+                height=task.result_version.grid_data["height"],
+            ),
+            "ironing_methods": IRONING_METHODS.values(),
         },
     )
 

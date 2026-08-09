@@ -29,6 +29,7 @@
     <section class="guidance"><h2>制作建议</h2><p><strong>难度：{{ guidance.difficulty }}</strong></p><p>{{ guidance.advice }}</p></section>
   </section>
   <section class="guidance"><h2>面部细节检查</h2><p>{{ face_check.message }}</p><p class="muted">这是制作前的可辨认性提示，不会阻止你保存或继续生成。</p></section>
+  <section class="guidance"><h2>推荐烫豆方式：{{ ironing.name }}</h2><p>{{ ironing.reason }}</p><p><strong>适合：</strong>{{ ironing.best_for }}</p><p><strong>步骤：</strong>{{ ironing.steps }}</p><p><strong>安全：</strong>{{ ironing.safety }}</p><p class="muted">效果示意：AI 生成的说明图片，用于理解豆孔与平整度差异。</p><div class="ironing-method-grid">{% for method in ironing_methods %}<article class="ironing-method {{ method.effect_position }}"><div class="ironing-example"></div><h3>{{ method.name }}</h3><p>{{ method.best_for }}</p></article>{% endfor %}</div></section>
   <p class="muted small">调整尺寸、颜色或背景属于参数调整；增加元素或改变内容会创建新版本，并在开始前确认使用 1 张。</p>
   {% if version.pattern.is_saved %}<a class="button" href="{% url 'library:detail' version.pattern.id %}?version={{ version.version_number }}">返回我的图纸</a>{% else %}<a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>{% endif %}
 </section>
