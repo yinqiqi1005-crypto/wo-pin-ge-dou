@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   document.querySelectorAll("[data-model-rotate]").forEach((button) => {
-    const model = button.closest(".report-model-chip").querySelector("[data-bead-model]");
+    const model = button.closest(".report-model-shelf").querySelector("[data-bead-model]");
     let angle = 0;
     button.addEventListener("click", () => {
       angle += 90;

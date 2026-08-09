@@ -3,8 +3,8 @@
 {% block content %}
 {% include "creation/_steps.html" with step=3 %}
 <section class="content-card">
-  <div class="two-column">
-    <div><img class="source-preview" src="{{ task.input_image.url }}" alt="原始图片"></div>
+  <div class="two-column generation-settings-layout">
+    <div class="settings-preview"><img class="source-preview" src="{{ task.input_image.url }}" alt="原始图片"></div>
     <div>
       <h1>确认生成设置</h1>
       <p class="membership-line">{{ membership.name }} · 本周期还可生成 <strong>{{ quota.remaining_count }}</strong> 张</p>

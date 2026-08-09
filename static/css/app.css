@@ -120,6 +120,8 @@ html[data-theme="pixel"] .brand-mark { border-radius: 5px; box-shadow: 3px 3px 0
 .narrow-card { max-width: 560px; margin: 30px auto; }
 .center { text-align: center; }
 .two-column { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); gap: 36px; align-items: center; }
+.generation-settings-layout { align-items: start; }
+.settings-preview { position: sticky; top: 96px; }
 .source-preview, .pattern-preview { display: block; width: 100%; max-height: 620px; object-fit: contain; border-radius: 14px; background: var(--page); }
 .steps { margin: 0 0 22px; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); list-style: none; color: var(--muted); }
 .steps li { padding: 10px; border-bottom: 2px solid var(--line); text-align: center; }
@@ -230,7 +232,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .report-preview-card figcaption span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: .68rem; font-weight: 800; }
 .comparison-arrow { display: grid; justify-items: center; gap: 3px; color: var(--accent); font-size: 1.4rem; font-weight: 800; }
 .comparison-arrow span { color: var(--muted); font-size: .65rem; font-weight: 800; letter-spacing: .05em; white-space: nowrap; }
-.report-model-chip { position: absolute; right: 8px; bottom: 8px; display: grid; gap: 4px; justify-items: end; z-index: 1; }
 .bead-model { --model-rotation: -12deg; width: 68px; flex: 0 0 auto; aspect-ratio: 1; padding: 4px; border: 3px solid var(--ink); background: var(--surface); box-shadow: 4px 5px 0 color-mix(in srgb, var(--ink) 48%, var(--surface)), 9px 11px 15px color-mix(in srgb, var(--ink) 20%, transparent); transform: rotateX(9deg) rotateY(var(--model-rotation)); transition: transform .45s ease; }
 .bead-model-face { width: 100%; height: 100%; overflow: hidden; background: repeating-conic-gradient(#ef6f61 0 25%, #f5d177 0 50%) 50% / 18px 18px; }
 .bead-model-face img { width: 100%; height: 100%; object-fit: contain; background: var(--surface); mix-blend-mode: normal; }
@@ -240,7 +241,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .bead-model.baking-paper { box-shadow: 4px 5px 0 color-mix(in srgb, var(--good) 38%, var(--surface)), 9px 11px 15px color-mix(in srgb, var(--ink) 20%, transparent); }
 .bead-model.glitter .bead-model-face { background-image: radial-gradient(circle at 20% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 80% 32%, #d7dcff 0 1px, transparent 2px), linear-gradient(135deg, #3d63ca, #d38bd9); background-size: 16px 16px, 19px 19px, auto; }
 .model-rotate { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; font-size: .82rem; }
-.report-model-chip .model-rotate { padding: 4px 7px; border-color: color-mix(in srgb, var(--accent) 36%, var(--line)); font-size: .64rem; }
+.report-model-shelf { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 78%, var(--accent-soft)); }
+.report-model-shelf p { margin: 3px 0 0; font-size: .76rem; line-height: 1.4; }
+.report-model-shelf .model-rotate { padding: 5px 8px; border-color: color-mix(in srgb, var(--accent) 36%, var(--line)); font-size: .68rem; white-space: nowrap; }
 .report-summary { padding: 5px; }
 .report-summary h2 { margin: 5px 0 18px; font-size: 1.5rem; }
 .report-summary dl { display: grid; gap: 10px; margin: 0 0 23px; }
@@ -290,6 +293,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .site-header nav { grid-column: 1 / -1; justify-content: center; padding-top: 10px; border-top: 1px solid var(--line); }
   .page-shell { padding-top: 24px; }
   .two-column { grid-template-columns: 1fr; }
+  .settings-preview { position: static; }
   .steps li { font-size: 0; }
   .steps li::first-letter { font-size: 1rem; }
   .page-heading { align-items: start; gap: 16px; }
@@ -305,6 +309,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .report-heading, .report-stage, .report-lower { grid-template-columns: 1fr; display: grid; }
   .report-heading { gap: 13px; }
   .report-comparison { grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr); gap: 7px; }
+  .report-model-shelf { grid-template-columns: auto minmax(0, 1fr); }.report-model-shelf .model-rotate { grid-column: 1 / -1; justify-self: start; }
   .comparison-arrow { font-size: 1.15rem; }.comparison-arrow span { font-size: .56rem; }
   .report-status { justify-self: start; }
   .report-summary dl div { grid-template-columns: 1fr; gap: 2px; }
