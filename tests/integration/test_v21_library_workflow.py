@@ -27,6 +27,8 @@ def test_library_report_shows_a_style_specific_3d_model(client, django_user_mode
         pattern=pattern,
         version_number=1,
         grid_data={"width": 58, "height": 58},
+        source_image="patterns/source/upload.png",
+        effect_preview="patterns/effect/result.png",
         material_counts={"WPD-001": 100},
         settings_snapshot={"ironing_style": "glitter"},
     )
@@ -40,6 +42,10 @@ def test_library_report_shows_a_style_specific_3d_model(client, django_user_mode
     assert "data-bead-model" in page
     assert "glitter" in page
     assert "真实案例图片" in page
+    assert "data-creation-compare" in page
+    assert "你的上传图" in page
+    assert "AI 拼豆成品预览" in page
+    assert "成品摆放效果" in page
     assert 'href="https://' not in page
 
 

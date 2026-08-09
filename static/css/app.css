@@ -216,20 +216,30 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .bead-report .muted { color: var(--muted); }
 .report-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 30px; }
 .report-heading h1 { margin: 4px 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1; letter-spacing: -.06em; }
-.report-pattern-name { margin: 7px 0; color: #e0e8fa; font-size: 1.05rem; }
+.report-pattern-name { margin: 7px 0; color: var(--muted); font-size: 1.05rem; }
 .report-status, .report-kicker { color: var(--accent); font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .report-status { padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--line)); border-radius: 999px; background: var(--accent-soft); white-space: nowrap; }
-.report-stage { display: grid; grid-template-columns: minmax(280px, .95fr) minmax(0, 1.05fr); gap: 30px; align-items: center; }
-.bead-model-wrap { display: grid; gap: 14px; justify-items: center; padding: 30px; border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--surface) 72%, var(--accent-soft)); perspective: 900px; }
-.bead-model { --model-rotation: -12deg; width: min(100%, 310px); aspect-ratio: 1; padding: 13px; border: 7px solid var(--ink); background: var(--surface); box-shadow: 10px 12px 0 color-mix(in srgb, var(--ink) 48%, var(--surface)), 20px 26px 32px color-mix(in srgb, var(--ink) 20%, transparent); transform: rotateX(9deg) rotateY(var(--model-rotation)); transition: transform .45s ease; }
+.report-stage { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr); gap: 30px; align-items: start; }
+.report-comparison { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 11px; align-items: center; margin: 0; }
+.report-preview-card { min-width: 0; margin: 0; padding: 11px; border: 1px solid var(--line); border-radius: 18px; background: color-mix(in srgb, var(--surface) 78%, var(--accent-soft)); }
+.report-image-frame { display: grid; width: 100%; aspect-ratio: 1; place-items: center; overflow: hidden; border-radius: 12px; background: var(--surface); }
+.report-image-frame img { width: 100%; height: 100%; object-fit: contain; }
+.report-image-frame span { color: var(--muted); font-size: .78rem; font-weight: 800; letter-spacing: .12em; }
+.report-preview-card figcaption { display: flex; gap: 7px; align-items: center; padding: 10px 3px 2px; font-size: .88rem; }
+.report-preview-card figcaption span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: .68rem; font-weight: 800; }
+.comparison-arrow { display: grid; justify-items: center; gap: 3px; color: var(--accent); font-size: 1.4rem; font-weight: 800; }
+.comparison-arrow span { color: var(--muted); font-size: .65rem; font-weight: 800; letter-spacing: .05em; white-space: nowrap; }
+.bead-model { --model-rotation: -12deg; width: 108px; flex: 0 0 auto; aspect-ratio: 1; padding: 6px; border: 4px solid var(--ink); background: var(--surface); box-shadow: 6px 7px 0 color-mix(in srgb, var(--ink) 48%, var(--surface)), 13px 16px 20px color-mix(in srgb, var(--ink) 20%, transparent); transform: rotateX(9deg) rotateY(var(--model-rotation)); transition: transform .45s ease; }
 .bead-model-face { width: 100%; height: 100%; overflow: hidden; background: repeating-conic-gradient(#ef6f61 0 25%, #f5d177 0 50%) 50% / 18px 18px; }
 .bead-model-face img { width: 100%; height: 100%; object-fit: contain; background: var(--surface); mix-blend-mode: normal; }
 .bead-model.waffle .bead-model-face, .bead-model.waffle .bead-model-face::after { background-image: linear-gradient(45deg, rgb(255 255 255 / 20%) 25%, transparent 25% 75%, rgb(0 0 0 / 17%) 75%), linear-gradient(135deg, rgb(255 255 255 / 16%) 25%, transparent 25% 75%, rgb(0 0 0 / 16%) 75%); background-size: 16px 16px; }
 .bead-model.towel { border-radius: 18px; filter: saturate(.92); }
 .bead-model.bathcloth .bead-model-face { background-image: radial-gradient(#1116 1px, transparent 1.5px), radial-gradient(#fff7 1px, transparent 1.5px); background-size: 7px 7px, 11px 11px; }
-.bead-model.baking-paper { box-shadow: 10px 12px 0 color-mix(in srgb, var(--good) 38%, var(--surface)), 20px 26px 32px color-mix(in srgb, var(--ink) 20%, transparent); }
+.bead-model.baking-paper { box-shadow: 6px 7px 0 color-mix(in srgb, var(--good) 38%, var(--surface)), 13px 16px 20px color-mix(in srgb, var(--ink) 20%, transparent); }
 .bead-model.glitter .bead-model-face { background-image: radial-gradient(circle at 20% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 80% 32%, #d7dcff 0 1px, transparent 2px), linear-gradient(135deg, #3d63ca, #d38bd9); background-size: 16px 16px, 19px 19px, auto; }
 .model-rotate { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; font-size: .82rem; }
+.report-model-aside { display: flex; gap: 15px; align-items: center; margin: 0 0 19px; padding: 13px; border: 1px solid var(--line); border-radius: 15px; background: color-mix(in srgb, var(--surface) 76%, var(--accent-soft)); }
+.report-model-aside p { margin: 4px 0 9px; font-size: .78rem; line-height: 1.45; }
 .report-summary { padding: 5px; }
 .report-summary h2 { margin: 5px 0 18px; font-size: 1.5rem; }
 .report-summary dl { display: grid; gap: 10px; margin: 0 0 23px; }
@@ -293,6 +303,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .ironing-choice-grid, .membership-grid { grid-template-columns: 1fr; }
   .report-heading, .report-stage, .report-lower { grid-template-columns: 1fr; display: grid; }
   .report-heading { gap: 13px; }
+  .report-comparison { grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr); gap: 7px; }
+  .comparison-arrow { font-size: 1.15rem; }.comparison-arrow span { font-size: .56rem; }
   .report-status { justify-self: start; }
   .report-summary dl div { grid-template-columns: 1fr; gap: 2px; }
   .inline-rename-form { grid-template-columns: 1fr auto; }
