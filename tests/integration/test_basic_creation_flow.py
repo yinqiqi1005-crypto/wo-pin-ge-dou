@@ -98,6 +98,31 @@ def test_registered_user_can_generate_save_and_view_pattern(signed_in_client):
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-test-media")
+def test_result_modal_save_returns_json_without_page_redirect(signed_in_client):
+    client, user = signed_in_client
+    client.post("/create/", {"image": uploaded_png()})
+    task = GenerationTask.objects.get(user=user)
+    client.post(
+        f"/create/{task.pk}/settings/",
+        {"grid_size": 30, "color_limit": 12, "background_mode": "keep"},
+    )
+
+    result = client.get(f"/create/{task.pk}/result/")
+    assert 'data-save-pattern-modal' in result.content.decode()
+    category_id = user.pattern_categories.first().pk
+    saved = client.post(
+        f"/create/{task.pk}/save/",
+        {"title": "弹窗保存", "category_id": category_id, "note": "无需刷新"},
+        HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+    )
+
+    assert saved.status_code == 200
+    assert saved.json()["saved"] is True
+    pattern = Pattern.objects.get(owner=user)
+    assert pattern.category_id == category_id
+
+
+@override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-test-media")
 def test_user_cannot_access_another_users_task_or_pattern(client, django_user_model):
     owner = django_user_model.objects.create_user(username="owner", password="password")
     stranger = django_user_model.objects.create_user(username="stranger", password="password")

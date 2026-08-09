@@ -138,4 +138,5 @@ class SubjectSelectionForm(forms.Form):
 
 class SavePatternForm(forms.Form):
     title = forms.CharField(label="图纸名称", max_length=120)
+    category_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
     note = forms.CharField(label="备注", required=False, widget=forms.Textarea(attrs={"rows": 3}))

@@ -161,6 +161,14 @@ input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var
 .top-right .ironing-example { background-position: top right; }
 .bottom-left .ironing-example { background-position: bottom left; }
 .bottom-right .ironing-example { background-position: bottom right; }
+.modal-backdrop { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(24 21 28 / 56%); }
+.modal-backdrop[hidden] { display: none; }
+.save-modal { position: relative; width: min(100%, 520px); padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: 0 22px 60px rgb(0 0 0 / 24%), var(--shadow); }
+.save-modal h2 { margin-top: 0; }
+.save-modal form > p { display: grid; gap: 7px; }
+.save-modal details { margin: 18px 0; }
+.save-modal summary { cursor: pointer; color: var(--muted); }
+.modal-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); cursor: pointer; font-size: 1.35rem; line-height: 1; }
 .status.try, .status.not_suitable { color: #805b00; background: #fff3cc; }
 .status.unprocessable { color: #8a2d2d; background: #fde8e8; }
 .errorlist { color: #9c2f2f; text-align: left; }

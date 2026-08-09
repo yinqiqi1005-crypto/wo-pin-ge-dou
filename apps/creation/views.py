@@ -12,6 +12,8 @@ from apps.memberships.services import (
     release_generation,
     reserve_generation,
 )
+from apps.patterns.categories import ensure_user_categories
+from apps.patterns.models import PatternCategory
 
 from .access import effective_creation_user
 from .forms import (
@@ -205,7 +207,8 @@ def cancel_task(request, task_id):
 
 
 def result(request, task_id):
-    task = _user_task_or_404(effective_creation_user(request), task_id)
+    creation_user = effective_creation_user(request)
+    task = _user_task_or_404(creation_user, task_id)
     if task.status != GenerationStatus.SUCCEEDED or not task.result_version:
         return redirect("creation:settings", task_id=task.pk)
     return render(
@@ -222,6 +225,9 @@ def result(request, task_id):
                 height=task.result_version.grid_data["height"],
             ),
             "ironing_methods": IRONING_METHODS.values(),
+            "save_form": SavePatternForm(initial={"title": task.result_version.pattern.title}),
+            "categories": ensure_user_categories(creation_user).order_by("sort_order", "id"),
+            "is_guest": UserProfile.objects.filter(user=creation_user, is_guest=True).exists(),
         },
     )
 
@@ -240,17 +246,39 @@ def save_pattern(request, task_id):
         initial={"title": pattern.title, "note": pattern.note},
     )
     if request.method == "POST" and form.is_valid():
+        category = None
+        if form.cleaned_data["category_id"]:
+            category = PatternCategory.objects.filter(
+                pk=form.cleaned_data["category_id"], owner=creation_user
+            ).first()
+            if category is None:
+                form.add_error("category_id", "请选择自己的图纸分类。")
+        if form.errors:
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {"saved": False, "errors": form.errors.get_json_data()}, status=400
+                )
+            return render(
+                request,
+                "creation/save.html",
+                {"task": task, "pattern": pattern, "form": form},
+            )
         pattern.title = form.cleaned_data["title"]
         pattern.note = form.cleaned_data["note"]
+        pattern.category = category
         pattern.is_saved = True
         try:
-            pattern.save(update_fields=("title", "note", "is_saved", "updated_at"))
+            pattern.save(update_fields=("title", "note", "category", "is_saved", "updated_at"))
         except DatabaseError:
             task.failure_code = GenerationErrorCode.SAVE_FAILED
             task.failure_message = "作品暂时无法保存，请稍后重试。"
             task.save(update_fields=("failure_code", "failure_message", "updated_at"))
             form.add_error(None, task.failure_message)
             pattern.refresh_from_db()
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {"saved": False, "errors": form.errors.get_json_data()}, status=500
+                )
             return render(
                 request,
                 "creation/save.html",
@@ -260,5 +288,9 @@ def save_pattern(request, task_id):
         task.failure_code = ""
         task.failure_message = ""
         task.save(update_fields=("status", "failure_code", "failure_message", "updated_at"))
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {"saved": True, "detail_url": f"/patterns/{pattern.pk}/", "title": pattern.title}
+            )
         return redirect("library:detail", pattern_id=pattern.pk)
     return render(request, "creation/save.html", {"task": task, "pattern": pattern, "form": form})

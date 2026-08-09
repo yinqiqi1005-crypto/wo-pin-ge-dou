@@ -72,6 +72,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     selectTab(tabs[0]);
   });
+  const modal = document.querySelector("[data-save-pattern-modal]");
+  const openModal = document.querySelector("[data-open-save-modal]");
+  if (modal && openModal) {
+    const form = modal.querySelector("[data-ajax-save]");
+    const errorMessage = form.querySelector("[data-save-errors]");
+    const feedback = document.querySelector("[data-save-feedback]");
+    const focusableSelector = "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary";
+    const closeModal = () => { modal.hidden = true; openModal.focus(); };
+    openModal.addEventListener("click", () => {
+      modal.hidden = false;
+      modal.querySelector("input").focus();
+    });
+    modal.querySelector("[data-close-save-modal]").addEventListener("click", closeModal);
+    modal.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(modal.querySelectorAll(focusableSelector));
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorMessage.textContent = "";
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.saved) {
+          errorMessage.textContent = "保存失败，请检查名称和分类后重试。";
+          return;
+        }
+        closeModal();
+        openModal.textContent = "已保存";
+        openModal.disabled = true;
+        feedback.hidden = false;
+        feedback.innerHTML = `图纸已保存。<a href="${payload.detail_url}">查看我的图纸</a>`;
+      } catch (error) {
+        errorMessage.textContent = "网络暂时不可用，请重试。";
+      }
+    });
+  }
   const form = document.querySelector("[data-drop-upload]");
   if (!form) return;
   const input = form.querySelector("input[type=file]");
