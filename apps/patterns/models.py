@@ -2,6 +2,52 @@ from django.conf import settings
 from django.db import models
 
 
+class DefaultPatternCategory(models.Model):
+    code = models.CharField(max_length=40, unique=True)
+    name = models.CharField(max_length=40)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_fallback = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("sort_order", "code")
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class PatternCategory(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pattern_categories",
+    )
+    name = models.CharField(max_length=40)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_fallback = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("sort_order", "id")
+        constraints = [
+            models.UniqueConstraint(fields=("owner", "name"), name="unique_user_pattern_category")
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def delete(self, *args, **kwargs):
+        from .categories import fallback_category_for_user
+
+        fallback = fallback_category_for_user(self.owner)
+        if fallback.pk != self.pk:
+            Pattern.objects.filter(category=self).update(category=fallback)
+        return super().delete(*args, **kwargs)
+
+
 class Palette(models.Model):
     code = models.CharField(max_length=64, unique=True)
     name = models.CharField(max_length=120)
@@ -50,6 +96,13 @@ class Pattern(models.Model):
     )
     title = models.CharField(max_length=120)
     note = models.TextField(blank=True)
+    category = models.ForeignKey(
+        PatternCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="patterns",
+    )
     is_saved = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

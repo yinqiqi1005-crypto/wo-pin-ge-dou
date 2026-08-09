@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import Palette, PaletteColor, Pattern, PatternExport, PatternVersion
+from .models import (
+    DefaultPatternCategory,
+    Palette,
+    PaletteColor,
+    Pattern,
+    PatternCategory,
+    PatternExport,
+    PatternVersion,
+)
 
 
 class PaletteColorInline(admin.TabularInline):
@@ -17,8 +25,28 @@ class PaletteAdmin(admin.ModelAdmin):
 
 @admin.register(Pattern)
 class PatternAdmin(admin.ModelAdmin):
-    list_display = ("title", "owner", "is_saved", "deleted_at", "created_at", "updated_at")
+    list_display = (
+        "title",
+        "owner",
+        "category",
+        "is_saved",
+        "deleted_at",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("is_saved", "deleted_at")
+
+
+@admin.register(DefaultPatternCategory)
+class DefaultPatternCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "code", "sort_order", "is_fallback", "is_active")
+    list_editable = ("sort_order", "is_fallback", "is_active")
+
+
+@admin.register(PatternCategory)
+class PatternCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "owner", "sort_order", "is_fallback")
+    list_filter = ("is_fallback",)
     search_fields = ("title", "owner__username")
 
 

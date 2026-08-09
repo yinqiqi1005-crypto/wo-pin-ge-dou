@@ -6,6 +6,7 @@ from django.db import IntegrityError, OperationalError, connection, transaction
 from django.db.models import F
 from django.utils import timezone
 
+from apps.accounts.models import UserProfile
 from apps.creation.models import GenerationStatus, GenerationTask
 
 from .models import (
@@ -31,7 +32,7 @@ _sqlite_reservation_lock = Lock()
 
 
 def current_plan_for_user(user) -> MembershipPlan:
-    if getattr(getattr(user, "profile", None), "is_guest", False):
+    if UserProfile.objects.filter(user=user, is_guest=True).exists():
         return MembershipPlan.objects.get(level=MembershipLevel.VISITOR, is_active=True)
     subscription = (
         MembershipSubscription.objects.select_related("plan")

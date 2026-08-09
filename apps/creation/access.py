@@ -19,6 +19,9 @@ def effective_creation_user(request):
     guest = user_model.objects.create_user(username=f"guest-{uuid.uuid4().hex}")
     guest.set_unusable_password()
     guest.save(update_fields=("password",))
-    UserProfile.objects.create(user=guest, display_name="免费游客", is_guest=True)
+    UserProfile.objects.update_or_create(
+        user=guest,
+        defaults={"display_name": "免费游客", "is_guest": True},
+    )
     request.session[GUEST_SESSION_KEY] = guest.pk
     return guest
