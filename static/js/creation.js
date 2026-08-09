@@ -113,7 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const payload = await response.json();
         if (!response.ok || !payload.saved) {
-          errorMessage.textContent = "保存失败，请检查名称和分类后重试。";
+          const errors = Object.values(payload.errors || {}).flat();
+          errorMessage.textContent = errors[0]?.message || "保存失败，请检查名称和分类后重试。";
           return;
         }
         closeModal();

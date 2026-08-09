@@ -1,8 +1,10 @@
 from io import BytesIO
+from unittest.mock import patch
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import DatabaseError
 from django.test import override_settings
 from PIL import Image
 
@@ -108,7 +110,7 @@ def test_result_modal_save_returns_json_without_page_redirect(signed_in_client):
     )
 
     result = client.get(f"/create/{task.pk}/result/")
-    assert 'data-save-pattern-modal' in result.content.decode()
+    assert "data-save-pattern-modal" in result.content.decode()
     category_id = user.pattern_categories.first().pk
     saved = client.post(
         f"/create/{task.pk}/save/",
@@ -120,6 +122,30 @@ def test_result_modal_save_returns_json_without_page_redirect(signed_in_client):
     assert saved.json()["saved"] is True
     pattern = Pattern.objects.get(owner=user)
     assert pattern.category_id == category_id
+
+
+@override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-test-media")
+def test_result_modal_returns_specific_save_error_without_losing_form_data(signed_in_client):
+    client, user = signed_in_client
+    client.post("/create/", {"image": uploaded_png()})
+    task = GenerationTask.objects.get(user=user)
+    client.post(
+        f"/create/{task.pk}/settings/",
+        {"grid_size": 30, "color_limit": 12, "background_mode": "keep"},
+    )
+    category_id = user.pattern_categories.first().pk
+
+    with patch("apps.patterns.models.Pattern.save", side_effect=DatabaseError("temporary")):
+        response = client.post(
+            f"/create/{task.pk}/save/",
+            {"title": "保留输入", "category_id": category_id, "note": "仍在弹窗内"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+    assert response.status_code == 500
+    assert response.json()["errors"]["__all__"][0]["message"] == "作品暂时无法保存，请稍后重试。"
+    task.refresh_from_db()
+    assert task.result_version.pattern.is_saved is False
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-test-media")

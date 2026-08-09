@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('creation', '0005_v2_pattern_sizes'),
+        ("creation", "0005_v2_pattern_sizes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='generationsettings',
-            name='finished_use',
-            field=models.CharField(default='unsure', max_length=30),
+            model_name="generationsettings",
+            name="finished_use",
+            field=models.CharField(default="unsure", max_length=30),
         ),
     ]

@@ -11,10 +11,24 @@ DEFAULT_CATEGORIES = (
 )
 
 
+def ensure_default_category_templates():
+    for code, name, sort_order, is_fallback in DEFAULT_CATEGORIES:
+        DefaultPatternCategory.objects.get_or_create(
+            code=code,
+            defaults={
+                "name": name,
+                "sort_order": sort_order,
+                "is_fallback": is_fallback,
+                "is_active": True,
+            },
+        )
+
+
 def ensure_user_categories(user):
     categories = PatternCategory.objects.filter(owner=user)
     if categories.exists():
         return categories
+    ensure_default_category_templates()
     templates = DefaultPatternCategory.objects.filter(is_active=True).order_by("sort_order", "code")
     PatternCategory.objects.bulk_create(
         [

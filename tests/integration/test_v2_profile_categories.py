@@ -22,6 +22,23 @@ def test_new_user_receives_editable_default_categories(django_user_model):
     assert categories[-1].is_fallback is True
 
 
+@pytest.mark.django_db(transaction=True)
+def test_default_categories_are_restored_if_local_demo_data_was_flushed(django_user_model):
+    DefaultPatternCategory.objects.all().delete()
+
+    user = django_user_model.objects.create_user(username="category-template-recovery")
+
+    assert list(PatternCategory.objects.filter(owner=user).values_list("name", flat=True)) == [
+        "人物",
+        "宠物",
+        "动漫",
+        "物品",
+        "风景",
+        "文字",
+        "其他",
+    ]
+
+
 @pytest.mark.django_db
 def test_deleting_category_moves_owned_patterns_to_fallback(django_user_model):
     user = django_user_model.objects.create_user(username="category-delete-owner")

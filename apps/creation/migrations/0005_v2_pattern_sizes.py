@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('creation', '0004_generationtask_task_user_status_created_and_more'),
+        ("creation", "0004_generationtask_task_user_status_created_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='generationsettings',
-            name='face_mode',
-            field=models.CharField(default='composition', max_length=30),
+            model_name="generationsettings",
+            name="face_mode",
+            field=models.CharField(default="composition", max_length=30),
         ),
         migrations.AddField(
-            model_name='generationsettings',
-            name='grid_height',
+            model_name="generationsettings",
+            name="grid_height",
             field=models.PositiveSmallIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='generationsettings',
-            name='grid_width',
+            model_name="generationsettings",
+            name="grid_width",
             field=models.PositiveSmallIntegerField(default=0),
         ),
     ]

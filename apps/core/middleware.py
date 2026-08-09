@@ -12,9 +12,12 @@ class LanguagePreferenceMiddleware:
     def __call__(self, request):
         language = request.session.get(self.session_key, "zh-Hans")
         if getattr(request, "user", None) and request.user.is_authenticated:
-            language = UserProfile.objects.filter(user=request.user).values_list(
-                "preferred_language", flat=True
-            ).first() or language
+            language = (
+                UserProfile.objects.filter(user=request.user)
+                .values_list("preferred_language", flat=True)
+                .first()
+                or language
+            )
         request.ui_language = language
         response = self.get_response(request)
         if (

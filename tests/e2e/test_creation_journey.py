@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from io import BytesIO
@@ -6,7 +7,6 @@ from unittest.mock import patch
 
 import pytest
 from django.core.management import call_command
-from django.db import DatabaseError
 from django.test import override_settings
 from PIL import Image
 
@@ -60,7 +60,7 @@ def continue_to_settings(page):
     page.wait_for_url(re.compile(r"/settings/$"))
 
 
-def choose_basic_settings(page, *, size="30", colors="12", background="keep"):
+def choose_basic_settings(page, *, size="29x29", colors="12", background="keep"):
     page.get_by_label("图纸尺寸").select_option(size)
     page.get_by_label("颜色数量").select_option(colors)
     page.get_by_label("背景处理").select_option(background)
@@ -152,7 +152,7 @@ def test_real_browser_completes_six_step_creation_and_save(
     else:
         activate(page, page.get_by_role("link", name=re.compile("仍然继续")), interaction)
     page.wait_for_url(re.compile(r"/settings/(?:#main-content)?$"))
-    page.get_by_label("图纸尺寸").select_option("30")
+    page.get_by_label("图纸尺寸").select_option("29x29")
     page.get_by_label("颜色数量").select_option("12")
     page.get_by_label("背景处理").select_option("keep")
     activate(page, page.get_by_role("button", name="开始生成 1 张图纸"), interaction)
@@ -185,10 +185,13 @@ def test_real_browser_completes_six_step_creation_and_save(
     assert page.evaluate(
         "document.documentElement.scrollWidth <= document.documentElement.clientWidth"
     )
-    activate(page, page.get_by_role("link", name="保存图纸"), interaction)
+    activate(page, page.get_by_role("button", name="保存图纸"), interaction)
     page.get_by_label("图纸名称").fill(f"浏览器验收 {viewport['width']}")
     activate(page, page.get_by_role("button", name="确认保存"), interaction)
 
+    assert re.search(r"/result/(?:#main-content)?$", page.url)
+    page.get_by_text("图纸已保存").wait_for()
+    page.get_by_role("link", name="查看我的图纸").click()
     page.wait_for_url(re.compile(r"/patterns/\d+/(?:#main-content)?$"))
     assert page.get_by_role("heading", name=f"浏览器验收 {viewport['width']}").is_visible()
     assert page.get_by_text("版本历史").is_visible()
@@ -270,13 +273,13 @@ def test_browser_keeps_settings_when_generation_images_are_exhausted(
     _, _, image_bytes = next(build_demo_images())
     upload_for_analysis(page, image_bytes)
     continue_to_settings(page)
-    choose_basic_settings(page, size="70", colors="36", background="keep")
+    choose_basic_settings(page, size="116x116", colors="36", background="keep")
 
     page.get_by_role("button", name="开始生成 1 张图纸").click()
 
     assert re.search(r"/settings/$", page.url)
     assert page.get_by_text("你本周期的生成张数已经用完").is_visible()
-    assert page.get_by_label("图纸尺寸").input_value() == "70"
+    assert page.get_by_label("图纸尺寸").input_value() == "116x116"
     assert page.get_by_label("颜色数量").input_value() == "36"
     quota.refresh_from_db()
     assert (quota.used_count, quota.reserved_count) == (0, 0)
@@ -335,20 +338,38 @@ def test_browser_explains_free_retry_and_recovers_from_save_failure(
     )
 
     page.get_by_role("link", name="查看生成结果").click()
-    page.get_by_role("link", name="保存图纸").click()
+    page.get_by_role("button", name="保存图纸").click()
     page.get_by_label("图纸名称").fill("保存恢复验收")
-    with patch(
-        "apps.patterns.models.Pattern.save",
-        side_effect=DatabaseError("temporary database failure"),
-    ):
-        page.get_by_role("button", name="确认保存").click()
+    category = page.get_by_label("分类")
+    assert category.locator("option").count() > 0
+    category.select_option(index=0)
+    assert page.locator("[data-ajax-save]").evaluate("form => form.checkValidity()")
 
-    assert page.get_by_text("作品暂时无法保存，请稍后重试").is_visible()
+    def fail_save(route):
+        route.fulfill(
+            status=500,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "saved": False,
+                    "errors": {"__all__": [{"message": "作品暂时无法保存，请稍后重试。"}]},
+                }
+            ),
+        )
+
+    page.route("**/save/", fail_save)
+    with page.expect_response(lambda response: "/save/" in response.url) as response_info:
+        page.get_by_role("button", name="确认保存").click()
+    assert response_info.value.status == 500
+    page.get_by_text("作品暂时无法保存，请稍后重试").wait_for()
+    assert page.get_by_label("图纸名称").input_value() == "保存恢复验收"
+    page.unroute("**/save/", fail_save)
     task.refresh_from_db()
     assert task.status == GenerationStatus.SUCCEEDED
     assert task.result_version_id is not None
 
     page.get_by_role("button", name="确认保存").click()
+    page.get_by_role("link", name="查看我的图纸").click()
     page.wait_for_url(re.compile(r"/patterns/\d+/$"))
     assert page.get_by_role("heading", name="保存恢复验收").is_visible()
 
