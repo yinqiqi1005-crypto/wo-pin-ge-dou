@@ -135,6 +135,9 @@ input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var
 .material-list { max-height: 260px; overflow: auto; padding: 0; list-style: none; }
 .page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
 .pattern-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+.category-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: -8px 0 24px; }
+.category-filter a { padding: 7px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); text-decoration: none; }
+.category-filter a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); font-weight: 700; }
 .pattern-card { padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); text-decoration: none; }
 .pattern-card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--page); }
 .empty-state { grid-column: 1 / -1; padding: 50px; text-align: center; border: 1px dashed var(--line); border-radius: 14px; }

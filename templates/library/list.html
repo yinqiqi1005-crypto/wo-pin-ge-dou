@@ -2,13 +2,18 @@
 {% block title %}我的图纸 · 我拼个豆{% endblock %}
 {% block content %}
 <div class="page-heading"><div><p class="eyebrow">My patterns</p><h1>我的图纸</h1></div><a class="button" href="{% url 'creation:upload' %}">新建图纸</a></div>
+<nav class="category-filter" aria-label="按分类浏览图纸">
+  <a href="{% url 'library:list' %}" {% if not selected_category %}aria-current="page"{% endif %}>全部</a>
+  {% for category in categories %}
+    <a href="?category={{ category.id }}" {% if selected_category.id == category.id %}aria-current="page"{% endif %}>{{ category.name }}</a>
+  {% endfor %}
+</nav>
 <section class="pattern-list">
   {% for pattern in patterns %}
     <a class="pattern-card" href="{% url 'library:detail' pattern.id %}">
       {% with version=pattern.latest_version %}{% if version.effect_preview %}<img src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}预览">{% endif %}{% endwith %}
-      <h2>{{ pattern.title }}</h2><p class="muted">{{ pattern.updated_at|date:"Y-m-d H:i" }}</p>
+      <h2>{{ pattern.title }}</h2><p class="muted">{{ pattern.category.name|default:"未分类" }} · {{ pattern.updated_at|date:"Y-m-d H:i" }}</p>
     </a>
   {% empty %}<div class="empty-state"><h2>还没有保存的图纸</h2><a href="{% url 'creation:upload' %}">开始第一张创作</a></div>{% endfor %}
 </section>
 {% endblock %}
-

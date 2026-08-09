@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.creation.advanced import create_parameter_version
+from apps.creation.ironing import recommend_ironing_method
 from apps.creation.models import AdvancedCreationRequest, GenerationMode
 from apps.creation.services import create_generation_task
 from apps.creation.tasks import run_advanced_task
@@ -16,6 +17,7 @@ from apps.memberships.services import (
     current_plan_for_user,
     reserve_generation,
 )
+from apps.patterns.categories import ensure_user_categories
 from apps.patterns.models import ExportKind, Pattern
 
 from .exports import get_or_create_export
@@ -29,10 +31,23 @@ from .forms import (
 
 @login_required
 def pattern_list(request):
+    categories = ensure_user_categories(request.user).order_by("sort_order", "id")
     patterns = Pattern.objects.filter(
         owner=request.user, is_saved=True, deleted_at__isnull=True
     ).prefetch_related("versions")
-    return render(request, "library/list.html", {"patterns": patterns})
+    selected_category_id = request.GET.get("category")
+    selected_category = categories.filter(pk=selected_category_id).first()
+    if selected_category is not None:
+        patterns = patterns.filter(category=selected_category)
+    return render(
+        request,
+        "library/list.html",
+        {
+            "patterns": patterns,
+            "categories": categories,
+            "selected_category": selected_category,
+        },
+    )
 
 
 @login_required
@@ -59,6 +74,11 @@ def pattern_detail(request, pattern_id):
             "pattern": pattern,
             "version": version,
             "versions": pattern.versions.all(),
+            "ironing": recommend_ironing_method(
+                version.settings_snapshot.get("finished_use", "unsure"),
+                width=version.grid_data.get("width", 0),
+                height=version.grid_data.get("height", 0),
+            ),
             "metadata_form": PatternMetadataForm(
                 initial={"title": pattern.title, "note": pattern.note}
             ),
