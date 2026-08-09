@@ -45,7 +45,7 @@ def test_library_report_shows_a_style_specific_3d_model(client, django_user_mode
     assert "data-creation-compare" in page
     assert "你的上传图" in page
     assert "AI 拼豆成品预览" in page
-    assert "成品摆放效果" in page
+    assert "3D 摆放效果 · 旋转" in page
     assert 'href="https://' not in page
 
 
@@ -56,6 +56,9 @@ def test_report_uses_the_active_theme_surface_with_a_lightweight_data_grid():
     assert "background: linear-gradient(color-mix(in srgb, var(--surface)" in css
     assert "border: 1px solid var(--line)" in css
     assert "background-size: auto, 24px 24px, 24px 24px, auto" in css
+    assert ".bead-report a.button { color: white; }" in css
+    assert ".report-model-chip { position: absolute;" in css
+    assert 'button.closest(".report-model-chip")' in Path("static/js/creation.js").read_text()
 
 
 def test_library_can_rename_delete_and_restore_without_opening_detail(client, django_user_model):

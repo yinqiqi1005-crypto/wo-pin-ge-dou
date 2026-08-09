@@ -213,6 +213,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .bead-report { position: relative; overflow: hidden; padding: clamp(20px, 4vw, 44px); border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--surface) 90%, transparent)), linear-gradient(90deg, color-mix(in srgb, var(--line) 42%, transparent) 1px, transparent 1px), linear-gradient(color-mix(in srgb, var(--line) 42%, transparent) 1px, transparent 1px), radial-gradient(circle at 88% 7%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 28%); background-size: auto, 24px 24px, 24px 24px, auto; box-shadow: var(--shadow); }
 .bead-report > * { position: relative; }
 .bead-report .eyebrow, .bead-report a { color: var(--accent); }
+.bead-report a.button { color: white; }
 .bead-report .muted { color: var(--muted); }
 .report-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 30px; }
 .report-heading h1 { margin: 4px 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1; letter-spacing: -.06em; }
@@ -229,17 +230,17 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .report-preview-card figcaption span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: .68rem; font-weight: 800; }
 .comparison-arrow { display: grid; justify-items: center; gap: 3px; color: var(--accent); font-size: 1.4rem; font-weight: 800; }
 .comparison-arrow span { color: var(--muted); font-size: .65rem; font-weight: 800; letter-spacing: .05em; white-space: nowrap; }
-.bead-model { --model-rotation: -12deg; width: 108px; flex: 0 0 auto; aspect-ratio: 1; padding: 6px; border: 4px solid var(--ink); background: var(--surface); box-shadow: 6px 7px 0 color-mix(in srgb, var(--ink) 48%, var(--surface)), 13px 16px 20px color-mix(in srgb, var(--ink) 20%, transparent); transform: rotateX(9deg) rotateY(var(--model-rotation)); transition: transform .45s ease; }
+.report-model-chip { position: absolute; right: 8px; bottom: 8px; display: grid; gap: 4px; justify-items: end; z-index: 1; }
+.bead-model { --model-rotation: -12deg; width: 68px; flex: 0 0 auto; aspect-ratio: 1; padding: 4px; border: 3px solid var(--ink); background: var(--surface); box-shadow: 4px 5px 0 color-mix(in srgb, var(--ink) 48%, var(--surface)), 9px 11px 15px color-mix(in srgb, var(--ink) 20%, transparent); transform: rotateX(9deg) rotateY(var(--model-rotation)); transition: transform .45s ease; }
 .bead-model-face { width: 100%; height: 100%; overflow: hidden; background: repeating-conic-gradient(#ef6f61 0 25%, #f5d177 0 50%) 50% / 18px 18px; }
 .bead-model-face img { width: 100%; height: 100%; object-fit: contain; background: var(--surface); mix-blend-mode: normal; }
 .bead-model.waffle .bead-model-face, .bead-model.waffle .bead-model-face::after { background-image: linear-gradient(45deg, rgb(255 255 255 / 20%) 25%, transparent 25% 75%, rgb(0 0 0 / 17%) 75%), linear-gradient(135deg, rgb(255 255 255 / 16%) 25%, transparent 25% 75%, rgb(0 0 0 / 16%) 75%); background-size: 16px 16px; }
 .bead-model.towel { border-radius: 18px; filter: saturate(.92); }
 .bead-model.bathcloth .bead-model-face { background-image: radial-gradient(#1116 1px, transparent 1.5px), radial-gradient(#fff7 1px, transparent 1.5px); background-size: 7px 7px, 11px 11px; }
-.bead-model.baking-paper { box-shadow: 6px 7px 0 color-mix(in srgb, var(--good) 38%, var(--surface)), 13px 16px 20px color-mix(in srgb, var(--ink) 20%, transparent); }
+.bead-model.baking-paper { box-shadow: 4px 5px 0 color-mix(in srgb, var(--good) 38%, var(--surface)), 9px 11px 15px color-mix(in srgb, var(--ink) 20%, transparent); }
 .bead-model.glitter .bead-model-face { background-image: radial-gradient(circle at 20% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 80% 32%, #d7dcff 0 1px, transparent 2px), linear-gradient(135deg, #3d63ca, #d38bd9); background-size: 16px 16px, 19px 19px, auto; }
 .model-rotate { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; font-size: .82rem; }
-.report-model-aside { display: flex; gap: 15px; align-items: center; margin: 0 0 19px; padding: 13px; border: 1px solid var(--line); border-radius: 15px; background: color-mix(in srgb, var(--surface) 76%, var(--accent-soft)); }
-.report-model-aside p { margin: 4px 0 9px; font-size: .78rem; line-height: 1.45; }
+.report-model-chip .model-rotate { padding: 4px 7px; border-color: color-mix(in srgb, var(--accent) 36%, var(--line)); font-size: .64rem; }
 .report-summary { padding: 5px; }
 .report-summary h2 { margin: 5px 0 18px; font-size: 1.5rem; }
 .report-summary dl { display: grid; gap: 10px; margin: 0 0 23px; }
