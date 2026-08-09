@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% block title %}个人资料与设置 · 我拼个豆{% endblock %}
 {% block content %}
-<section class="content-card">
+<section class="content-card profile-settings-card">
   <p class="eyebrow">Account & settings</p>
   <h1>个人资料与设置</h1>
-  <form method="post" enctype="multipart/form-data" class="stacked-form">
+  <p class="muted">把常用偏好保存在账号里；每次创作前仍可单独调整。</p>
+  <form method="post" enctype="multipart/form-data" class="stacked-form profile-preferences">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.non_field_errors }}
+    <section class="profile-setting-group"><h2>个人资料</h2><div class="profile-setting-grid"><p>{{ form.avatar.label_tag }}{{ form.avatar }}{{ form.avatar.errors }}</p><p>{{ form.display_name.label_tag }}{{ form.display_name }}{{ form.display_name.errors }}</p><p>{{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}</p><p class="wide">{{ form.bio.label_tag }}{{ form.bio }}{{ form.bio.errors }}</p></div></section>
+    <section class="profile-setting-group"><h2>界面与默认创作参数</h2><div class="profile-setting-grid"><p>{{ form.preferred_language.label_tag }}{{ form.preferred_language }}{{ form.preferred_language.errors }}</p><p>{{ form.default_pattern_size.label_tag }}{{ form.default_pattern_size }}{{ form.default_pattern_size.errors }}</p><p>{{ form.default_color_limit.label_tag }}{{ form.default_color_limit }}{{ form.default_color_limit.errors }}</p><p>{{ form.default_background_mode.label_tag }}{{ form.default_background_mode }}{{ form.default_background_mode.errors }}</p><p>{{ form.default_finished_use.label_tag }}{{ form.default_finished_use }}{{ form.default_finished_use.errors }}</p><p class="preference-toggle">{{ form.remember_creation_parameters }}<span>{{ form.remember_creation_parameters.label }}</span>{{ form.remember_creation_parameters.errors }}</p></div></section>
     <button class="button">保存设置</button>
   </form>
 </section>
-<section class="content-card">
+<section class="content-card category-settings-card">
   <h2>我的分类</h2>
   <p class="muted">删除分类时，作品会移入“其他”。</p>
   <form method="post" action="{% url 'accounts:add_category' %}" class="inline-form">{% csrf_token %}{{ category_form.name }}{{ category_form.sort_order }}<button class="button small">新增分类</button></form>

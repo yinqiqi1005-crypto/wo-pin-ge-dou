@@ -1,5 +1,6 @@
 from django import forms
 
+from .ironing import IRONING_STYLES
 from .models import GenerationSettings
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
@@ -36,7 +37,13 @@ class GenerationSettingsForm(forms.ModelForm):
         ("116x116", "116×116 · 16 块拼板"),
         ("14x14", "14×14 · 极简图标"),
     )
-    COLOR_CHOICES = ((12, "12 色"), (24, "24 色"), (36, "36 色"))
+    COLOR_CHOICES = (
+        (12, "12 色上限 · 简洁图标"),
+        (18, "18 色上限 · 简约插画"),
+        (24, "24 色上限 · 常用照片"),
+        (30, "30 色上限 · 丰富层次"),
+        (36, "36 色上限 · 通用色板全量"),
+    )
     BACKGROUND_CHOICES = (
         ("keep", "保留背景"),
         ("simplify", "简化背景"),
@@ -61,6 +68,13 @@ class GenerationSettingsForm(forms.ModelForm):
         ),
         required=False,
     )
+    ironing_style = forms.ChoiceField(
+        label="烫豆方式",
+        choices=[(code, style["name"]) for code, style in IRONING_STYLES.items()],
+        widget=forms.RadioSelect,
+        help_text="由你选择；图纸保存后会记录这项制作方式。",
+        required=False,
+    )
     color_limit = forms.TypedChoiceField(label="颜色数量", choices=COLOR_CHOICES, coerce=int)
     background_mode = forms.ChoiceField(label="背景处理", choices=BACKGROUND_CHOICES)
 
@@ -74,6 +88,7 @@ class GenerationSettingsForm(forms.ModelForm):
             "background_mode",
             "face_mode",
             "finished_use",
+            "ironing_style",
         )
         widgets = {"grid_width": forms.HiddenInput(), "grid_height": forms.HiddenInput()}
 
@@ -87,10 +102,17 @@ class GenerationSettingsForm(forms.ModelForm):
         self.fields["pattern_size"].initial = f"{width}x{height}"
         self.fields["face_mode"].initial = self.instance.face_mode
         self.fields["finished_use"].initial = self.instance.finished_use
+        self.fields["ironing_style"].initial = self.instance.ironing_style
         enabled_options = enabled_options or {}
         if enabled_options:
+            configured_limits = enabled_options.get("color_limits", [])
+            # Upgrade the original three-option demo without overriding a later
+            # administrator's deliberately customised list.
+            if configured_limits == [12, 24, 36]:
+                configured_limits = [choice[0] for choice in self.COLOR_CHOICES]
             self.fields["color_limit"].choices = [
-                (value, f"{value} 色") for value in enabled_options.get("color_limits", [])
+                (value, dict(self.COLOR_CHOICES).get(value, f"{value} 色上限"))
+                for value in configured_limits
             ]
             background_labels = dict(self.BACKGROUND_CHOICES)
             self.fields["background_mode"].choices = [
@@ -115,6 +137,7 @@ class GenerationSettingsForm(forms.ModelForm):
         cleaned["grid_size"] = max(width, height)
         cleaned["face_mode"] = cleaned.get("face_mode") or "composition"
         cleaned["finished_use"] = cleaned.get("finished_use") or "unsure"
+        cleaned["ironing_style"] = cleaned.get("ironing_style") or "standard_two_sided"
         if cleaned.get("background_mode") == "remove" and not self.has_subject:
             self.add_error("background_mode", "未识别到主体时不能移除背景，请先选择主体。")
         return cleaned

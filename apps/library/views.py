@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.creation.advanced import create_parameter_version
-from apps.creation.ironing import recommend_ironing_method
+from apps.creation.ironing import get_ironing_style
 from apps.creation.models import AdvancedCreationRequest, GenerationMode
 from apps.creation.services import create_generation_task
 from apps.creation.tasks import run_advanced_task
@@ -74,10 +74,8 @@ def pattern_detail(request, pattern_id):
             "pattern": pattern,
             "version": version,
             "versions": pattern.versions.all(),
-            "ironing": recommend_ironing_method(
-                version.settings_snapshot.get("finished_use", "unsure"),
-                width=version.grid_data.get("width", 0),
-                height=version.grid_data.get("height", 0),
+            "ironing": get_ironing_style(
+                version.settings_snapshot.get("ironing_style", "standard_two_sided")
             ),
             "metadata_form": PatternMetadataForm(
                 initial={"title": pattern.title, "note": pattern.note}

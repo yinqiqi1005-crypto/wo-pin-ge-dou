@@ -120,6 +120,7 @@ def test_profile_page_is_private_and_contains_language_and_category_entries(
     assert "个人资料与设置" in page
     assert "界面语言" in page
     assert "我的分类" in page
+    assert "profile-preferences" in page
 
 
 @pytest.mark.django_db

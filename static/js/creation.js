@@ -72,6 +72,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     selectTab(tabs[0]);
   });
+  document.querySelectorAll("[data-ironing-card]").forEach((card) => {
+    const input = card.querySelector("input[type=radio]");
+    if (!input) return;
+    const syncSelection = () => {
+      document.querySelectorAll("[data-ironing-card]").forEach((candidate) => {
+        candidate.classList.toggle("is-selected", candidate.querySelector("input")?.checked);
+      });
+    };
+    input.addEventListener("change", syncSelection);
+    syncSelection();
+  });
   const modal = document.querySelector("[data-save-pattern-modal]");
   const openModal = document.querySelector("[data-open-save-modal]");
   if (modal && openModal) {
@@ -82,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeModal = () => { modal.hidden = true; openModal.focus(); };
     openModal.addEventListener("click", () => {
       modal.hidden = false;
-      modal.querySelector("input").focus();
+      modal.querySelector("[name=title]").focus();
     });
     modal.querySelector("[data-close-save-modal]").addEventListener("click", closeModal);
     modal.addEventListener("keydown", (event) => {

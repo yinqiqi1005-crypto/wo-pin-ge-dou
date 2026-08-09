@@ -159,10 +159,10 @@ def test_result_has_three_sections_guidance_and_save_error_is_near_form(creator)
     assert "材料与建议" in result_page
     assert "难度：入门" in result_page
     assert "放大查看带编号网格图" in result_page
-    assert "推荐烫豆方式：标准单面烫" in result_page
-    assert "效果示意：AI 生成的说明图片" in result_page
-    for method in ("轻烫保孔", "标准单面烫", "双面加固烫", "平整压制烫"):
-        assert method in result_page
+    assert "你在生成前的选择" in result_page
+    assert "烫豆方式：标准双面半烫（保留豆孔）" in result_page
+    assert "效果示意：AI 生成的说明图片" not in result_page
+    assert "查看官方标准熔合示例" in result_page
     for panel_id in ("effect-panel", "grid-panel", "materials-panel"):
         assert f'id="{panel_id}" data-tab-panel' in result_page
         assert f'id="{panel_id}" data-tab-panel hidden' not in result_page

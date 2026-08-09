@@ -25,7 +25,7 @@ SUPPORTED_GRID_DIMENSIONS = frozenset(
         (70, 70),
     }
 )
-SUPPORTED_COLOR_LIMITS = frozenset({12, 24, 36})
+SUPPORTED_COLOR_LIMITS = frozenset({12, 18, 24, 30, 36})
 ALPHA_BLANK_THRESHOLD = 128
 
 

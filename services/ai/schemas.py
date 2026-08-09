@@ -22,7 +22,7 @@ class AnalysisRecommendation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     grid_size: Literal[30, 50, 70]
-    color_limit: Literal[12, 24, 36]
+    color_limit: Literal[12, 18, 24, 30, 36]
     background_mode: Literal["keep", "simplify", "remove"]
     reason: str = Field(min_length=1, max_length=240)
 

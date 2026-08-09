@@ -34,7 +34,7 @@ def test_create_pattern_supports_standard_rectangular_board_sizes(four_color_png
     assert result.total_beads + result.grid.blank_cells == width * height
 
 
-@pytest.mark.parametrize("color_limit", [12, 24, 36])
+@pytest.mark.parametrize("color_limit", [12, 18, 24, 30, 36])
 def test_create_pattern_uses_only_legal_colors(four_color_png, color_limit):
     result = create_pattern(four_color_png, size=30, color_limit=color_limit)
     allowed_codes = set(DEFAULT_PALETTE.by_code)

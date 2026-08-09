@@ -22,7 +22,7 @@ from .forms import (
     SavePatternForm,
     SubjectSelectionForm,
 )
-from .ironing import IRONING_METHODS, recommend_ironing_method
+from .ironing import IRONING_STYLES, get_ironing_style
 from .models import (
     GenerationErrorCode,
     GenerationSettings,
@@ -40,6 +40,23 @@ def _user_task_or_404(user, task_id):
         pk=task_id,
         user=user,
     )
+
+
+def _analysis_settings_defaults(analysis_result, creation_user):
+    """Translate legacy analysis buckets into real, selectable pegboard dimensions."""
+    recommended_size = analysis_result.recommendations.get("grid_size", 50)
+    width, height = {30: (29, 29), 50: (58, 58), 70: (87, 87)}.get(
+        recommended_size, (58, 58)
+    )
+    return {
+        "grid_size": max(width, height),
+        "grid_width": width,
+        "grid_height": height,
+        "color_limit": analysis_result.recommendations.get("color_limit", 24),
+        "background_mode": analysis_result.recommendations.get("background_mode", "simplify"),
+        "finished_use": getattr(creation_user.profile, "default_finished_use", "unsure"),
+        "ironing_style": "standard_two_sided",
+    }
 
 
 def upload(request):
@@ -76,13 +93,7 @@ def analysis(request, task_id):
             defaults={
                 "selected_subject": subject_form.cleaned_data,
                 "crop": subject_form.cleaned_data,
-                "grid_size": 58,
-                "grid_width": 58,
-                "grid_height": 58,
-                "color_limit": analysis_result.recommendations.get("color_limit", 24),
-                "background_mode": analysis_result.recommendations.get(
-                    "background_mode", "simplify"
-                ),
+                **_analysis_settings_defaults(analysis_result, task.user),
             },
         )
         return redirect("creation:settings", task_id=task.pk)
@@ -114,6 +125,12 @@ def analysis(request, task_id):
             if analysis_result
             else "",
             "region_percent": region_percent,
+            "recommended_pattern_size": (
+                f"{_analysis_settings_defaults(analysis_result, task.user)['grid_width']}×"
+                f"{_analysis_settings_defaults(analysis_result, task.user)['grid_height']}"
+                if analysis_result
+                else ""
+            ),
         },
     )
 
@@ -121,17 +138,9 @@ def analysis(request, task_id):
 def settings(request, task_id):
     creation_user = effective_creation_user(request)
     task = _user_task_or_404(creation_user, task_id)
-    recommendations = task.analysis.recommendations
     instance, _ = GenerationSettings.objects.get_or_create(
         task=task,
-        defaults={
-            "grid_size": 58,
-            "grid_width": 58,
-            "grid_height": 58,
-            "color_limit": recommendations.get("color_limit", 24),
-            "background_mode": recommendations.get("background_mode", "simplify"),
-            "finished_use": getattr(creation_user.profile, "default_finished_use", "unsure"),
-        },
+        defaults=_analysis_settings_defaults(task.analysis, creation_user),
     )
     form = GenerationSettingsForm(
         request.POST or None,
@@ -164,6 +173,7 @@ def settings(request, task_id):
             "quota": quota,
             "membership": membership,
             "features": membership.get("features", []),
+            "ironing_styles": IRONING_STYLES.values(),
         },
     )
 
@@ -219,12 +229,9 @@ def result(request, task_id):
             "version": task.result_version,
             "guidance": pattern_making_guidance(task.result_version),
             "face_check": face_detail_check(task.result_version.settings_snapshot),
-            "ironing": recommend_ironing_method(
-                task.result_version.settings_snapshot.get("finished_use", "unsure"),
-                width=task.result_version.grid_data["width"],
-                height=task.result_version.grid_data["height"],
+            "ironing": get_ironing_style(
+                task.result_version.settings_snapshot.get("ironing_style", "standard_two_sided")
             ),
-            "ironing_methods": IRONING_METHODS.values(),
             "save_form": SavePatternForm(initial={"title": task.result_version.pattern.title}),
             "categories": ensure_user_categories(creation_user).order_by("sort_order", "id"),
             "is_guest": UserProfile.objects.filter(user=creation_user, is_guest=True).exists(),

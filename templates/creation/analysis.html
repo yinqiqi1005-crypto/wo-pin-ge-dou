@@ -28,8 +28,8 @@
       <h1>智能分析完成</h1>
       <dl class="summary-list">
         <div><dt>主要主体</dt><dd>{{ analysis.primary_subject }}</dd></div>
-        <div><dt>推荐尺寸</dt><dd>{{ analysis.recommendations.grid_size }}×{{ analysis.recommendations.grid_size }}</dd></div>
-        <div><dt>推荐颜色</dt><dd>{{ analysis.recommendations.color_limit }} 色</dd></div>
+        <div><dt>已带入的推荐尺寸</dt><dd>{{ recommended_pattern_size }}</dd></div>
+        <div><dt>已带入的颜色上限</dt><dd>{{ analysis.recommendations.color_limit }} 色</dd></div>
       </dl>
       <p>{{ analysis.recommendations.reason }}</p>
       <div aria-label="主要问题">{% for issue in analysis.issues|slice:":3" %}<p class="notice">{{ issue }}</p>{% empty %}<p class="muted">没有发现明显问题。</p>{% endfor %}</div>
@@ -38,7 +38,7 @@
         <form method="post" class="compact-grid">{% csrf_token %}{{ subject_form.as_p }}<button class="button">使用这个主体</button></form>
       </details>
       <p><a href="{% url 'creation:settings' task.id %}">仍然继续，稍后保留背景</a></p>
-      {% else %}<a class="button" href="{% url 'creation:settings' task.id %}">确认生成设置</a>{% endif %}
+      {% else %}<a class="button" href="{% url 'creation:settings' task.id %}">查看已带入的生成设置</a>{% endif %}
     </div>
   </div>
   {% endif %}

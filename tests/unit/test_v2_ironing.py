@@ -1,22 +1,26 @@
-from apps.creation.ironing import recommend_ironing_method
+from apps.creation.ironing import IRONING_STYLES, get_ironing_style
 
 
-def test_daily_use_recommends_durable_double_sided_ironing():
-    recommendation = recommend_ironing_method("daily", width=58, height=58)
+def test_standard_two_sided_style_is_the_hole_preserving_baseline():
+    style = get_ironing_style("standard_two_sided")
 
-    assert recommendation["code"] == "double_sided"
-    assert "牢固" in recommendation["reason"]
-
-
-def test_display_recommends_hole_preserving_light_ironing():
-    recommendation = recommend_ironing_method("display", width=87, height=87)
-
-    assert recommendation["code"] == "light_single"
-    assert "豆孔" in recommendation["reason"]
+    assert style["code"] == "standard_two_sided"
+    assert "双面" in style["name"]
+    assert "豆孔" in style["effect"]
 
 
-def test_unsure_large_pattern_gets_clear_default_without_blocking_choice():
-    recommendation = recommend_ironing_method("unsure", width=116, height=116)
+def test_ironing_styles_are_choices_not_a_use_based_recommendation():
+    codes = set(IRONING_STYLES)
 
-    assert recommendation["code"] == "standard_single"
-    assert recommendation["alternatives"]
+    assert codes == {
+        "standard_two_sided",
+        "single_sided_shape",
+        "flat_melt",
+        "large_project_tape",
+    }
+
+
+def test_unknown_style_uses_the_safe_standard_reference():
+    style = get_ironing_style("unknown")
+
+    assert style["code"] == "standard_two_sided"

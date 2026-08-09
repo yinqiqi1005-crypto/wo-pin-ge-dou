@@ -1,59 +1,61 @@
-IRONING_METHODS = {
-    "light_single": {
-        "code": "light_single",
-        "name": "轻烫保孔",
-        "effect_position": "top-left",
-        "best_for": "装框展示、希望保留豆孔的作品",
-        "reason": "轻烫能固定作品，同时尽量保留豆孔和颗粒感。",
-        "materials": "熨斗、烫纸、平整耐热桌面",
-        "steps": "中低温隔烫纸轻压，画小圈移动；冷却前不要掀起作品。",
-        "safety": "熨斗持续移动，不要直接接触拼豆；完全冷却后再取下。",
+"""User-selectable ironing guidance based on documented bead-fusing methods."""
+
+IRONING_STYLES = {
+    "standard_two_sided": {
+        "code": "standard_two_sided",
+        "name": "标准双面半烫（保留豆孔）",
+        "effect": "正反两面轻度融合，豆孔仍清晰，保留颗粒感。",
+        "best_for": "人物、宠物、风景、动漫等绝大多数平面图案。",
+        "reason": "这是最稳妥的入门做法：作品有足够连接力，也便于保留颜色与细节。",
+        "materials": "熨斗、烫纸、平整耐热桌面、压板或厚书。",
+        "steps": "中温隔烫纸画小圈移动，看到豆孔轻微收口就停；冷却后翻面，再短时间补烫。",
+        "safety": "不要在同一处停留或用力下压；完全冷却后再移动作品。",
+        "source_url": "https://perler.com/blogs/projects/standard-fusing-method",
+        "source_label": "查看官方标准熔合示例",
+        "diagram": "open-holes",
     },
-    "standard_single": {
-        "code": "standard_single",
-        "name": "标准单面烫",
-        "effect_position": "top-right",
-        "best_for": "大型拼接、一般摆件和不确定用途",
-        "reason": "牢固度和豆孔保留较平衡，适合第一次制作时优先选择。",
-        "materials": "熨斗、烫纸、厚书或压板",
-        "steps": "中温隔纸均匀移动，表面轻微融合后压平冷却。",
-        "safety": "不要停在同一处；压平时隔纸，避免烫伤和粘连。",
+    "single_sided_shape": {
+        "code": "single_sided_shape",
+        "name": "单面烫与热塑形",
+        "effect": "一面融合、另一面保留纹理；趁热可弯折成有弧度的部件。",
+        "best_for": "立体小物、支架、需要拼接或希望保留反面纹理的图案。",
+        "reason": "它服务于造型和装配，不是一般平面图纸的默认做法。",
+        "materials": "熨斗、烫纸、耐热手套或工具、定型支撑物。",
+        "steps": "只烫需要融合的一面；在仍温热时轻轻弯折或放入支撑物定型。",
+        "safety": "高温会让孔闭合，插槽可能无法装配；塑形时避免直接触摸热作品。",
+        "source_url": "https://perler.com/blogs/projects/cell-phone-stands",
+        "source_label": "查看官方单面烫与立体支架案例",
+        "diagram": "single-side",
     },
-    "double_sided": {
-        "code": "double_sided",
-        "name": "双面加固烫",
-        "effect_position": "bottom-left",
-        "best_for": "挂件、日常使用和需要更牢固的作品",
-        "reason": "双面加固更牢固，适合经常拿取或受力的成品。",
-        "materials": "熨斗、两张烫纸、压板",
-        "steps": "一面标准烫并冷却，翻面后短时间补烫，再平压冷却。",
-        "safety": "先完全冷却再翻面；第二面时间更短，避免过融变形。",
+    "flat_melt": {
+        "code": "flat_melt",
+        "name": "平烫全熔（平滑表面）",
+        "effect": "豆孔大幅闭合，表面更平滑、更接近一整片塑料。",
+        "best_for": "追求平滑质感的装饰画、杯垫与现代图形；不适合依赖豆孔的细节风格。",
+        "reason": "选择它是为了视觉效果，不是为了替代标准加固；它会改变像素颗粒感。",
+        "materials": "熨斗、烫纸、平整耐热桌面、压板或厚书。",
+        "steps": "在烫纸下均匀延长熔合时间，观察豆孔逐渐闭合；两面完成后平压冷却。",
+        "safety": "过热会变形、发亮或粘纸；先拿小样测试温度和时间。",
+        "source_url": "https://perler.com/pages/frequently-asked-questions",
+        "source_label": "查看官方熔合与冷却说明",
+        "diagram": "flat-melt",
     },
-    "flat_press": {
-        "code": "flat_press",
-        "name": "平整压制烫",
-        "effect_position": "bottom-right",
-        "best_for": "杯垫等平面用品",
-        "reason": "更平整、不易翘边，适合需要稳定放置的平面作品。",
-        "materials": "熨斗、烫纸、平整压板或厚书",
-        "steps": "完成标准单面烫后，在烫纸保护下用压板平压至完全冷却。",
-        "safety": "不要追求完全融平；豆孔过度闭合会让作品失去结构。",
+    "large_project_tape": {
+        "code": "large_project_tape",
+        "name": "多板胶带翻面法",
+        "effect": "用胶带固定大图案后翻面熔合，减少多块拼板移动时散落或错位。",
+        "best_for": "大型人物、风景、海报式图案，以及跨多块拼板的作品。",
+        "reason": "这是大作品的操作方法；熔合程度仍可选保孔或平烫。",
+        "materials": "美纹胶或专用胶带、熨斗、烫纸、平整大桌面、压板。",
+        "steps": "完成排豆后贴带固定并打孔排气，翻面分区熔合；压平并彻底冷却后再揭带。",
+        "safety": "逐区烫，不要直接烫胶带；大作品移动与翻面最好由成年人协助。",
+        "source_url": "https://perler.com/blogs/projects/the-tape-method-for-fusing-large-projects",
+        "source_label": "查看官方多板胶带法案例",
+        "diagram": "tape-method",
     },
 }
 
 
-def recommend_ironing_method(finished_use: str, *, width: int, height: int) -> dict:
-    if finished_use == "display":
-        code = "light_single"
-    elif finished_use == "daily":
-        code = "double_sided"
-    elif finished_use == "flat":
-        code = "flat_press"
-    else:
-        code = "standard_single"
-    recommendation = {**IRONING_METHODS[code]}
-    recommendation["alternatives"] = [
-        method for method_code, method in IRONING_METHODS.items() if method_code != code
-    ]
-    recommendation["pattern_size"] = f"{width}×{height}"
-    return recommendation
+def get_ironing_style(code: str) -> dict:
+    """Return a safe, documented baseline for old or unknown saved versions."""
+    return IRONING_STYLES.get(code, IRONING_STYLES["standard_two_sided"])

@@ -22,14 +22,14 @@ def test_library_filters_saved_patterns_by_the_users_category(client, django_use
     assert 'aria-current="page"' in page
 
 
-def test_saved_pattern_detail_explains_its_ironing_recommendation(client, django_user_model):
+def test_saved_pattern_detail_shows_the_ironing_style_chosen_by_the_user(client, django_user_model):
     user = django_user_model.objects.create_user(username="library-ironing-user")
     pattern = Pattern.objects.create(owner=user, title="杯垫", is_saved=True)
     PatternVersion.objects.create(
         pattern=pattern,
         version_number=1,
         grid_data={"width": 58, "height": 58},
-        settings_snapshot={"finished_use": "flat"},
+        settings_snapshot={"ironing_style": "flat_melt"},
     )
     client.force_login(user)
 
@@ -37,6 +37,6 @@ def test_saved_pattern_detail_explains_its_ironing_recommendation(client, django
 
     page = response.content.decode()
     assert response.status_code == 200
-    assert "推荐烫豆方式" in page
-    assert "平整压制烫" in page
+    assert "你选择的烫豆方式" in page
+    assert "平烫全熔" in page
     assert "新手操作说明" in page

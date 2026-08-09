@@ -86,8 +86,8 @@ def evaluate_portfolio_readiness():
         values = enabled_options.value
         if values.get("grid_sizes") != [30, 50, 70]:
             errors.append("Portfolio grid sizes must be 30, 50 and 70")
-        if values.get("color_limits") != [12, 24, 36]:
-            errors.append("Portfolio color limits must be 12, 24 and 36")
+        if values.get("color_limits") != [12, 18, 24, 30, 36]:
+            errors.append("Portfolio color limits must cover 12, 18, 24, 30 and 36")
 
     user_model = get_user_model()
     account_levels = {}

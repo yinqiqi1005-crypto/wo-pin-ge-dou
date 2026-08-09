@@ -111,6 +111,7 @@ def test_result_modal_save_returns_json_without_page_redirect(signed_in_client):
 
     result = client.get(f"/create/{task.pk}/result/")
     assert "data-save-pattern-modal" in result.content.decode()
+    assert 'aria-modal="true"' in result.content.decode()
     category_id = user.pattern_categories.first().pk
     saved = client.post(
         f"/create/{task.pk}/save/",

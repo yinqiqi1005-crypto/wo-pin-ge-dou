@@ -52,7 +52,7 @@ def upload_for_analysis(page, image_bytes, *, filename="e2e-person.png"):
 
 
 def continue_to_settings(page):
-    confirm = page.get_by_role("link", name="确认生成设置")
+    confirm = page.get_by_role("link", name=re.compile("确认生成设置|查看已带入的生成设置"))
     if confirm.count():
         confirm.click()
     else:
@@ -146,7 +146,7 @@ def test_real_browser_completes_six_step_creation_and_save(
     page.get_by_role("heading", name="智能分析完成").wait_for()
     assert page.locator(".notice").count() <= 3
 
-    confirm = page.get_by_role("link", name="确认生成设置")
+    confirm = page.get_by_role("link", name=re.compile("确认生成设置|查看已带入的生成设置"))
     if confirm.count():
         activate(page, confirm, interaction)
     else:

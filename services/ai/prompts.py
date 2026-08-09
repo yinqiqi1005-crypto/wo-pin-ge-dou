@@ -4,7 +4,7 @@ ANALYSIS_PROMPT_VERSION = "analysis-v1.0"
 def build_analysis_prompt(
     *,
     grid_sizes: tuple[int, ...] = (30, 50, 70),
-    color_limits: tuple[int, ...] = (12, 24, 36),
+    color_limits: tuple[int, ...] = (12, 18, 24, 30, 36),
     background_modes: tuple[str, ...] = ("keep", "simplify", "remove"),
 ) -> str:
     return f"""你是拼豆图纸的图片分析器。只分析图片，不生成或修改图片。

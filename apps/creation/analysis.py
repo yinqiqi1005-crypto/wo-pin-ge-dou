@@ -193,7 +193,7 @@ def execute_analysis_task(task_id: str) -> GenerationTask:
     if result is None and configured_provider != "rules":
         fallback = RuleBasedAnalysisProvider(
             grid_sizes=tuple(route.get("grid_sizes", (30, 50, 70))),
-            color_limits=tuple(route.get("color_limits", (12, 24, 36))),
+            color_limits=tuple(route.get("color_limits", (12, 18, 24, 30, 36))),
             background_modes=tuple(route.get("background_modes", ("keep", "simplify", "remove"))),
         )
         try:

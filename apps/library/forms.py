@@ -87,7 +87,15 @@ class ParameterAdjustmentForm(forms.Form):
         label="图纸尺寸", choices=((30, "30×30"), (50, "50×50"), (70, "70×70")), coerce=int
     )
     color_limit = forms.TypedChoiceField(
-        label="颜色数量", choices=((12, "12 色"), (24, "24 色"), (36, "36 色")), coerce=int
+        label="颜色数量",
+        choices=(
+            (12, "12 色上限"),
+            (18, "18 色上限"),
+            (24, "24 色上限"),
+            (30, "30 色上限"),
+            (36, "36 色上限"),
+        ),
+        coerce=int,
     )
     background_mode = forms.ChoiceField(
         label="背景处理",

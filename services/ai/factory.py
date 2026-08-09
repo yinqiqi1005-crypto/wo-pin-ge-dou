@@ -9,7 +9,7 @@ def get_analysis_provider(route: dict | None = None):
     if provider == "rules":
         return RuleBasedAnalysisProvider(
             grid_sizes=tuple(route.get("grid_sizes", (30, 50, 70))),
-            color_limits=tuple(route.get("color_limits", (12, 24, 36))),
+            color_limits=tuple(route.get("color_limits", (12, 18, 24, 30, 36))),
             background_modes=tuple(route.get("background_modes", ("keep", "simplify", "remove"))),
         )
     if provider == "openai":
@@ -19,7 +19,7 @@ def get_analysis_provider(route: dict | None = None):
             base_url=settings.OPENAI_BASE_URL,
             timeout_seconds=route.get("timeout_seconds", settings.AI_ANALYSIS_TIMEOUT_SECONDS),
             grid_sizes=tuple(route.get("grid_sizes", (30, 50, 70))),
-            color_limits=tuple(route.get("color_limits", (12, 24, 36))),
+            color_limits=tuple(route.get("color_limits", (12, 18, 24, 30, 36))),
             background_modes=tuple(route.get("background_modes", ("keep", "simplify", "remove"))),
         )
     raise ValueError(f"Unsupported AI analysis provider: {provider}")

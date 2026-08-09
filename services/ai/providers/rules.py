@@ -18,7 +18,7 @@ class RuleBasedAnalysisProvider:
         self,
         *,
         grid_sizes=(30, 50, 70),
-        color_limits=(12, 24, 36),
+        color_limits=(12, 18, 24, 30, 36),
         background_modes=("keep", "simplify", "remove"),
     ):
         if not grid_sizes or not color_limits or not background_modes:

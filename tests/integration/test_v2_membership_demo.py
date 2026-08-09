@@ -21,6 +21,8 @@ def test_membership_plan_page_explains_all_four_levels(client):
     for label in ("免费游客", "注册会员", "Plus 会员", "Pro 会员"):
         assert label in page
     assert "模拟升级" in page
+    assert "适合第一次做宠物头像" in page
+    assert "适合高细节人物和系列创作" in page
 
 
 def test_logged_in_user_can_simulate_upgrade_and_sees_new_quota(client, django_user_model):

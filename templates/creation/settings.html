@@ -10,8 +10,36 @@
       <p class="membership-line">{{ membership.name }} · 本周期还可生成 <strong>{{ quota.remaining_count }}</strong> 张</p>
       <p class="notice">本次成功后使用 1 张；失败或取消不会使用。当前参数可在生成前免费调整。</p>
       <form method="post" class="stacked-form" novalidate>{% csrf_token %}
-        {{ form.as_p }}
-        <p class="muted">系统会推荐尺寸和人物模式；即使提示五官可能简化，你仍可以继续生成。</p>
+        {% if form.non_field_errors %}<div class="notice errorlist" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+          {% if field.is_hidden %}{{ field }}
+          {% elif field.name == "ironing_style" %}
+            <fieldset class="ironing-choice-fieldset">
+              <legend>{{ field.label }}</legend>
+              <p class="muted">{{ field.help_text }}</p>
+              <div class="ironing-choice-grid">
+                {% for radio in field %}
+                  {% for style in ironing_styles %}
+                    {% if style.code == radio.data.value %}
+                      <article class="ironing-choice-card" data-ironing-card>
+                        <label>
+                          {{ radio.tag }}
+                          <span class="ironing-diagram {{ style.diagram }}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b></b></span>
+                          <span><strong>{{ style.name }}</strong><small>{{ style.effect }}</small><small><b>适用图案：</b>{{ style.best_for }}</small></span>
+                        </label>
+                        <a href="{{ style.source_url }}" target="_blank" rel="noopener">{{ style.source_label }}</a>
+                      </article>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              </div>
+              {% for error in field.errors %}<p class="errorlist">{{ error }}</p>{% endfor %}
+            </fieldset>
+          {% else %}
+            <p class="form-field {{ field.name }}-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<span class="errorlist">{{ error }}</span>{% endfor %}</p>
+          {% endif %}
+        {% endfor %}
+        <p class="muted">分析页的尺寸、颜色和背景建议已带入。你可自由调整；颜色数量是“最多使用的色豆种类”，最终实际数量以材料清单为准。</p>
         {% if features|length > 1 %}<details><summary>会员高级选项</summary><p class="muted">风格、构图和主体增强会在高级创作中使用，并会在生成新内容前再次确认张数。</p></details>{% endif %}
         <button class="button">开始生成 1 张图纸</button>
       </form>

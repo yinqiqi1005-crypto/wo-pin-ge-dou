@@ -138,3 +138,20 @@ def test_optional_segmentation_failure_keeps_background_flow_available(analysis_
     assert completed.status == GenerationStatus.AWAITING_CONFIRMATION
     assert not completed.analysis.subject_mask
     assert completed.model_calls.filter(capability="segmentation", success=False).exists()
+
+
+def test_analysis_recommendation_is_applied_to_the_generation_settings(client, analysis_task):
+    completed = execute_analysis_task(str(analysis_task.pk))
+    client.force_login(completed.user)
+
+    response = client.get(f"/create/{completed.pk}/settings/")
+
+    completed.refresh_from_db()
+    settings = completed.settings
+    assert response.status_code == 200
+    expected_dimension = {30: 29, 50: 58, 70: 87}[completed.analysis.recommendations["grid_size"]]
+    assert settings.grid_width == expected_dimension
+    assert settings.grid_height == expected_dimension
+    assert settings.color_limit == completed.analysis.recommendations["color_limit"]
+    selected_value = f'value="{expected_dimension}x{expected_dimension}" selected'
+    assert selected_value in response.content.decode()
