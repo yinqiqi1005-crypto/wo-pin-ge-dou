@@ -28,6 +28,7 @@
     <ul class="material-list">{% for code, count in version.material_counts.items %}<li><span>{{ code }}</span><strong>{{ count }} 颗</strong></li>{% endfor %}</ul>
     <section class="guidance"><h2>制作建议</h2><p><strong>难度：{{ guidance.difficulty }}</strong></p><p>{{ guidance.advice }}</p></section>
   </section>
+  <section class="guidance"><h2>面部细节检查</h2><p>{{ face_check.message }}</p><p class="muted">这是制作前的可辨认性提示，不会阻止你保存或继续生成。</p></section>
   <p class="muted small">调整尺寸、颜色或背景属于参数调整；增加元素或改变内容会创建新版本，并在开始前确认使用 1 张。</p>
   {% if version.pattern.is_saved %}<a class="button" href="{% url 'library:detail' version.pattern.id %}?version={{ version.version_number }}">返回我的图纸</a>{% else %}<a class="button" href="{% url 'creation:save' task.id %}">保存图纸</a>{% endif %}
 </section>

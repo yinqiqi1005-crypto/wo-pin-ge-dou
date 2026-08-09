@@ -11,6 +11,7 @@
       <p class="notice">本次成功后使用 1 张；失败或取消不会使用。当前参数可在生成前免费调整。</p>
       <form method="post" class="stacked-form" novalidate>{% csrf_token %}
         {{ form.as_p }}
+        <p class="muted">系统会推荐尺寸和人物模式；即使提示五官可能简化，你仍可以继续生成。</p>
         {% if features|length > 1 %}<details><summary>会员高级选项</summary><p class="muted">风格、构图和主体增强会在高级创作中使用，并会在生成新内容前再次确认张数。</p></details>{% endif %}
         <button class="button">开始生成 1 张图纸</button>
       </form>

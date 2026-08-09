@@ -26,7 +26,7 @@ from .models import (
     GenerationStatus,
     GenerationTask,
 )
-from .services import create_generation_task, pattern_making_guidance
+from .services import create_generation_task, face_detail_check, pattern_making_guidance
 from .state import transition_task
 from .tasks import run_analysis_task, run_generation_task
 
@@ -73,7 +73,9 @@ def analysis(request, task_id):
             defaults={
                 "selected_subject": subject_form.cleaned_data,
                 "crop": subject_form.cleaned_data,
-                "grid_size": analysis_result.recommendations.get("grid_size", 50),
+                "grid_size": 58,
+                "grid_width": 58,
+                "grid_height": 58,
                 "color_limit": analysis_result.recommendations.get("color_limit", 24),
                 "background_mode": analysis_result.recommendations.get(
                     "background_mode", "simplify"
@@ -120,7 +122,9 @@ def settings(request, task_id):
     instance, _ = GenerationSettings.objects.get_or_create(
         task=task,
         defaults={
-            "grid_size": recommendations.get("grid_size", 50),
+            "grid_size": 58,
+            "grid_width": 58,
+            "grid_height": 58,
             "color_limit": recommendations.get("color_limit", 24),
             "background_mode": recommendations.get("background_mode", "simplify"),
         },
@@ -209,6 +213,7 @@ def result(request, task_id):
             "task": task,
             "version": task.result_version,
             "guidance": pattern_making_guidance(task.result_version),
+            "face_check": face_detail_check(task.result_version.settings_snapshot),
         },
     )
 

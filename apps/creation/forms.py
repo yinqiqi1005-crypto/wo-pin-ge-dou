@@ -23,7 +23,19 @@ class ImageUploadForm(forms.Form):
 
 
 class GenerationSettingsForm(forms.ModelForm):
-    GRID_CHOICES = ((30, "30×30"), (50, "50×50"), (70, "70×70"))
+    PATTERN_SIZE_CHOICES = (
+        ("29x29", "29×29 · 1 块拼板"),
+        ("29x58", "29×58 · 2 块竖版"),
+        ("58x29", "58×29 · 2 块横版"),
+        ("58x58", "58×58 · 4 块拼板"),
+        ("58x87", "58×87 · 6 块竖版"),
+        ("87x58", "87×58 · 6 块横版"),
+        ("87x87", "87×87 · 9 块拼板"),
+        ("87x116", "87×116 · 12 块竖版"),
+        ("116x87", "116×87 · 12 块横版"),
+        ("116x116", "116×116 · 16 块拼板"),
+        ("14x14", "14×14 · 极简图标"),
+    )
     COLOR_CHOICES = ((12, "12 色"), (24, "24 色"), (36, "36 色"))
     BACKGROUND_CHOICES = (
         ("keep", "保留背景"),
@@ -31,22 +43,39 @@ class GenerationSettingsForm(forms.ModelForm):
         ("remove", "移除背景"),
     )
 
-    grid_size = forms.TypedChoiceField(label="图纸尺寸", choices=GRID_CHOICES, coerce=int)
+    grid_size = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    pattern_size = forms.ChoiceField(label="图纸尺寸", choices=PATTERN_SIZE_CHOICES, required=False)
+    face_mode = forms.ChoiceField(
+        label="人物生成模式",
+        choices=(("face_detail", "脸部细节优先"), ("composition", "整体构图优先")),
+        required=False,
+    )
     color_limit = forms.TypedChoiceField(label="颜色数量", choices=COLOR_CHOICES, coerce=int)
     background_mode = forms.ChoiceField(label="背景处理", choices=BACKGROUND_CHOICES)
 
     class Meta:
         model = GenerationSettings
-        fields = ("grid_size", "color_limit", "background_mode")
+        fields = (
+            "grid_size",
+            "grid_width",
+            "grid_height",
+            "color_limit",
+            "background_mode",
+            "face_mode",
+        )
+        widgets = {"grid_width": forms.HiddenInput(), "grid_height": forms.HiddenInput()}
 
     def __init__(self, *args, has_subject=True, enabled_options=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.has_subject = has_subject
+        self.fields["grid_width"].required = False
+        self.fields["grid_height"].required = False
+        width = self.instance.grid_width or self.instance.grid_size
+        height = self.instance.grid_height or self.instance.grid_size
+        self.fields["pattern_size"].initial = f"{width}x{height}"
+        self.fields["face_mode"].initial = self.instance.face_mode
         enabled_options = enabled_options or {}
         if enabled_options:
-            self.fields["grid_size"].choices = [
-                (value, f"{value}×{value}") for value in enabled_options.get("grid_sizes", [])
-            ]
             self.fields["color_limit"].choices = [
                 (value, f"{value} 色") for value in enabled_options.get("color_limits", [])
             ]
@@ -59,6 +88,19 @@ class GenerationSettingsForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        pattern_size = cleaned.get("pattern_size")
+        legacy_size = self.data.get("grid_size") if self.is_bound else None
+        if pattern_size:
+            width, height = (int(value) for value in pattern_size.split("x", maxsplit=1))
+        elif legacy_size:
+            width = height = int(legacy_size)
+        else:
+            width = self.instance.grid_width or self.instance.grid_size
+            height = self.instance.grid_height or self.instance.grid_size
+        cleaned["grid_width"] = width
+        cleaned["grid_height"] = height
+        cleaned["grid_size"] = max(width, height)
+        cleaned["face_mode"] = cleaned.get("face_mode") or "composition"
         if cleaned.get("background_mode") == "remove" and not self.has_subject:
             self.add_error("background_mode", "未识别到主体时不能移除背景，请先选择主体。")
         return cleaned

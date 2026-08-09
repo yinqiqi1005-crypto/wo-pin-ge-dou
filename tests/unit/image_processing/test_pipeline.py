@@ -21,6 +21,19 @@ def test_create_pattern_supports_configured_sizes(four_color_png, size):
     assert all(len(row) == size for row in result.grid.cells)
 
 
+@pytest.mark.parametrize("width,height", ((29, 58), (58, 87), (116, 87)))
+def test_create_pattern_supports_standard_rectangular_board_sizes(four_color_png, width, height):
+    result = create_pattern(
+        four_color_png,
+        width=width,
+        height=height,
+        color_limit=12,
+    )
+
+    assert (result.grid.width, result.grid.height) == (width, height)
+    assert result.total_beads + result.grid.blank_cells == width * height
+
+
 @pytest.mark.parametrize("color_limit", [12, 24, 36])
 def test_create_pattern_uses_only_legal_colors(four_color_png, color_limit):
     result = create_pattern(four_color_png, size=30, color_limit=color_limit)
@@ -75,7 +88,7 @@ def test_rendered_effect_keeps_blank_cells_transparent(transparent_png):
     assert effect.getpixel((155, 155))[3] == 255
 
 
-@pytest.mark.parametrize("size", [29, 31, 100])
+@pytest.mark.parametrize("size", [31, 100])
 def test_create_pattern_rejects_unsupported_size(four_color_png, size):
     with pytest.raises(ValueError, match="Unsupported grid size"):
         create_pattern(four_color_png, size=size, color_limit=12)

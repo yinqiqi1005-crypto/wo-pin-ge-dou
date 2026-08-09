@@ -32,3 +32,17 @@ def crop_square(image: Image.Image) -> Image.Image:
     left = (width - side) // 2
     top = (height - side) // 2
     return image.crop((left, top, left + side, top + side))
+
+
+def crop_to_ratio(image: Image.Image, *, width: int, height: int) -> Image.Image:
+    """Return a centered crop matching the requested grid ratio."""
+    source_width, source_height = image.size
+    target_ratio = width / height
+    source_ratio = source_width / source_height
+    if source_ratio > target_ratio:
+        cropped_width = round(source_height * target_ratio)
+        left = (source_width - cropped_width) // 2
+        return image.crop((left, 0, left + cropped_width, source_height))
+    cropped_height = round(source_width / target_ratio)
+    top = (source_height - cropped_height) // 2
+    return image.crop((0, top, source_width, top + cropped_height))

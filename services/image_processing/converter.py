@@ -6,7 +6,25 @@ from skimage.color import rgb2lab
 
 from .models import BeadPalette, PatternGrid
 
-SUPPORTED_GRID_SIZES = frozenset({30, 50, 70})
+SUPPORTED_GRID_SIZES = frozenset({14, 29, 30, 50, 58, 70, 87, 116})
+SUPPORTED_GRID_DIMENSIONS = frozenset(
+    {
+        (14, 14),
+        (29, 29),
+        (29, 58),
+        (58, 29),
+        (58, 58),
+        (58, 87),
+        (87, 58),
+        (87, 87),
+        (87, 116),
+        (116, 87),
+        (116, 116),
+        (30, 30),
+        (50, 50),
+        (70, 70),
+    }
+)
 SUPPORTED_COLOR_LIMITS = frozenset({12, 24, 36})
 ALPHA_BLANK_THRESHOLD = 128
 
@@ -36,18 +54,23 @@ def _nearest_palette_codes(
 def image_to_grid(
     image: Image.Image,
     *,
-    size: int,
+    size: int | None = None,
+    width: int | None = None,
+    height: int | None = None,
     color_limit: int,
     palette: BeadPalette,
 ) -> PatternGrid:
-    if size not in SUPPORTED_GRID_SIZES:
-        raise ValueError(f"Unsupported grid size: {size}")
+    if size is not None:
+        width = width or size
+        height = height or size
+    if width is None or height is None or (width, height) not in SUPPORTED_GRID_DIMENSIONS:
+        raise ValueError(f"Unsupported grid size: {width}x{height}")
     if color_limit not in SUPPORTED_COLOR_LIMITS:
         raise ValueError(f"Unsupported color limit: {color_limit}")
     if color_limit > len(palette.colors):
         raise ValueError("Color limit cannot exceed the selected palette size.")
 
-    rgba = image.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
+    rgba = image.convert("RGBA").resize((width, height), Image.Resampling.LANCZOS)
     alpha = np.asarray(rgba.getchannel("A"), dtype=np.uint8)
 
     # Quantize only RGB data. Transparency is restored as empty cells afterwards.
@@ -57,16 +80,16 @@ def image_to_grid(
     rgb = np.asarray(quantized_rgb.convert("RGB"), dtype=np.uint8)
     opaque_colors = [
         tuple(int(channel) for channel in rgb[y, x])
-        for y in range(size)
-        for x in range(size)
+        for y in range(height)
+        for x in range(width)
         if alpha[y, x] >= ALPHA_BLANK_THRESHOLD
     ]
     mapping = _nearest_palette_codes(opaque_colors, palette)
 
     rows: list[tuple[str | None, ...]] = []
-    for y in range(size):
+    for y in range(height):
         row: list[str | None] = []
-        for x in range(size):
+        for x in range(width):
             if alpha[y, x] < ALPHA_BLANK_THRESHOLD:
                 row.append(None)
             else:
@@ -74,4 +97,4 @@ def image_to_grid(
                 row.append(mapping[source_rgb])
         rows.append(tuple(row))
 
-    return PatternGrid(width=size, height=size, cells=tuple(rows))
+    return PatternGrid(width=width, height=height, cells=tuple(rows))

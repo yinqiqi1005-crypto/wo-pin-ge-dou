@@ -87,6 +87,23 @@ def pattern_making_guidance(version: PatternVersion) -> dict:
     return {"difficulty": difficulty, "advice": advice}
 
 
+def face_detail_check(settings_snapshot: dict) -> dict:
+    width = settings_snapshot.get("grid_width", settings_snapshot.get("grid_size", 0))
+    height = settings_snapshot.get("grid_height", settings_snapshot.get("grid_size", 0))
+    mode = settings_snapshot.get("face_mode", "composition")
+    if mode != "face_detail":
+        return {"status": "composition", "message": "当前优先保留整体构图与人物关系。"}
+    if min(width, height) < 58:
+        return {
+            "status": "warning",
+            "message": "当前尺寸较小，眼睛、鼻子和嘴可能被简化；可改用 58×58 或更大尺寸。",
+        }
+    return {
+        "status": "ready",
+        "message": "已启用五官细节保护，并保留局部小色块以降低眼鼻嘴丢失风险。",
+    }
+
+
 def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -> PatternVersion:
     if not task.input_image:
         raise ValueError("Generation task has no input image.")
@@ -103,8 +120,10 @@ def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -
     prepared_source.seek(0)
     result = create_pattern(
         prepared_source,
-        size=settings.grid_size,
+        width=settings.grid_width or settings.grid_size,
+        height=settings.grid_height or settings.grid_size,
         color_limit=settings.color_limit,
+        clean_isolated=settings.face_mode != "face_detail",
     )
 
     task.status = GenerationStatus.VALIDATING
@@ -127,8 +146,11 @@ def generate_basic_pattern(task: GenerationTask, settings: GenerationSettings) -
         material_counts=result.material_counts,
         settings_snapshot={
             "grid_size": settings.grid_size,
+            "grid_width": settings.grid_width or settings.grid_size,
+            "grid_height": settings.grid_height or settings.grid_size,
             "color_limit": settings.color_limit,
             "background_mode": settings.background_mode,
+            "face_mode": settings.face_mode,
         },
         validation_result={"technical": "passed"},
     )
