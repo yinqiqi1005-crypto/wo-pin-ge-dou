@@ -40,6 +40,7 @@ def test_library_report_shows_a_style_specific_3d_model(client, django_user_mode
     assert "data-bead-model" in page
     assert "glitter" in page
     assert "真实案例图片" in page
+    assert 'href="https://' not in page
 
 
 def test_report_uses_the_active_theme_surface_with_a_lightweight_data_grid():

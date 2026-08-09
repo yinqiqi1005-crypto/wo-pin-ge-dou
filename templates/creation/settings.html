@@ -27,7 +27,7 @@
                           <img class="ironing-case-image" src="{{ style.case_image_url }}" alt="{{ style.case_caption }}" referrerpolicy="no-referrer" loading="lazy">
                           <span><strong>{{ style.name }}</strong><small>{{ style.effect }}</small><small><b>适用图案：</b>{{ style.best_for }}</small></span>
                         </label>
-                        <a href="{{ style.case_source_url }}" target="_blank" rel="noopener">{{ style.case_source_label }} · 查看案例</a>
+                        <span class="case-source-note">{{ style.case_source_label }} · 真实案例已在卡片中展示</span>
                       </article>
                     {% endif %}
                   {% endfor %}

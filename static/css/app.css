@@ -207,6 +207,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .ironing-choice-card > label > span:last-of-type { display: grid; gap: 4px; padding-right: 20px; }
 .ironing-choice-card small { color: var(--muted); font-size: .82rem; line-height: 1.4; }
 .ironing-choice-card a { grid-column: 1 / -1; color: var(--accent); font-size: .81rem; font-weight: 700; }
+.case-source-note { grid-column: 1 / -1; color: var(--muted); font-size: .81rem; font-weight: 700; }
 .ironing-case-image { width: 76px; height: 76px; align-self: start; border-radius: 11px; object-fit: cover; background: var(--page); }
 .chosen-ironing details { margin: 16px 0; }
 .bead-report { position: relative; overflow: hidden; padding: clamp(20px, 4vw, 44px); border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--surface) 90%, transparent)), linear-gradient(90deg, color-mix(in srgb, var(--line) 42%, transparent) 1px, transparent 1px), linear-gradient(color-mix(in srgb, var(--line) 42%, transparent) 1px, transparent 1px), radial-gradient(circle at 88% 7%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 28%); background-size: auto, 24px 24px, 24px 24px, auto; box-shadow: var(--shadow); }
@@ -239,6 +240,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .report-guidance h2 { margin: 6px 0 11px; }.report-guidance details { margin: 14px 0; }.report-guidance summary { cursor: pointer; font-weight: 700; }
 .report-case { display: grid; grid-template-columns: 92px 1fr; gap: 13px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .report-case img { width: 92px; height: 92px; border-radius: 8px; object-fit: cover; background: var(--page); }.report-case p { margin: 3px 0 7px; font-size: .84rem; }
+.source-note { color: var(--muted); font-size: .84rem; font-weight: 700; }
 .membership-assurance { display: flex; gap: 12px; align-items: center; margin: 0 0 20px; padding: 13px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--accent-soft); }
 .membership-assurance span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: var(--accent); color: white; }
 .membership-assurance p { margin: 0; }

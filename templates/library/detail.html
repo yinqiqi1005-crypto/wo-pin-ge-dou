@@ -23,7 +23,7 @@
     <p>{{ ironing.reason }}</p>
     <p><strong>适用图案：</strong>{{ ironing.best_for }}</p>
     <details><summary>新手操作说明</summary><p><strong>材料：</strong>{{ ironing.materials }}</p><p><strong>步骤：</strong>{{ ironing.steps }}</p><p><strong>安全：</strong>{{ ironing.safety }}</p></details>
-    <div class="report-case"><img src="{{ ironing.case_image_url }}" alt="{{ ironing.case_caption }}" referrerpolicy="no-referrer" loading="lazy"><div><strong>真实案例图片</strong><p>{{ ironing.case_caption }}</p><a href="{{ ironing.case_source_url }}" target="_blank" rel="noopener">{{ ironing.case_source_label }}</a></div></div><p><a href="{{ ironing.source_url }}" target="_blank" rel="noopener">{{ ironing.source_label }}</a></p>
+    <div class="report-case"><img src="{{ ironing.case_image_url }}" alt="{{ ironing.case_caption }}" referrerpolicy="no-referrer" loading="lazy"><div><strong>真实案例图片</strong><p>{{ ironing.case_caption }}</p><span class="source-note">{{ ironing.case_source_label }}</span></div></div><p class="source-note">{{ ironing.source_label }}</p>
   </section></div>
   <details><summary>重命名和备注</summary><form method="post" action="{% url 'library:update' pattern.id %}" class="stacked-form">{% csrf_token %}{{ metadata_form.as_p }}<button class="button">保存信息</button></form></details>
   <details><summary>删除图纸</summary><p>首版采用软删除，便于误删恢复；关联文件由后台保留策略统一清理。</p><form method="post" action="{% url 'library:delete' pattern.id %}">{% csrf_token %}<button class="link-button">确认移入回收状态</button></form></details>
