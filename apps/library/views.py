@@ -3,7 +3,7 @@ import uuid
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-from django.http import FileResponse
+from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -32,8 +32,9 @@ from .forms import (
 @login_required
 def pattern_list(request):
     categories = ensure_user_categories(request.user).order_by("sort_order", "id")
-    patterns = Pattern.objects.filter(
-        owner=request.user, is_saved=True, deleted_at__isnull=True
+    in_trash = request.GET.get("view") == "trash"
+    patterns = Pattern.objects.filter(owner=request.user, is_saved=True).filter(
+        deleted_at__isnull=not in_trash
     ).prefetch_related("versions")
     selected_category_id = request.GET.get("category")
     selected_category = categories.filter(pk=selected_category_id).first()
@@ -46,6 +47,7 @@ def pattern_list(request):
             "patterns": patterns,
             "categories": categories,
             "selected_category": selected_category,
+            "in_trash": in_trash,
         },
     )
 
@@ -75,7 +77,7 @@ def pattern_detail(request, pattern_id):
             "version": version,
             "versions": pattern.versions.all(),
             "ironing": get_ironing_style(
-                version.settings_snapshot.get("ironing_style", "standard_two_sided")
+                version.settings_snapshot.get("ironing_style", "regular")
             ),
             "metadata_form": PatternMetadataForm(
                 initial={"title": pattern.title, "note": pattern.note}
@@ -95,6 +97,8 @@ def update_pattern(request, pattern_id):
         pattern.note = form.cleaned_data["note"]
         pattern.save(update_fields=("title", "note", "updated_at"))
         messages.success(request, "图纸信息已更新。")
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"renamed": True, "title": pattern.title})
     return redirect("library:detail", pattern_id=pattern.pk)
 
 
@@ -107,8 +111,24 @@ def delete_pattern(request, pattern_id):
         pattern.deleted_at = timezone.now()
         pattern.save(update_fields=("deleted_at", "updated_at"))
         messages.success(request, "图纸已移入回收状态，文件暂时保留。")
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"deleted": True})
         return redirect("library:list")
     return redirect("library:detail", pattern_id=pattern.pk)
+
+
+@login_required
+def restore_pattern(request, pattern_id):
+    pattern = get_object_or_404(
+        Pattern, pk=pattern_id, owner=request.user, is_saved=True, deleted_at__isnull=False
+    )
+    if request.method == "POST":
+        pattern.deleted_at = None
+        pattern.save(update_fields=("deleted_at", "updated_at"))
+        messages.success(request, "图纸已从回收站恢复。")
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"restored": True})
+    return redirect("library:list")
 
 
 @login_required

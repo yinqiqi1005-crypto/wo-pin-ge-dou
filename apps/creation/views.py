@@ -55,7 +55,7 @@ def _analysis_settings_defaults(analysis_result, creation_user):
         "color_limit": analysis_result.recommendations.get("color_limit", 24),
         "background_mode": analysis_result.recommendations.get("background_mode", "simplify"),
         "finished_use": getattr(creation_user.profile, "default_finished_use", "unsure"),
-        "ironing_style": "standard_two_sided",
+        "ironing_style": "regular",
     }
 
 
@@ -230,7 +230,7 @@ def result(request, task_id):
             "guidance": pattern_making_guidance(task.result_version),
             "face_check": face_detail_check(task.result_version.settings_snapshot),
             "ironing": get_ironing_style(
-                task.result_version.settings_snapshot.get("ironing_style", "standard_two_sided")
+                task.result_version.settings_snapshot.get("ironing_style", "regular")
             ),
             "save_form": SavePatternForm(initial={"title": task.result_version.pattern.title}),
             "categories": ensure_user_categories(creation_user).order_by("sort_order", "id"),

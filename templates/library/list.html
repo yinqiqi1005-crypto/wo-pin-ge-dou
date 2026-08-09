@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}我的图纸 · 我拼个豆{% endblock %}
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow">My patterns</p><h1>我的图纸</h1></div><a class="button" href="{% url 'creation:upload' %}">新建图纸</a></div>
+<div class="page-heading"><div><p class="eyebrow">My patterns</p><h1>{% if in_trash %}回收站{% else %}我的图纸{% endif %}</h1></div><div class="library-heading-actions"><a class="text-action" href="{% url 'library:list' %}{% if not in_trash %}?view=trash{% endif %}">{% if in_trash %}返回图纸库{% else %}回收站{% endif %}</a><a class="button" href="{% url 'creation:upload' %}">新建图纸</a></div></div>
+{% if in_trash %}<p class="notice">回收站里的图纸可恢复；目前不会自动永久删除。</p>{% endif %}
 <nav class="category-filter" aria-label="按分类浏览图纸">
   <a href="{% url 'library:list' %}" {% if not selected_category %}aria-current="page"{% endif %}>全部</a>
   {% for category in categories %}
@@ -10,10 +11,26 @@
 </nav>
 <section class="pattern-list">
   {% for pattern in patterns %}
-    <a class="pattern-card" href="{% url 'library:detail' pattern.id %}">
+    <article class="pattern-card" data-pattern-card>
+      <a class="pattern-card-preview" href="{% url 'library:detail' pattern.id %}" aria-label="打开 {{ pattern.title }}">
       {% with version=pattern.latest_version %}{% if version.effect_preview %}<img src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}预览">{% endif %}{% endwith %}
-      <h2>{{ pattern.title }}</h2><p class="muted">{{ pattern.category.name|default:"未分类" }} · {{ pattern.updated_at|date:"Y-m-d H:i" }}</p>
-    </a>
+      </a>
+      <div class="pattern-card-body">
+        <h2 data-pattern-title>{{ pattern.title }}</h2>
+        {% if not in_trash %}
+          <form method="post" action="{% url 'library:update' pattern.id %}" class="inline-rename-form" data-inline-rename hidden>{% csrf_token %}<input name="title" value="{{ pattern.title }}" maxlength="120" aria-label="图纸名称"><input type="hidden" name="note" value="{{ pattern.note }}"><button class="button small">保存</button><button type="button" class="text-action" data-cancel-rename>取消</button></form>
+          <button type="button" class="pattern-title-edit" data-open-rename aria-label="修改 {{ pattern.title }} 的名称">修改名称</button>
+        {% endif %}
+        <p class="muted">{{ pattern.category.name|default:"未分类" }} · {{ pattern.updated_at|date:"Y-m-d H:i" }}</p>
+        <div class="pattern-card-actions">
+          {% if in_trash %}
+            <form method="post" action="{% url 'library:restore' pattern.id %}" data-pattern-restore>{% csrf_token %}<button class="button small">恢复图纸</button></form>
+          {% else %}
+            <form method="post" action="{% url 'library:delete' pattern.id %}" data-pattern-delete>{% csrf_token %}<button class="icon-button danger" aria-label="将 {{ pattern.title }} 移入回收站" title="移入回收站">⌫</button></form>
+          {% endif %}
+        </div>
+      </div>
+    </article>
   {% empty %}<div class="empty-state"><h2>还没有保存的图纸</h2><a href="{% url 'creation:upload' %}">开始第一张创作</a></div>{% endfor %}
 </section>
 {% endblock %}

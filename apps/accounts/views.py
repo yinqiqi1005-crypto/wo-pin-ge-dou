@@ -67,6 +67,19 @@ def profile(request):
 
 
 @login_required
+def set_language(request):
+    """Change the interface language from the header's appearance menu."""
+    allowed_languages = {choice[0] for choice in ProfileSettingsForm.LANGUAGE_CHOICES}
+    language = request.POST.get("preferred_language")
+    if request.method == "POST" and language in allowed_languages:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        profile.preferred_language = language
+        profile.save(update_fields=("preferred_language",))
+        request.session["wpgd-language"] = language
+    return redirect(request.POST.get("next") or "home")
+
+
+@login_required
 def add_category(request):
     if request.method != "POST":
         return redirect("accounts:profile")

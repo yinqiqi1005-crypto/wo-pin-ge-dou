@@ -137,7 +137,7 @@ class GenerationSettingsForm(forms.ModelForm):
         cleaned["grid_size"] = max(width, height)
         cleaned["face_mode"] = cleaned.get("face_mode") or "composition"
         cleaned["finished_use"] = cleaned.get("finished_use") or "unsure"
-        cleaned["ironing_style"] = cleaned.get("ironing_style") or "standard_two_sided"
+        cleaned["ironing_style"] = cleaned.get("ironing_style") or "regular"
         if cleaned.get("background_mode") == "remove" and not self.has_subject:
             self.add_error("background_mode", "未识别到主体时不能移除背景，请先选择主体。")
         return cleaned

@@ -29,7 +29,7 @@ def test_saved_pattern_detail_shows_the_ironing_style_chosen_by_the_user(client,
         pattern=pattern,
         version_number=1,
         grid_data={"width": 58, "height": 58},
-        settings_snapshot={"ironing_style": "flat_melt"},
+        settings_snapshot={"ironing_style": "towel"},
     )
     client.force_login(user)
 
@@ -38,5 +38,5 @@ def test_saved_pattern_detail_shows_the_ironing_style_chosen_by_the_user(client,
     page = response.content.decode()
     assert response.status_code == 200
     assert "你选择的烫豆方式" in page
-    assert "平烫全熔" in page
+    assert "毛巾烫" in page
     assert "新手操作说明" in page

@@ -193,7 +193,8 @@ def test_real_browser_completes_six_step_creation_and_save(
     page.get_by_text("图纸已保存").wait_for()
     page.get_by_role("link", name="查看我的图纸").click()
     page.wait_for_url(re.compile(r"/patterns/\d+/(?:#main-content)?$"))
-    assert page.get_by_role("heading", name=f"浏览器验收 {viewport['width']}").is_visible()
+    assert page.get_by_role("heading", name="拼豆制作报告").is_visible()
+    assert page.get_by_text(f"浏览器验收 {viewport['width']}", exact=True).is_visible()
     assert page.get_by_text("版本历史").is_visible()
     assert page.evaluate(
         "document.documentElement.scrollWidth <= document.documentElement.clientWidth"
@@ -371,7 +372,8 @@ def test_browser_explains_free_retry_and_recovers_from_save_failure(
     page.get_by_role("button", name="确认保存").click()
     page.get_by_role("link", name="查看我的图纸").click()
     page.wait_for_url(re.compile(r"/patterns/\d+/$"))
-    assert page.get_by_role("heading", name="保存恢复验收").is_visible()
+    assert page.get_by_role("heading", name="拼豆制作报告").is_visible()
+    assert page.get_by_text("保存恢复验收", exact=True).is_visible()
 
 
 @override_settings(MEDIA_ROOT="/tmp/wo-pin-ge-dou-e2e-failure-media")

@@ -128,7 +128,7 @@ class GenerationSettings(models.Model):
     editable_content = models.JSONField(default=list)
     face_mode = models.CharField(max_length=30, default="composition")
     finished_use = models.CharField(max_length=30, default="unsure")
-    ironing_style = models.CharField(max_length=40, default="standard_two_sided")
+    ironing_style = models.CharField(max_length=40, default="regular")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

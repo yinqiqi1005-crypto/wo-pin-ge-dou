@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ pattern.title }} · 我拼个豆{% endblock %}
 {% block content %}
-<section class="content-card">
-  <p class="eyebrow">已保存图纸</p><h1>{{ pattern.title }}</h1>{% if pattern.note %}<p>{{ pattern.note }}</p>{% endif %}
-  <div class="two-column result-layout">
-    {% if version.effect_preview %}<img class="pattern-preview" src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}效果预览">{% endif %}
-    <div><h2>v{{ version.version_number }}</h2><p>{{ version.grid_data.width }}×{{ version.grid_data.height }} · {{ version.material_counts|length }} 色</p>
+<section class="bead-report" data-bead-report>
+  <div class="report-heading"><div><p class="eyebrow">BEAD / REPORT / {{ version.version_number|stringformat:"02d" }}</p><h1>拼豆制作报告</h1><p class="report-pattern-name">{{ pattern.title }}</p>{% if pattern.note %}<p class="muted">{{ pattern.note }}</p>{% endif %}</div><span class="report-status">READY TO MAKE</span></div>
+  <div class="report-stage">
+    <div class="bead-model-wrap"><div class="bead-model {{ ironing.model_class }}" data-bead-model="{{ ironing.code }}" aria-label="{{ ironing.name }}的三维成品预览"><div class="bead-model-face">{% if version.effect_preview %}<img src="{{ version.effect_preview.url }}" alt="{{ pattern.title }}效果预览">{% else %}<span>BEAD</span>{% endif %}</div></div><button type="button" class="model-rotate" data-model-rotate>旋转 3D 成品预览</button></div>
+    <div class="report-summary"><p class="report-kicker">制作数据</p><h2>v{{ version.version_number }} · {{ version.grid_data.width }}×{{ version.grid_data.height }}</h2><dl><div><dt>实际色豆种类</dt><dd>{{ version.material_counts|length }} 色</dd></div><div><dt>已选烫法</dt><dd>{{ ironing.name }}</dd></div><div><dt>成品定位</dt><dd>{{ ironing.best_for }}</dd></div></dl>
       {% if version.grid_preview %}<p><a class="button" href="{{ version.grid_preview.url }}" target="_blank">查看网格图</a></p>{% endif %}
       <p><a href="{% url 'library:adjust' pattern.id version.version_number %}">免费调整尺寸、颜色或背景</a></p>
       <p><a href="{% url 'library:advanced' pattern.id version.version_number %}">高级创作新版本</a></p>
@@ -16,15 +16,15 @@
       </p>
     </div>
   </div>
-  <h2>版本历史</h2><nav class="version-list" aria-label="版本历史">{% for item in versions %}<a {% if item.id == version.id %}aria-current="page"{% endif %} href="?version={{ item.version_number }}">v{{ item.version_number }}</a>{% endfor %}</nav>
-  <section class="guidance">
-    <h2>你选择的烫豆方式：{{ ironing.name }}</h2>
+  <div class="report-lower"><section class="report-versions"><p class="report-kicker">版本历史</p><nav class="version-list" aria-label="版本历史">{% for item in versions %}<a {% if item.id == version.id %}aria-current="page"{% endif %} href="?version={{ item.version_number }}">v{{ item.version_number }}</a>{% endfor %}</nav></section>
+  <section class="guidance report-guidance">
+    <p class="report-kicker">制作建议</p><h2>你选择的烫豆方式：{{ ironing.name }}</h2>
     <p>{{ ironing.effect }}</p>
     <p>{{ ironing.reason }}</p>
     <p><strong>适用图案：</strong>{{ ironing.best_for }}</p>
     <details><summary>新手操作说明</summary><p><strong>材料：</strong>{{ ironing.materials }}</p><p><strong>步骤：</strong>{{ ironing.steps }}</p><p><strong>安全：</strong>{{ ironing.safety }}</p></details>
-    <p><a href="{{ ironing.source_url }}" target="_blank" rel="noopener">{{ ironing.source_label }}</a></p>
-  </section>
+    <div class="report-case"><img src="{{ ironing.case_image_url }}" alt="{{ ironing.case_caption }}" referrerpolicy="no-referrer" loading="lazy"><div><strong>真实案例图片</strong><p>{{ ironing.case_caption }}</p><a href="{{ ironing.case_source_url }}" target="_blank" rel="noopener">{{ ironing.case_source_label }}</a></div></div><p><a href="{{ ironing.source_url }}" target="_blank" rel="noopener">{{ ironing.source_label }}</a></p>
+  </section></div>
   <details><summary>重命名和备注</summary><form method="post" action="{% url 'library:update' pattern.id %}" class="stacked-form">{% csrf_token %}{{ metadata_form.as_p }}<button class="button">保存信息</button></form></details>
   <details><summary>删除图纸</summary><p>首版采用软删除，便于误删恢复；关联文件由后台保留策略统一清理。</p><form method="post" action="{% url 'library:delete' pattern.id %}">{% csrf_token %}<button class="link-button">确认移入回收状态</button></form></details>
 </section>

@@ -24,10 +24,10 @@
                       <article class="ironing-choice-card" data-ironing-card>
                         <label>
                           {{ radio.tag }}
-                          <span class="ironing-diagram {{ style.diagram }}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b></b></span>
+                          <img class="ironing-case-image" src="{{ style.case_image_url }}" alt="{{ style.case_caption }}" referrerpolicy="no-referrer" loading="lazy">
                           <span><strong>{{ style.name }}</strong><small>{{ style.effect }}</small><small><b>适用图案：</b>{{ style.best_for }}</small></span>
                         </label>
-                        <a href="{{ style.source_url }}" target="_blank" rel="noopener">{{ style.source_label }}</a>
+                        <a href="{{ style.case_source_url }}" target="_blank" rel="noopener">{{ style.case_source_label }} · 查看案例</a>
                       </article>
                     {% endif %}
                   {% endfor %}

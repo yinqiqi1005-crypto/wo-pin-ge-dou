@@ -25,6 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+  document.querySelectorAll("[data-account-menu]").forEach((menuWrap) => {
+    const trigger = menuWrap.querySelector(".account-trigger");
+    const menu = menuWrap.querySelector(".account-menu");
+    const setOpen = (open) => {
+      trigger.setAttribute("aria-expanded", String(open));
+      menu.hidden = !open;
+    };
+    trigger.addEventListener("click", () => setOpen(menu.hidden));
+    document.addEventListener("click", (event) => {
+      if (!menuWrap.contains(event.target)) setOpen(false);
+    });
+    menuWrap.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        trigger.focus();
+      }
+    });
+  });
   document.querySelectorAll("[data-submit-state]").forEach((statefulForm) => {
     statefulForm.addEventListener("submit", () => {
       statefulForm.setAttribute("aria-busy", "true");
@@ -82,6 +100,48 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     input.addEventListener("change", syncSelection);
     syncSelection();
+  });
+  document.querySelectorAll("[data-inline-rename]").forEach((form) => {
+    const card = form.closest("[data-pattern-card]");
+    const open = card.querySelector("[data-open-rename]");
+    const cancel = form.querySelector("[data-cancel-rename]");
+    const title = card.querySelector("[data-pattern-title]");
+    const setEditing = (editing) => {
+      form.hidden = !editing;
+      open.hidden = editing;
+      if (editing) form.querySelector("input[name=title]").focus();
+    };
+    open.addEventListener("click", () => setEditing(true));
+    cancel.addEventListener("click", () => setEditing(false));
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const response = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" } });
+      if (!response.ok) return;
+      const payload = await response.json();
+      title.textContent = payload.title;
+      form.querySelector("input[name=title]").value = payload.title;
+      setEditing(false);
+    });
+  });
+  document.querySelectorAll("[data-pattern-delete], [data-pattern-restore]").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      const deleting = form.matches("[data-pattern-delete]");
+      if (deleting && !window.confirm("移入回收站？你可以随时恢复这张图纸。")) return;
+      event.preventDefault();
+      const response = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" } });
+      if (!response.ok) return;
+      const card = form.closest("[data-pattern-card]");
+      if (deleting) card.remove();
+      else window.location.assign("/patterns/");
+    });
+  });
+  document.querySelectorAll("[data-model-rotate]").forEach((button) => {
+    const model = button.closest(".bead-model-wrap").querySelector("[data-bead-model]");
+    let angle = 0;
+    button.addEventListener("click", () => {
+      angle += 90;
+      model.style.setProperty("--model-rotation", `${angle}deg`);
+    });
   });
   const modal = document.querySelector("[data-save-pattern-modal]");
   const openModal = document.querySelector("[data-open-save-modal]");

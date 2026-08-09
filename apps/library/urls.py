@@ -9,6 +9,7 @@ urlpatterns = [
     path("<int:pattern_id>/", views.pattern_detail, name="detail"),
     path("<int:pattern_id>/update/", views.update_pattern, name="update"),
     path("<int:pattern_id>/delete/", views.delete_pattern, name="delete"),
+    path("<int:pattern_id>/restore/", views.restore_pattern, name="restore"),
     path(
         "<int:pattern_id>/versions/<int:version_number>/export/<str:kind>/",
         views.export_version,
