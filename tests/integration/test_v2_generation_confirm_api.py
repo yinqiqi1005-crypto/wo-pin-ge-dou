@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pytest
+from django.core.cache import cache
 from django.core.management import call_command
 
 from apps.creation.models import GenerationSettings, GenerationStatus
@@ -14,6 +15,7 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture(autouse=True)
 def demo_configuration():
     call_command("seed_demo_config", verbosity=0)
+    cache.clear()
 
 
 @pytest.fixture

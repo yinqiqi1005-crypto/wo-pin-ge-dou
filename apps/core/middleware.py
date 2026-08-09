@@ -19,6 +19,7 @@ class LanguagePreferenceMiddleware:
         response = self.get_response(request)
         if (
             language != "zh-Hans"
+            and not request.path.startswith("/admin/")
             and not response.streaming
             and response.get("Content-Type", "").startswith("text/html")
         ):
