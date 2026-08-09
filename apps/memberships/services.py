@@ -86,6 +86,30 @@ def get_or_create_current_quota(user) -> GenerationQuotaPeriod:
     return quota
 
 
+@transaction.atomic
+def activate_demo_membership(user, plan: MembershipPlan) -> MembershipSubscription:
+    """Activate a locally simulated paid plan and synchronise the current quota."""
+    now = timezone.now()
+    subscription, _ = MembershipSubscription.objects.update_or_create(
+        user=user,
+        defaults={"plan": plan, "starts_at": now, "ends_at": None, "is_active": True},
+    )
+    quota = get_or_create_current_quota(user)
+    previous_limit = quota.total_limit
+    quota.plan = plan
+    quota.total_limit = max(plan.generation_limit, quota.used_count + quota.reserved_count)
+    quota.save(update_fields=("plan", "total_limit", "updated_at"))
+    if quota.total_limit != previous_limit:
+        GenerationQuotaLedger.objects.create(
+            quota_period=quota,
+            event=QuotaLedgerEvent.ADJUST,
+            amount=abs(quota.total_limit - previous_limit),
+            idempotency_key=f"demo-upgrade:{user.pk}:{plan.pk}:{quota.pk}",
+            reason=f"模拟升级至 {plan.name}",
+        )
+    return subscription
+
+
 def reserve_generation(task: GenerationTask, *, amount: int = 1) -> GenerationQuotaPeriod:
     if connection.vendor == "sqlite":
         # SQLite locks tables rather than rows, so serialize this short local-only path.

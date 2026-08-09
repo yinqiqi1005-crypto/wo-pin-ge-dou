@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}会员中心 · 我拼个豆{% endblock %}
+{% block content %}
+<section class="content-card"><p class="eyebrow">Membership center</p><h1>会员中心</h1><h2>{{ plan.name }}</h2><p>本周期可生成总张数：{{ quota.total_limit }}</p><p>已使用：{{ quota.used_count }} 张 · 已预留：{{ quota.reserved_count }} 张</p><p><strong>剩余生成张数：{{ quota.remaining_count }}</strong></p><p class="muted">图纸质量不因会员等级不同而变化；每次 AI 成功生成新图前都会显示将使用的张数。</p><a class="button" href="{% url 'memberships:plans' %}">查看会员方案</a></section>
+{% endblock %}

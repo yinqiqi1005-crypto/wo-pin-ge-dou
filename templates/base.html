@@ -21,6 +21,7 @@
     <a class="brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true">✦</span><span>我拼个豆</span><small>BEAD LAB</small></a>
     <nav aria-label="主导航">
       <a class="nav-link" href="{% url 'creation:upload' %}">AI 创作 <span aria-hidden="true">↗</span></a>
+      <a class="nav-link" href="{% url 'memberships:plans' %}">会员</a>
       {% if user.is_authenticated %}<a class="nav-link" href="{% url 'library:list' %}">我的图纸</a><a class="nav-link" href="{% url 'accounts:profile' %}">设置</a>{% endif %}
     </nav>
     <div class="header-actions">

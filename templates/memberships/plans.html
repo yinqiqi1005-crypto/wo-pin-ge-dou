@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}会员方案 · 我拼个豆{% endblock %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">Membership</p><h1>选择适合你的创作方式</h1><p>所有方案使用同一套高质量图纸算法，区别只在张数和附加工具。</p></div></section>
+<section class="decision-grid">{% for plan in plans %}<article class="content-card"><h2>{{ plan.name }}</h2><p>{{ plan.price_display|default:"价格由后台配置" }}</p><p><strong>{{ plan.generation_limit }}</strong> 张 · {{ plan.get_quota_period_display }}</p><ul>{% for feature in plan.features.all %}<li>{{ feature.name }}</li>{% empty %}<li>基础图纸质量一致</li>{% endfor %}</ul>{% if user.is_authenticated and plan.level == current_plan.level %}<p class="muted">当前方案</p>{% elif plan.level == "plus" or plan.level == "pro" %}<form method="post" action="{% url 'memberships:upgrade' plan.level %}">{% csrf_token %}<button class="button">模拟升级</button></form>{% else %}<p class="muted">注册后可保存作品</p>{% endif %}</article>{% endfor %}</section>
+{% endblock %}
